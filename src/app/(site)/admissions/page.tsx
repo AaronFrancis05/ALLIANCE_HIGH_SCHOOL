@@ -228,6 +228,12 @@ export default async function AdmissionsPage() {
               Contact the school
             </ButtonLink>
           </div>
+          <p className="mt-6 text-sm text-cream-200">
+            Already applied?{' '}
+            <Link href="/admissions/track" className="text-white underline">
+              Track your application
+            </Link>
+          </p>
         </Container>
       </Section>
     </>

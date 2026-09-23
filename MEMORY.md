@@ -81,6 +81,12 @@ left until launch (the school owner's call, 2026-09-23).
 
 ## Log
 
+### 2026-09-23 (P5-T3)
+- **Tracking page** `/admissions/track` (FR-18): reference plus the guardian's phone number, both required; a wrong half and an unknown reference get the identical message. Rate-limited (10/min), a POST so nothing lands in a URL, and it shows no name (shared phones): stage, class, date submitted, interview date.
+- Family wording for each status now lives in `src/lib/application-status.ts` (also the status list, moved out of the collection), ready for P5-T4 notifications. Phone numbers match however they are written (0772…, +256 772…).
+- `tests/helpers/application.ts` creates applications through the local API, so tests do not spend the form's rate limit.
+- Verified: unit 123/123; tracking e2e 2/2.
+
 ### 2026-09-23 (P5-T2)
 - **Documents with the application** (FR-17): birth certificate and photo for everyone, result slip for S1/S5. They are sent with the form, so the server attaches them itself; no document id ever comes from the browser. `src/lib/application-documents.ts` (shared with the browser) checks presence, declared type and the 5 MB cap; `src/lib/document-intake.ts` checks magic bytes, refuses incomplete PDFs, re-encodes photos with sharp (EXIF and GPS gone, auto-rotated, max 2000 px) and gives every file a random name. Stored files are deleted again if the application cannot be saved.
 - **New delivery route** `/api/files/application-document/[id]`: until now officers had no way to open these files (private files carry no URL). Rule `canOpenApplicationDocument` in `src/access/admissions.ts` (unit-tested), five-minute signed link, every opening and refusal audited. An "Open document" link sits in the admin panel.

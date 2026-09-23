@@ -21,6 +21,7 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataR
     { path: '/admissions', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/admissions/fees', priority: 0.8, changeFrequency: 'monthly' },
     { path: '/admissions/apply', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/admissions/track', priority: 0.4, changeFrequency: 'yearly' },
     { path: '/student-life', priority: 0.7, changeFrequency: 'monthly' },
     { path: '/news', priority: 0.7, changeFrequency: 'weekly' },
     { path: '/events', priority: 0.7, changeFrequency: 'weekly' },

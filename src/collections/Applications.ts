@@ -12,16 +12,8 @@
 import type { CollectionConfig } from 'payload'
 import { denyAll, hasRole, roles, type StaffUser } from '../access/roles'
 import { readAdmissions } from '../access/admissions'
+import { APPLICATION_STATUSES } from '../lib/application-status'
 import { recordAudit } from '../lib/audit'
-
-export const APPLICATION_STATUSES = [
-  { label: 'Submitted', value: 'submitted' },
-  { label: 'Under review', value: 'review' },
-  { label: 'Interview or entrance test', value: 'interview' },
-  { label: 'Admitted', value: 'admitted' },
-  { label: 'Waitlisted', value: 'waitlisted' },
-  { label: 'Not successful', value: 'rejected' },
-] as const
 
 export const Applications: CollectionConfig = {
   slug: 'applications',

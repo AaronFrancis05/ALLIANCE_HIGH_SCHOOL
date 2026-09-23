@@ -327,8 +327,12 @@ function Submitted({ trackingCode }: { trackingCode: string }) {
         {trackingCode}
       </p>
       <p className="mt-4 text-[var(--text-body)]">
-        Write this reference down or take a screenshot, and quote it whenever you contact the
-        admissions office about this application.
+        Write this reference down or take a screenshot. With it and your telephone number you
+        can{' '}
+        <Link href="/admissions/track" className="text-maroon-700 underline">
+          check the application&rsquo;s progress
+        </Link>{' '}
+        at any time, and quote it whenever you contact the admissions office.
       </p>
       <p className="mt-3 text-[var(--text-body)]">
         The admissions office will review the application and contact you on the telephone
