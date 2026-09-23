@@ -1,31 +1,28 @@
 import { defineConfig, devices } from '@playwright/test'
-
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
 import 'dotenv/config'
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
+
 export default defineConfig({
   testDir: './tests/e2e',
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  /* Fail the build on CI if a test.only was left in the source. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  /* 'list' prints to the terminal; the HTML report would try to open a browser. */
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
+  /*
+   * Generous timeouts: these run against `next dev`, which compiles each route on its
+   * first request, so a first navigation can take a minute on a cold or slow machine.
+   * They are ceilings, not waits — a warm run still finishes in seconds.
+   */
+  timeout: 180_000,
+  expect: { timeout: 20_000 },
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://localhost:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    baseURL: BASE_URL,
     trace: 'on-first-retry',
+    navigationTimeout: 150_000,
+    actionTimeout: 30_000,
   },
   projects: [
     {
@@ -35,7 +32,9 @@ export default defineConfig({
   ],
   webServer: {
     command: 'pnpm dev',
-    reuseExistingServer: true,
-    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    url: BASE_URL,
+    /* A cold Next.js dev start on a slow machine needs more than the 60 s default. */
+    timeout: 180_000,
   },
 })

@@ -48,3 +48,17 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Original, full-resolution school photos (only optimised derivatives are committed)
+/assets/*
+!/assets/README.md
+# The brand artwork is small, irreplaceable and the input to `pnpm crest`, so it is kept.
+!/assets/brand/
+
+# Local tooling output
+/.lighthouseci/
+/zap-report/
+/backups/
+
+# Local dev server log
+/dev.log

@@ -64,38 +64,97 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    students: StudentAuthOperations;
   };
   blocks: {};
   collections: {
-    users: User;
+    pages: Page;
+    posts: Post;
+    categories: Category;
+    events: Event;
+    albums: Album;
+    videos: Video;
     media: Media;
+    staffProfiles: StaffProfile;
+    testimonials: Testimonial;
+    downloads: Download;
+    departments: Department;
+    subjects: Subject;
+    resources: Resource;
+    academicTerms: AcademicTerm;
+    feeClearances: FeeClearance;
+    reportCards: ReportCard;
+    applications: Application;
+    applicationDocuments: ApplicationDocument;
+    users: User;
+    students: Student;
+    formSubmissions: FormSubmission;
+    auditLogs: AuditLog;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
+    albums: AlbumsSelect<false> | AlbumsSelect<true>;
+    videos: VideosSelect<false> | VideosSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    staffProfiles: StaffProfilesSelect<false> | StaffProfilesSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    downloads: DownloadsSelect<false> | DownloadsSelect<true>;
+    departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
+    subjects: SubjectsSelect<false> | SubjectsSelect<true>;
+    resources: ResourcesSelect<false> | ResourcesSelect<true>;
+    academicTerms: AcademicTermsSelect<false> | AcademicTermsSelect<true>;
+    feeClearances: FeeClearancesSelect<false> | FeeClearancesSelect<true>;
+    reportCards: ReportCardsSelect<false> | ReportCardsSelect<true>;
+    applications: ApplicationsSelect<false> | ApplicationsSelect<true>;
+    applicationDocuments: ApplicationDocumentsSelect<false> | ApplicationDocumentsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    students: StudentsSelect<false> | StudentsSelect<true>;
+    formSubmissions: FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
+    auditLogs: AuditLogsSelect<false> | AuditLogsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    siteSettings: SiteSetting;
+    homePage: HomePage;
+    navigation: Navigation;
+    admissionsSettings: AdmissionsSetting;
+  };
+  globalsSelect: {
+    siteSettings: SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    homePage: HomePageSelect<false> | HomePageSelect<true>;
+    navigation: NavigationSelect<false> | NavigationSelect<true>;
+    admissionsSettings: AdmissionsSettingsSelect<false> | AdmissionsSettingsSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | Student;
   jobs: {
-    tasks: unknown;
+    tasks: {
+      schedulePublish: TaskSchedulePublish;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -117,12 +176,403 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface StudentAuthOperations {
+  forgotPassword: {
+    username: string;
+  };
+  login: {
+    password: string;
+    username: string;
+  };
+  registerFirstUser: {
+    password: string;
+    username: string;
+  };
+  unlock: {
+    username: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * The web address. Changing it breaks links that already exist.
+   */
+  slug: string;
+  /**
+   * Short paragraph under the page heading.
+   */
+  intro?: string | null;
+  heroImage?: (number | null) | Media;
+  /**
+   * Build the page by stacking blocks.
+   */
+  layout: (
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'richText';
+      }
+    | {
+        heading?: string | null;
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        image: number | Media;
+        imagePosition?: ('right' | 'left') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'imageWithText';
+      }
+    | {
+        heading?: string | null;
+        cards: {
+          title: string;
+          body: string;
+          icon?: ('star' | 'book' | 'cap' | 'users' | 'trophy' | 'building' | 'heart') | null;
+          image?: (number | null) | Media;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'cards';
+      }
+    | {
+        heading?: string | null;
+        milestones: {
+          year: string;
+          title: string;
+          body?: string | null;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'timeline';
+      }
+    | {
+        heading?: string | null;
+        items: {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'faq';
+      }
+    | {
+        heading?: string | null;
+        columns: {
+          label: string;
+          id?: string | null;
+        }[];
+        rows: {
+          cells: {
+            value: string;
+            id?: string | null;
+          }[];
+          id?: string | null;
+        }[];
+        /**
+         * Small print under the table.
+         */
+        note?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'table';
+      }
+    | {
+        heading?: string | null;
+        video: number | Video;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'videoEmbed';
+      }
+    | {
+        heading: string;
+        body?: string | null;
+        buttonLabel: string;
+        buttonHref: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'callToAction';
+      }
+  )[];
+  meta?: {
+    /**
+     * Up to 60 characters shows in full on Google. Leave empty to use the page title.
+     */
+    title?: string | null;
+    /**
+     * Up to 155 characters. This is the grey text under the link on Google.
+     */
+    description?: string | null;
+    /**
+     * Shown when the page is shared on WhatsApp or Facebook. 1200x630 works best.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Keep this page out of search results.
+     */
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Photographs and graphics used across the website.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * Describe the picture: [Who] [doing what] [where] at Alliance High School Nansana. Screen readers and Google both use this.
+   */
+  alt: string;
+  /**
+   * Optional caption shown under the picture in galleries.
+   */
+  caption?: string | null;
+  /**
+   * Photographer or source, if it should be shown.
+   */
+  credit?: string | null;
+  /**
+   * A temporary stand-in, not a real photograph of the school. Replace it as soon as a real photo exists.
+   */
+  isPlaceholder?: boolean | null;
+  /**
+   * The photograph that should replace this one.
+   */
+  replacementBrief?: string | null;
+  blurDataUrl?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    xlarge?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos".
+ */
+export interface Video {
+  id: number;
+  title: string;
+  /**
+   * The web address. Changing it breaks links that already exist.
+   */
+  slug: string;
+  description?: string | null;
+  /**
+   * Paste the YouTube address. Shorts and youtu.be links work too.
+   */
+  youtubeUrl: string;
+  youtubeId?: string | null;
+  /**
+   * Still image shown before the video loads. The player itself only loads when someone clicks.
+   */
+  poster: number | Media;
+  category?: ('school' | 'welcome' | 'event' | 'testimonial') | null;
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  /**
+   * The web address. Changing it breaks links that already exist.
+   */
+  slug: string;
+  /**
+   * One or two sentences shown on the news listing and in search results.
+   */
+  excerpt: string;
+  /**
+   * Landscape photograph taken at the event itself.
+   */
+  coverImage: number | Media;
+  category: number | Category;
+  publishedAt: string;
+  author?: (number | null) | User;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Up to 40 photographs from the event.
+   */
+  gallery?: (number | Media)[] | null;
+  meta?: {
+    /**
+     * Up to 60 characters shows in full on Google. Leave empty to use the page title.
+     */
+    title?: string | null;
+    /**
+     * Up to 155 characters. This is the grey text under the link on Google.
+     */
+    description?: string | null;
+    /**
+     * Shown when the page is shared on WhatsApp or Facebook. 1200x630 works best.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Keep this page out of search results.
+     */
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  /**
+   * The web address. Changing it breaks links that already exist.
+   */
+  slug: string;
+  /**
+   * Tag colour on the news cards.
+   */
+  colour?: ('maroon' | 'gold' | 'ink') | null;
+  updatedAt: string;
+  createdAt: string;
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
+  /**
+   * Full name as it should appear in the staff directory.
+   */
+  name: string;
+  /**
+   * Decides what this person can see and change.
+   */
+  role: 'superAdmin' | 'editor' | 'hod' | 'registrar' | 'bursar' | 'admissions' | 'teacher';
+  /**
+   * Required for Heads of Department: they may only manage their own department.
+   */
+  department?: (number | null) | Department;
+  /**
+   * Unchecked accounts keep their history but cannot sign in.
+   */
+  active?: boolean | null;
+  twoFactor?: {
+    /**
+     * Set up from the staff profile page.
+     */
+    enabled?: boolean | null;
+    secret?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -130,6 +580,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -144,11 +595,187 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "departments".
  */
-export interface Media {
-  id: string;
-  alt: string;
+export interface Department {
+  id: number;
+  name: string;
+  /**
+   * Short code, for example SCI or HUM.
+   */
+  code: string;
+  /**
+   * Head of Department.
+   */
+  head?: (number | null) | User;
+  description?: string | null;
+  /**
+   * One action shot that represents the department.
+   */
+  image?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  /**
+   * The web address. Changing it breaks links that already exist.
+   */
+  slug: string;
+  summary: string;
+  startDate: string;
+  endDate?: string | null;
+  location?: string | null;
+  audience?: ('all' | 'parents' | 'students' | 'alumni' | 'staff') | null;
+  image?: (number | null) | Media;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  meta?: {
+    /**
+     * Up to 60 characters shows in full on Google. Leave empty to use the page title.
+     */
+    title?: string | null;
+    /**
+     * Up to 155 characters. This is the grey text under the link on Google.
+     */
+    description?: string | null;
+    /**
+     * Shown when the page is shared on WhatsApp or Facebook. 1200x630 works best.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Keep this page out of search results.
+     */
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "albums".
+ */
+export interface Album {
+  id: number;
+  title: string;
+  /**
+   * The web address. Changing it breaks links that already exist.
+   */
+  slug: string;
+  description?: string | null;
+  category: 'academics' | 'sports' | 'mdd' | 'visitation' | 'career' | 'speech' | 'clubs' | 'campus';
+  year: number;
+  cover: number | Media;
+  /**
+   * Drag in the whole set at once. Each photo needs a description.
+   */
+  photos: (number | Media)[];
+  meta?: {
+    /**
+     * Up to 60 characters shows in full on Google. Leave empty to use the page title.
+     */
+    title?: string | null;
+    /**
+     * Up to 155 characters. This is the grey text under the link on Google.
+     */
+    description?: string | null;
+    /**
+     * Shown when the page is shared on WhatsApp or Facebook. 1200x630 works best.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Keep this page out of search results.
+     */
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Shown on the About page. A photograph is optional: initials are used instead.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staffProfiles".
+ */
+export interface StaffProfile {
+  id: number;
+  /**
+   * For example Mr. John Okello.
+   */
+  name: string;
+  /**
+   * For example Head Teacher.
+   */
+  title: string;
+  group: 'administration' | 'board' | 'hods' | 'teaching' | 'support';
+  department?: (number | null) | Department;
+  bio?: string | null;
+  /**
+   * Square headshot, same neutral background for everyone. Optional.
+   */
+  photo?: (number | null) | Media;
+  /**
+   * Lower numbers appear first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  name: string;
+  /**
+   * For example Parent, Senior Six student, Alumnus of 2014.
+   */
+  role: string;
+  quote: string;
+  photo?: (number | null) | Media;
+  /**
+   * Show on the home page.
+   */
+  featured?: boolean | null;
+  /**
+   * Confirm this person agreed to their words and picture being published.
+   */
+  consent: boolean;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "downloads".
+ */
+export interface Download {
+  id: number;
+  title: string;
+  description?: string | null;
+  category: 'circular' | 'form' | 'fees' | 'policy' | 'newsletter';
+  prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -163,10 +790,386 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subjects".
+ */
+export interface Subject {
+  id: number;
+  name: string;
+  code: string;
+  department: number | Department;
+  level: 'o' | 'a' | 'both';
+  /**
+   * Classes that take this subject.
+   */
+  classes?: ('S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6')[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Notes, past papers, textbooks and schemes of work for students.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "resources".
+ */
+export interface Resource {
+  id: number;
+  title: string;
+  /**
+   * One or two lines so students know what is inside.
+   */
+  description?: string | null;
+  type: 'notes' | 'pastPaper' | 'textbook' | 'scheme' | 'video' | 'other';
+  /**
+   * Heads of Department may only add resources to their own department.
+   */
+  department: number | Department;
+  subject: number | Subject;
+  /**
+   * Which classes this is for.
+   */
+  classes: ('S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6')[];
+  year?: number | null;
+  term?: ('1' | '2' | '3') | null;
+  visibility: 'public' | 'students' | 'classes';
+  /**
+   * Use instead of a file for a YouTube lesson or an external link.
+   */
+  externalUrl?: string | null;
+  /**
+   * Times this has been opened.
+   */
+  downloads?: number | null;
+  uploadedBy?: (number | null) | User;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * School terms, reporting dates and the results release switch.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "academicTerms".
+ */
+export interface AcademicTerm {
+  id: number;
+  label?: string | null;
+  year: number;
+  term: '1' | '2' | '3';
+  startDate: string;
+  endDate: string;
+  /**
+   * The term the school is in now.
+   */
+  current?: boolean | null;
+  /**
+   * When this is on, cleared students can download their report cards for this term. Turn it on only when the school is ready.
+   */
+  resultsReleased?: boolean | null;
+  /**
+   * Shown on the Admissions page (FR-20).
+   */
+  reportingDates?:
+    | {
+        /**
+         * For example "S.1, S.2 and S.3".
+         */
+        classes: string;
+        date: string;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Which students are cleared to download their report card each term.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feeClearances".
+ */
+export interface FeeClearance {
+  id: number;
+  label?: string | null;
+  student: number | Student;
+  term: number | AcademicTerm;
+  /**
+   * Blocked students see a polite message pointing them to the Bursar.
+   */
+  status: 'cleared' | 'blocked';
+  /**
+   * Shown to the student. Keep it factual, for example "outstanding balance".
+   */
+  reason?: string | null;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Student records and portal sign-in details.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "students".
+ */
+export interface Student {
+  id: number;
+  /**
+   * For example AHSN/25/030. This is also the portal username.
+   */
+  admissionNo: string;
+  /**
+   * UNEB registration number, when issued.
+   */
+  regNo?: string | null;
+  firstName: string;
+  lastName: string;
+  fullName?: string | null;
+  class: 'S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6';
+  /**
+   * For example East, West.
+   */
+  stream?: string | null;
+  house?: string | null;
+  residence?: ('boarding' | 'day') | null;
+  guardians?:
+    | {
+        name: string;
+        relationship?: string | null;
+        phone: string;
+        email?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Used for password reset codes. The guardian’s number is fine.
+   */
+  phone?: string | null;
+  status: 'active' | 'suspended' | 'alumni';
+  /**
+   * Forces a new password at the next sign-in (FR-10).
+   */
+  mustChangePassword?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  email?: string | null;
+  username: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'students';
+}
+/**
+ * Uploaded by the registrar. Students see theirs once the term is released and fees are cleared.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reportCards".
+ */
+export interface ReportCard {
+  id: number;
+  label?: string | null;
+  student: number | Student;
+  term: number | AcademicTerm;
+  /**
+   * Publishing is not enough on its own: the term must also be released and the student cleared.
+   */
+  published?: boolean | null;
+  uploadedBy?: (number | null) | User;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * Applications submitted through the website.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "applications".
+ */
+export interface Application {
+  id: number;
+  trackingCode: string;
+  /**
+   * The applicant is notified on every change.
+   */
+  status: 'submitted' | 'review' | 'interview' | 'admitted' | 'waitlisted' | 'rejected';
+  applicantType: 's1' | 's5' | 'transfer';
+  applicantName: string;
+  dateOfBirth: string;
+  gender: 'female' | 'male';
+  classSought: 'S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6';
+  residence: 'boarding' | 'day';
+  previousSchool: string;
+  pleIndexNumber?: string | null;
+  pleAggregate?: number | null;
+  /**
+   * Mathematics, English, Science and Social Studies.
+   */
+  pleGrades?:
+    | {
+        subject: string;
+        grade: string;
+        id?: string | null;
+      }[]
+    | null;
+  uceIndexNumber?: string | null;
+  combination?: string | null;
+  uceResults?:
+    | {
+        subject: string;
+        grade: string;
+        id?: string | null;
+      }[]
+    | null;
+  currentClass?: string | null;
+  reasonForTransfer?: string | null;
+  lastReportSummary?: string | null;
+  guardianName: string;
+  guardianPhone: string;
+  guardianEmail?: string | null;
+  guardianRelationship?: string | null;
+  address?: string | null;
+  /**
+   * Birth certificate, result slip and photograph, stored privately.
+   */
+  documents?:
+    | {
+        kind: 'birth' | 'results' | 'photo' | 'other';
+        file: number | ApplicationDocument;
+        id?: string | null;
+      }[]
+    | null;
+  comment?: string | null;
+  /**
+   * The guardian confirmed the details are true and agreed to the privacy notice.
+   */
+  consent: boolean;
+  notes?:
+    | {
+        note: string;
+        by?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  interviewDate?: string | null;
+  /**
+   * Every status change.
+   */
+  history?:
+    | {
+        status?: string | null;
+        at?: string | null;
+        by?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "applicationDocuments".
+ */
+export interface ApplicationDocument {
+  id: number;
+  kind: 'birth' | 'results' | 'photo' | 'other';
+  prefix?: string | null;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * Messages sent through the website.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "formSubmissions".
+ */
+export interface FormSubmission {
+  id: number;
+  form: 'contact' | 'alumni' | 'careers' | 'visit';
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  subject?: string | null;
+  message: string;
+  meta?: {
+    yearOfCompletion?: string | null;
+    occupation?: string | null;
+    position?: string | null;
+  };
+  /**
+   * Tick once the office has replied.
+   */
+  handled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Logins, permission changes, fee clearance changes and report card access.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auditLogs".
+ */
+export interface AuditLog {
+  id: number;
+  action: string;
+  actorType: 'users' | 'students' | 'anonymous' | 'system';
+  actorId?: string | null;
+  actorLabel?: string | null;
+  targetType?: string | null;
+  targetId?: string | null;
+  detail?: string | null;
+  ip?: string | null;
+  userAgent?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -180,24 +1183,201 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: number;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'schedulePublish';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'schedulePublish') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'albums';
+        value: number | Album;
+      } | null)
+    | ({
+        relationTo: 'videos';
+        value: number | Video;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'staffProfiles';
+        value: number | StaffProfile;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: number | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'downloads';
+        value: number | Download;
+      } | null)
+    | ({
+        relationTo: 'departments';
+        value: number | Department;
+      } | null)
+    | ({
+        relationTo: 'subjects';
+        value: number | Subject;
+      } | null)
+    | ({
+        relationTo: 'resources';
+        value: number | Resource;
+      } | null)
+    | ({
+        relationTo: 'academicTerms';
+        value: number | AcademicTerm;
+      } | null)
+    | ({
+        relationTo: 'feeClearances';
+        value: number | FeeClearance;
+      } | null)
+    | ({
+        relationTo: 'reportCards';
+        value: number | ReportCard;
+      } | null)
+    | ({
+        relationTo: 'applications';
+        value: number | Application;
+      } | null)
+    | ({
+        relationTo: 'applicationDocuments';
+        value: number | ApplicationDocument;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'students';
+        value: number | Student;
+      } | null)
+    | ({
+        relationTo: 'formSubmissions';
+        value: number | FormSubmission;
+      } | null)
+    | ({
+        relationTo: 'auditLogs';
+        value: number | AuditLog;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'students';
+        value: number | Student;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -206,11 +1386,16 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  id: number;
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'students';
+        value: number | Student;
+      };
   key?: string | null;
   value?:
     | {
@@ -229,7 +1414,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -237,25 +1422,237 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "pages_select".
  */
-export interface UsersSelect<T extends boolean = true> {
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  intro?: T;
+  heroImage?: T;
+  layout?:
     | T
     | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
+        richText?:
+          | T
+          | {
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+        imageWithText?:
+          | T
+          | {
+              heading?: T;
+              content?: T;
+              image?: T;
+              imagePosition?: T;
+              id?: T;
+              blockName?: T;
+            };
+        cards?:
+          | T
+          | {
+              heading?: T;
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    icon?: T;
+                    image?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        timeline?:
+          | T
+          | {
+              heading?: T;
+              milestones?:
+                | T
+                | {
+                    year?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        faq?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        table?:
+          | T
+          | {
+              heading?: T;
+              columns?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+              rows?:
+                | T
+                | {
+                    cells?:
+                      | T
+                      | {
+                          value?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              note?: T;
+              id?: T;
+              blockName?: T;
+            };
+        videoEmbed?:
+          | T
+          | {
+              heading?: T;
+              video?: T;
+              id?: T;
+              blockName?: T;
+            };
+        callToAction?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              buttonLabel?: T;
+              buttonHref?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  excerpt?: T;
+  coverImage?: T;
+  category?: T;
+  publishedAt?: T;
+  author?: T;
+  body?: T;
+  gallery?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  colour?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  startDate?: T;
+  endDate?: T;
+  location?: T;
+  audience?: T;
+  image?: T;
+  body?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "albums_select".
+ */
+export interface AlbumsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  description?: T;
+  category?: T;
+  year?: T;
+  cover?: T;
+  photos?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos_select".
+ */
+export interface VideosSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  description?: T;
+  youtubeUrl?: T;
+  youtubeId?: T;
+  poster?: T;
+  category?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -263,6 +1660,118 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  caption?: T;
+  credit?: T;
+  isPlaceholder?: T;
+  replacementBrief?: T;
+  blurDataUrl?: T;
+  prefix?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        small?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        medium?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        large?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        xlarge?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staffProfiles_select".
+ */
+export interface StaffProfilesSelect<T extends boolean = true> {
+  name?: T;
+  title?: T;
+  group?: T;
+  department?: T;
+  bio?: T;
+  photo?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  quote?: T;
+  photo?: T;
+  featured?: T;
+  consent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "downloads_select".
+ */
+export interface DownloadsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  category?: T;
+  prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -277,11 +1786,366 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "departments_select".
+ */
+export interface DepartmentsSelect<T extends boolean = true> {
+  name?: T;
+  code?: T;
+  head?: T;
+  description?: T;
+  image?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subjects_select".
+ */
+export interface SubjectsSelect<T extends boolean = true> {
+  name?: T;
+  code?: T;
+  department?: T;
+  level?: T;
+  classes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "resources_select".
+ */
+export interface ResourcesSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  type?: T;
+  department?: T;
+  subject?: T;
+  classes?: T;
+  year?: T;
+  term?: T;
+  visibility?: T;
+  externalUrl?: T;
+  downloads?: T;
+  uploadedBy?: T;
+  prefix?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "academicTerms_select".
+ */
+export interface AcademicTermsSelect<T extends boolean = true> {
+  label?: T;
+  year?: T;
+  term?: T;
+  startDate?: T;
+  endDate?: T;
+  current?: T;
+  resultsReleased?: T;
+  reportingDates?:
+    | T
+    | {
+        classes?: T;
+        date?: T;
+        note?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feeClearances_select".
+ */
+export interface FeeClearancesSelect<T extends boolean = true> {
+  label?: T;
+  student?: T;
+  term?: T;
+  status?: T;
+  reason?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reportCards_select".
+ */
+export interface ReportCardsSelect<T extends boolean = true> {
+  label?: T;
+  student?: T;
+  term?: T;
+  published?: T;
+  uploadedBy?: T;
+  prefix?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "applications_select".
+ */
+export interface ApplicationsSelect<T extends boolean = true> {
+  trackingCode?: T;
+  status?: T;
+  applicantType?: T;
+  applicantName?: T;
+  dateOfBirth?: T;
+  gender?: T;
+  classSought?: T;
+  residence?: T;
+  previousSchool?: T;
+  pleIndexNumber?: T;
+  pleAggregate?: T;
+  pleGrades?:
+    | T
+    | {
+        subject?: T;
+        grade?: T;
+        id?: T;
+      };
+  uceIndexNumber?: T;
+  combination?: T;
+  uceResults?:
+    | T
+    | {
+        subject?: T;
+        grade?: T;
+        id?: T;
+      };
+  currentClass?: T;
+  reasonForTransfer?: T;
+  lastReportSummary?: T;
+  guardianName?: T;
+  guardianPhone?: T;
+  guardianEmail?: T;
+  guardianRelationship?: T;
+  address?: T;
+  documents?:
+    | T
+    | {
+        kind?: T;
+        file?: T;
+        id?: T;
+      };
+  comment?: T;
+  consent?: T;
+  notes?:
+    | T
+    | {
+        note?: T;
+        by?: T;
+        at?: T;
+        id?: T;
+      };
+  interviewDate?: T;
+  history?:
+    | T
+    | {
+        status?: T;
+        at?: T;
+        by?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "applicationDocuments_select".
+ */
+export interface ApplicationDocumentsSelect<T extends boolean = true> {
+  kind?: T;
+  prefix?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  department?: T;
+  active?: T;
+  twoFactor?:
+    | T
+    | {
+        enabled?: T;
+        secret?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "students_select".
+ */
+export interface StudentsSelect<T extends boolean = true> {
+  admissionNo?: T;
+  regNo?: T;
+  firstName?: T;
+  lastName?: T;
+  fullName?: T;
+  class?: T;
+  stream?: T;
+  house?: T;
+  residence?: T;
+  guardians?:
+    | T
+    | {
+        name?: T;
+        relationship?: T;
+        phone?: T;
+        email?: T;
+        id?: T;
+      };
+  phone?: T;
+  status?: T;
+  mustChangePassword?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  username?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "formSubmissions_select".
+ */
+export interface FormSubmissionsSelect<T extends boolean = true> {
+  form?: T;
+  name?: T;
+  email?: T;
+  phone?: T;
+  subject?: T;
+  message?: T;
+  meta?:
+    | T
+    | {
+        yearOfCompletion?: T;
+        occupation?: T;
+        position?: T;
+      };
+  handled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auditLogs_select".
+ */
+export interface AuditLogsSelect<T extends boolean = true> {
+  action?: T;
+  actorType?: T;
+  actorId?: T;
+  actorLabel?: T;
+  targetType?: T;
+  targetId?: T;
+  detail?: T;
+  ip?: T;
+  userAgent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -316,6 +2180,464 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Name, contacts, identity statements and the numbers shown on the home page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "siteSettings".
+ */
+export interface SiteSetting {
+  id: number;
+  schoolName: string;
+  shortName?: string | null;
+  /**
+   * As it appears on the crest.
+   */
+  motto: string;
+  /**
+   * Plain English meaning, shown beside the motto.
+   */
+  mottoMeaning?: string | null;
+  /**
+   * One line under the school name in the hero.
+   */
+  tagline?: string | null;
+  /**
+   * Leave the bracketed placeholder until the school confirms it.
+   */
+  foundedYear?: string | null;
+  vision: string;
+  mission: string;
+  coreValues?:
+    | {
+        value: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  themeOfTheYear?: {
+    year?: string | null;
+    theme?: string | null;
+    /**
+     * Optional scripture or source.
+     */
+    reference?: string | null;
+  };
+  phones?:
+    | {
+        /**
+         * For example Head Teacher, Admissions.
+         */
+        label?: string | null;
+        number: string;
+        whatsapp?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  emails?:
+    | {
+        label?: string | null;
+        address: string;
+        id?: string | null;
+      }[]
+    | null;
+  address: {
+    line1: string;
+    district: string;
+    country: string;
+    poBox?: string | null;
+    /**
+     * Google Maps embed address for the contact page.
+     */
+    mapEmbedUrl?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+  };
+  officeHours?:
+    | {
+        days: string;
+        hours: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shown as counters on the home page. Only use figures the school confirms.
+   */
+  stats?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  social?:
+    | {
+        platform: 'facebook' | 'x' | 'instagram' | 'youtube' | 'tiktok' | 'linkedin';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Hero slides, welcome message and the feature cards.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homePage".
+ */
+export interface HomePage {
+  id: number;
+  /**
+   * Keep the headline short. Choose photographs with empty sky or wall on the left, so the words do not cover anyone’s face.
+   */
+  hero?:
+    | {
+        headline: string;
+        subhead?: string | null;
+        image: number | Media;
+        buttonLabel?: string | null;
+        buttonHref?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  welcome: {
+    heading?: string | null;
+    name: string;
+    title?: string | null;
+    message: string;
+    photo?: (number | null) | Media;
+    readMoreHref?: string | null;
+  };
+  features?:
+    | {
+        title: string;
+        body: string;
+        image?: (number | null) | Media;
+        icon?: ('book' | 'flask' | 'trophy' | 'users' | 'heart' | 'star') | null;
+        id?: string | null;
+      }[]
+    | null;
+  callToAction?: {
+    heading?: string | null;
+    body?: string | null;
+    buttonLabel?: string | null;
+    buttonHref?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The top menu and the footer links.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation".
+ */
+export interface Navigation {
+  id: number;
+  header?:
+    | {
+        label: string;
+        /**
+         * For example /admissions.
+         */
+        href: string;
+        children?:
+          | {
+              label: string;
+              /**
+               * For example /admissions.
+               */
+              href: string;
+              description?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  footer?:
+    | {
+        heading: string;
+        links?:
+          | {
+              label: string;
+              /**
+               * For example /admissions.
+               */
+              href: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  announcement?: {
+    enabled?: boolean | null;
+    text?: string | null;
+    href?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Requirements, fees and the online application switch.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admissionsSettings".
+ */
+export interface AdmissionsSetting {
+  id: number;
+  /**
+   * When off, the apply page explains that applications are closed.
+   */
+  applicationsOpen?: boolean | null;
+  /**
+   * For example "Senior One intake, 2027".
+   */
+  intakeNote?: string | null;
+  requirements?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shown as a table. Use the same figures as the printed structure.
+   */
+  fees?:
+    | {
+        /**
+         * For example Senior One boarding.
+         */
+        category: string;
+        tuition: string;
+        other?: string | null;
+        total: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Small print under the fees table.
+   */
+  feesNote?: string | null;
+  feesDocument?: (number | null) | Download;
+  /**
+   * These are marked up for Google, which can show them under the search result.
+   */
+  faqs?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "siteSettings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  schoolName?: T;
+  shortName?: T;
+  motto?: T;
+  mottoMeaning?: T;
+  tagline?: T;
+  foundedYear?: T;
+  vision?: T;
+  mission?: T;
+  coreValues?:
+    | T
+    | {
+        value?: T;
+        description?: T;
+        id?: T;
+      };
+  themeOfTheYear?:
+    | T
+    | {
+        year?: T;
+        theme?: T;
+        reference?: T;
+      };
+  phones?:
+    | T
+    | {
+        label?: T;
+        number?: T;
+        whatsapp?: T;
+        id?: T;
+      };
+  emails?:
+    | T
+    | {
+        label?: T;
+        address?: T;
+        id?: T;
+      };
+  address?:
+    | T
+    | {
+        line1?: T;
+        district?: T;
+        country?: T;
+        poBox?: T;
+        mapEmbedUrl?: T;
+        latitude?: T;
+        longitude?: T;
+      };
+  officeHours?:
+    | T
+    | {
+        days?: T;
+        hours?: T;
+        id?: T;
+      };
+  stats?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  social?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homePage_select".
+ */
+export interface HomePageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        headline?: T;
+        subhead?: T;
+        image?: T;
+        buttonLabel?: T;
+        buttonHref?: T;
+        id?: T;
+      };
+  welcome?:
+    | T
+    | {
+        heading?: T;
+        name?: T;
+        title?: T;
+        message?: T;
+        photo?: T;
+        readMoreHref?: T;
+      };
+  features?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        image?: T;
+        icon?: T;
+        id?: T;
+      };
+  callToAction?:
+    | T
+    | {
+        heading?: T;
+        body?: T;
+        buttonLabel?: T;
+        buttonHref?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation_select".
+ */
+export interface NavigationSelect<T extends boolean = true> {
+  header?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        children?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              description?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  footer?:
+    | T
+    | {
+        heading?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  announcement?:
+    | T
+    | {
+        enabled?: T;
+        text?: T;
+        href?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admissionsSettings_select".
+ */
+export interface AdmissionsSettingsSelect<T extends boolean = true> {
+  applicationsOpen?: T;
+  intakeNote?: T;
+  requirements?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  fees?:
+    | T
+    | {
+        category?: T;
+        tuition?: T;
+        other?: T;
+        total?: T;
+        id?: T;
+      };
+  feesNote?: T;
+  feesDocument?: T;
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
@@ -324,6 +2646,36 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSchedulePublish".
+ */
+export interface TaskSchedulePublish {
+  input: {
+    type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
+    doc?:
+      | ({
+          relationTo: 'pages';
+          value: number | Page;
+        } | null)
+      | ({
+          relationTo: 'posts';
+          value: number | Post;
+        } | null);
+    global?: string | null;
+    user?:
+      | ({
+          relationTo: 'users';
+          value: number | User;
+        } | null)
+      | ({
+          relationTo: 'students';
+          value: number | Student;
+        } | null);
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

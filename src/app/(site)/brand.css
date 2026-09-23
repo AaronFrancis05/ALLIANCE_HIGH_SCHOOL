@@ -1,0 +1,170 @@
+/**
+ * Brand tokens for Alliance High School Nansana.
+ * Taken from the school crest (maroon shield, gold elephant and lettering, black banners)
+ * and the uniforms (white with red, cream with brown).
+ *
+ * Components use these variables and Tailwind utilities only. No raw hex values elsewhere.
+ */
+
+@import 'tailwindcss';
+
+@theme {
+  /* Maroon: the shield. Primary brand colour. */
+  --color-maroon-50: #fdf3f3;
+  --color-maroon-100: #fbe4e4;
+  --color-maroon-200: #f6cbcb;
+  --color-maroon-300: #eea5a5;
+  --color-maroon-400: #e07070;
+  --color-maroon-500: #cc4444;
+  --color-maroon-600: #b02024;
+  --color-maroon-700: #8b1a1a;
+  --color-maroon-800: #741417;
+  --color-maroon-900: #5c1013;
+  --color-maroon-950: #2a0a0b;
+
+  /* Gold: the lettering, the elephant and the laurels. Accent, never body text on white. */
+  --color-gold-50: #fffaeb;
+  --color-gold-100: #fef0c7;
+  --color-gold-200: #fedf89;
+  --color-gold-300: #fec84b;
+  --color-gold-400: #fdb022;
+  --color-gold-500: #f2b705;
+  --color-gold-600: #dc9a06;
+  --color-gold-700: #b87708;
+  --color-gold-800: #93600d;
+  --color-gold-900: #7a4f0e;
+
+  /* Ink: the crest banners. Headings and body text. */
+  --color-ink-50: #f6f6f6;
+  --color-ink-100: #e7e7e7;
+  --color-ink-200: #d1d1d1;
+  --color-ink-300: #b0b0b0;
+  --color-ink-400: #888888;
+  --color-ink-500: #6b6f76;
+  --color-ink-600: #5d5d5d;
+  --color-ink-700: #4f4f4f;
+  --color-ink-800: #333333;
+  --color-ink-900: #1f1f1f;
+  --color-ink-950: #141414;
+
+  /* Cream: page background, taken from the O-Level uniform shirt. */
+  --color-cream-50: #fdfbf7;
+  --color-cream-100: #fbf6ec;
+  --color-cream-200: #f5ecda;
+  --color-cream-300: #ead9ba;
+
+  --font-display: var(--font-playfair), Georgia, 'Times New Roman', serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 0.875rem;
+
+  --shadow-card: 0 1px 2px rgb(20 20 20 / 0.06), 0 8px 24px -12px rgb(20 20 20 / 0.18);
+  --shadow-raised: 0 2px 4px rgb(20 20 20 / 0.08), 0 16px 40px -16px rgb(20 20 20 / 0.28);
+}
+
+/* Semantic roles. Change these, not the scales, when the school tweaks its palette. */
+:root {
+  --surface: var(--color-cream-50);
+  --surface-raised: #ffffff;
+  --surface-sunken: var(--color-cream-100);
+  --text-strong: var(--color-ink-950);
+  --text-body: var(--color-ink-800);
+  --text-muted: var(--color-ink-500);
+  --border-subtle: var(--color-cream-300);
+  --brand: var(--color-maroon-700);
+  --brand-strong: var(--color-maroon-900);
+  --accent: var(--color-gold-500);
+  --focus-ring: var(--color-maroon-600);
+}
+
+@layer base {
+  * {
+    border-color: var(--border-subtle);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--text-body);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--text-strong);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* One visible focus style everywhere. Never remove it. */
+  :focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-200);
+    color: var(--color-ink-950);
+  }
+}
+
+@layer components {
+  /* Page width. Matches the 16 px side gutter the design calls for on phones. */
+  .container-site {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 1rem;
+    max-width: 80rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-site {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  /* Skip link, visible only when focused. */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+  }
+
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--brand);
+    color: #fff;
+    border-radius: 0.5rem;
+  }
+}
