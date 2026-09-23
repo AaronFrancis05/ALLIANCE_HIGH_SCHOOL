@@ -58,7 +58,7 @@ left until launch (the school owner's call, 2026-09-23).
 - **Docs**: SRS, ARCHITECTURE, IMAGE_GUIDE, CONTENT_TODO.
 
 ### Known gaps and loose ends
-- The contact page says the enquiry form "is being finished" (P2-T9 not built).
+- `TURNSTILE_*` settings exist in `.env.example` and `env.ts` but nothing uses them; the enquiry and application forms rely on a honeypot and rate limits (and a link cap for enquiries).
 - Rate limits (`src/lib/rate-limit.ts`) are still in memory per process. Fine for one VPS; several servers would need a shared store.
 - There is no `.ics` route for events and no site search. Admissions has no document upload, tracking page or family notification yet (P5-T2 to P5-T4).
 - The header's "Apply now" link (Navigation global) still points to `/admissions`, which now links on to `/admissions/apply`.
@@ -81,6 +81,10 @@ left until launch (the school owner's call, 2026-09-23).
 ---
 
 ## Log
+
+### 2026-09-23 (P2-T9)
+- **Enquiry form** on `/contact#enquiry` (FR-21): a general question, visit request, alumni registration or job enquiry. Shared schema in `src/lib/enquiry-schema.ts` (browser and server), needs an email or a phone, at most 2 links, honeypot; the server rate-limits (5 per 10 min), saves to Enquiries with `overrideAccess` (public create stays denied) and emails the first address in School details. Works without JavaScript.
+- Verified: unit 144/144; enquiry e2e 3/3 (saved and readable by the editor, one copy in Mailpit, public read and create get 403, no-JS server check for the alumni year).
 
 ### 2026-09-23 (P3-T2, and an FR-07 security fix)
 - **Security bug found and fixed (FR-07)**: a head of department could create a resource in *another* department (proved: HOD Sciences got 201 filing under "Vocational and Creative"), and could move their own resource out by update. `writeResources` returns a `where` filter, which Payload cannot apply to a create. New rule `canFileInDepartment` in `src/access/resources.ts` (unit-tested) is enforced in the Resources `beforeValidate` hook on create and on every update that touches the department; refusals are a 403 with a plain message.

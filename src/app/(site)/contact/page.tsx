@@ -1,16 +1,17 @@
 /**
  * Contact (FR-21, FR-24).
  *
- * Every detail comes from the site settings global. The enquiry form itself is P2-T9;
- * until then this page gives every way of reaching the school that already exists.
+ * Every detail comes from the site settings global. The enquiry form (P2-T9) sends a
+ * message to the office and saves it under Enquiries in the admin panel.
  */
 
 import React from 'react'
 import type { Metadata } from 'next'
-import { Mail, MapPin, Phone, Clock, MessageCircle } from 'lucide-react'
+import { Mail, MapPin, Phone, Clock } from 'lucide-react'
 import { Container, Card, Section, SectionHeading } from '../../../components/ui'
 import { PageHeader } from '../../../components/layout/PageHeader'
 import { BreadcrumbJsonLd } from '../../../components/seo/JsonLd'
+import { EnquiryForm } from '../../../components/contact/EnquiryForm'
 import { getMediaBySlug, getSiteSettings } from '../../../lib/payload'
 
 export const revalidate = 3600
@@ -118,16 +119,18 @@ export default async function ContactPage() {
               </Card>
             ) : null}
 
-            <Card className="p-6 md:col-span-2 lg:col-span-1">
-              <MessageCircle className="h-7 w-7 text-maroon-700" aria-hidden />
-              <h2 className="mt-3 font-display text-lg">Send us a message</h2>
-              <p className="mt-2 text-[var(--text-body)]">
-                The online enquiry form is being finished. For now, please call the school office or
-                send an email — both reach the same people, and you will get an answer the same day
-                during office hours.
-              </p>
-            </Card>
           </div>
+        </Container>
+      </Section>
+
+      <Section tone="plain" id="enquiry">
+        <Container className="max-w-3xl">
+          <SectionHeading
+            eyebrow="Write to us"
+            title="Send the school a message"
+            lead="For a question, a visit, registering as a former student, or asking about working here."
+          />
+          <EnquiryForm />
         </Container>
       </Section>
 

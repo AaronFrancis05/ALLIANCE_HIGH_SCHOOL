@@ -65,7 +65,7 @@ them before you open a branch.
       Write the script or remove the entry.
 
 ### P2: finish the public site
-- [ ] **P2-T9** Contact, alumni and careers enquiry form: Zod on the server, rate-limited,
+- [x] **P2-T9** Contact, alumni and careers enquiry form: Zod on the server, rate-limited,
       spam-protected, saved to `FormSubmissions` (FR-21)
 - [ ] Events: `.ics` download route under `src/app/api/` (FR-20)
 - [ ] About sub-pages (leadership, staff). Blocked until the school supplies names and photos

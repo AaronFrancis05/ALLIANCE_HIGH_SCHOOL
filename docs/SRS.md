@@ -93,7 +93,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 | ID | Requirement | Status |
 |---|---|---|
 | FR-20 | Events have dates and a location, and can be added to a phone calendar (.ics). | Partial |
-| FR-21 | Contact, alumni and careers enquiries are captured, rate-limited and spam-protected. | Partial |
+| FR-21 | Contact, alumni and careers enquiries are captured, rate-limited and spam-protected. | Built |
 | FR-22 | Site-wide search across pages, news and resources. | Planned |
 | FR-23 | Sensitive actions — sign-in, report card access, clearance changes, releases — are written to an append-only audit log. | Built |
 | FR-24 | Every page carries a title, description, canonical URL, Open Graph tags and structured data; the school appears as an organisation Google can understand. | Built |
