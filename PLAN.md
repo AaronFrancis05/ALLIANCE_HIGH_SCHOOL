@@ -48,7 +48,7 @@ Out of scope for now: paying fees online, a full school management system, a mob
 | **P2** | Public site: about, academics, news, events, gallery, contact | 🟡 Mostly done: enquiry form, sub-pages and `.ics` outstanding |
 | **P3** | e-Library: browse, filter, gated download | 🟡 Started: browse, filters, gated download and portal library done; bulk upload (P3-T2) not |
 | **P4** | Student portal: sign-in, report cards, clearance messages | ✅ Done, except the bulk report-card import (FR-12) |
-| **P5** | Admissions: form, documents, tracking, review | 🟡 Started: schema and form validation only |
+| **P5** | Admissions: form, documents, tracking, review | 🟡 Started: online form done (P5-T1); documents, tracking page and review not |
 | **P6** | SEO, performance and security hardening | 🟡 Started: structured data and security headers done |
 | **P7** | Content from the school, training, deployment, launch | ⬜ Not started |
 
@@ -81,8 +81,9 @@ them before you open a branch.
 - [ ] **P4-T?** *(proposed)* Report-card bulk import from a spreadsheet, with a dry-run summary (FR-12)
 
 ### P5: admissions
-- [ ] **P5-T1** *(proposed)* Submit the application end to end, with the same schema in the browser and on the server (FR-16)
-- [ ] **P5-T2** *(proposed)* Document uploads (PLE slip, birth certificate, photo): allow-listed type, magic-byte check, size cap, EXIF stripped (FR-17)
+- [x] **P5-T1** Submit the application end to end, with the same schema in the browser and on the server (FR-16)
+- [ ] **P5-T2** *(proposed)* Document uploads (PLE slip, birth certificate, photo): allow-listed type, magic-byte check, size cap, EXIF stripped (FR-17).
+      P5-T1 removed the schema's unchecked `documentIds`; link uploads to an application only with proof the uploader made them.
 - [ ] **P5-T3** *(proposed)* Reference number and public tracking page, rate-limited (FR-18)
 - [ ] **P5-T4** *(proposed)* Officer review workflow and family notification (FR-19)
 - [ ] Retention job for applications and their documents, with a dry run (SRS §6)

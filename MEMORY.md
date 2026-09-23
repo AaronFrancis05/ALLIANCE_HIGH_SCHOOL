@@ -11,8 +11,8 @@ entry short: what changed, what was verified, what is left.
 
 ## Current status (as of 2026-09-23)
 
-**Where we are:** P0, P1 and P4 are done. P2 is mostly done. P3 has browse, filters and gated download (P3-T1, P3-T3), bulk upload left; P5 and P6 have started. P7 has not started.
-**Next up:** **P5-T1** (online application) or **P3-T2** (bulk upload for heads of department),
+**Where we are:** P0, P1 and P4 are done. P2 is mostly done. P3 has browse, filters and gated download (P3-T1, P3-T3), bulk upload left. P5 has the online form (P5-T1); P6 has started. P7 has not started.
+**Next up:** **P5-T2** (document uploads) then **P5-T3** (tracking page), or **P3-T2** (bulk upload),
 plus the `import:students` loose end. Contact details in docs/CONTENT_TODO.md are deliberately
 left until launch (the school owner's call, 2026-09-23).
 
@@ -27,8 +27,9 @@ left until launch (the school owner's call, 2026-09-23).
 
 ### Git
 - `main` holds only `064eda3 feat: initial commit`. P0 to P4 is on `feat/P0-P4-foundation-and-portal`;
-  P3-T3 is on `feat/P3-library-downloads`, and P3-T1 on `feat/P3-T1-library-filters`, each branched
-  from the one before. None is merged or pushed.
+  P3-T3 is on `feat/P3-library-downloads`, P3-T1 on `feat/P3-T1-library-filters`, the session fixes on
+  `fix/P4-session-hardening`, and P5-T1 on `feat/P5-T1-online-application`, each branched from the
+  one before. None is merged or pushed.
 
 ---
 
@@ -58,9 +59,10 @@ left until launch (the school owner's call, 2026-09-23).
 
 ### Known gaps and loose ends
 - The contact page says the enquiry form "is being finished" (P2-T9 not built).
-- Library filters (P3-T1) and bulk upload (P3-T2) are not built.
+- Library bulk upload (P3-T2) is not built.
 - Rate limits (`src/lib/rate-limit.ts`) are still in memory per process. Fine for one VPS; several servers would need a shared store.
-- There is no `.ics` route for events, no site search, and no admissions submit, upload or tracking flow.
+- There is no `.ics` route for events and no site search. Admissions has no document upload, tracking page or family notification yet (P5-T2 to P5-T4).
+- The header's "Apply now" link (Navigation global) still points to `/admissions`, which now links on to `/admissions/apply`.
 - The `import:students` script points to a file that does not exist: `scripts/import-students.ts`.
 - There is no `docs/DEPLOYMENT-VPS.md` and no CI pipeline.
 - There are 12 AI placeholder images, and many school facts are still placeholders (docs/CONTENT_TODO.md).
@@ -78,6 +80,12 @@ left until launch (the school owner's call, 2026-09-23).
 ---
 
 ## Log
+
+### 2026-09-23 (P5-T1)
+- **Online application** (FR-16) at `/admissions/apply`: one form for Senior One, Senior Five and transfer applicants. `src/lib/application-form.ts` turns the posted form into the schema's shape; the browser and the server action both run it and then `applicationSchema`, so they cannot disagree. Works without JavaScript: sections switch with CSS `:has(:checked)`, and server errors come back with the typed answers kept.
+- The server works out the PLE aggregate from the four grades; it never trusts a posted aggregate. The submission is rate-limited (5/min), has a honeypot, respects the applications-open switch, writes with `overrideAccess` (public create stays denied), audits `application.submitted` and returns an `AHSN-XXXXXX` reference.
+- Removed `documentIds` from the schema: nothing checked who owned those files. Added `pleYear` and `uceYear` to Applications. The admissions page now links to the form when applications are open; the page is in the sitemap and revalidates with the admissions global.
+- Tests: 10 parser unit tests; e2e proves a submission reaches the admissions officer, is refused (403) to the public and to a student, that public API create is refused, and that the server refuses an incomplete form with JavaScript off.
 
 ### 2026-09-23 (portal session hardening)
 - **Sign-out now revokes the session on the server** (FR-10): `signOutAction` runs Payload's `logoutOperation`, which removes that session from the student's record, then deletes the cookie. A new e2e test replays a copied cookie after sign-out and is refused; run against the old code, the same test got into `/portal/results`. Sign-outs are audited as `student.logout`.

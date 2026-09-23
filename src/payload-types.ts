@@ -1032,6 +1032,7 @@ export interface Application {
   previousSchool: string;
   pleIndexNumber?: string | null;
   pleAggregate?: number | null;
+  pleYear?: number | null;
   /**
    * Mathematics, English, Science and Social Studies.
    */
@@ -1044,6 +1045,7 @@ export interface Application {
     | null;
   uceIndexNumber?: string | null;
   combination?: string | null;
+  uceYear?: number | null;
   uceResults?:
     | {
         subject: string;
@@ -1918,6 +1920,7 @@ export interface ApplicationsSelect<T extends boolean = true> {
   previousSchool?: T;
   pleIndexNumber?: T;
   pleAggregate?: T;
+  pleYear?: T;
   pleGrades?:
     | T
     | {
@@ -1927,6 +1930,7 @@ export interface ApplicationsSelect<T extends boolean = true> {
       };
   uceIndexNumber?: T;
   combination?: T;
+  uceYear?: T;
   uceResults?:
     | T
     | {

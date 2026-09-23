@@ -54,5 +54,5 @@ export const AdmissionsSettings: GlobalConfig = {
       ],
     },
   ],
-  hooks: { afterChange: [revalidateGlobalAfterChange(() => ['/admissions', '/admissions/fees'])] },
+  hooks: { afterChange: [revalidateGlobalAfterChange(() => ['/admissions', '/admissions/fees', '/admissions/apply'])] },
 }

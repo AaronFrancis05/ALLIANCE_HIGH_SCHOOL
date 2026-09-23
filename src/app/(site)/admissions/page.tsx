@@ -195,14 +195,27 @@ export default async function AdmissionsPage() {
         <Container className="text-center">
           <h2 className="text-3xl text-white">Ready to apply?</h2>
           <p className="mx-auto mt-3 max-w-2xl text-cream-200">
-            Online applications are being finished. In the meantime, call the admissions office or
-            visit the school on any weekday and we will start your application there.
+            {open
+              ? 'Apply online in about ten minutes, or call the admissions office or visit the school on any weekday and we will start your application there.'
+              : 'Online applications are closed at the moment. Call the admissions office or visit the school on any weekday to ask about a place.'}
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
+            {open ? (
+              <Link
+                href="/admissions/apply"
+                className="inline-flex min-h-12 items-center rounded-lg bg-gold-500 px-7 text-sm font-semibold text-ink-950 hover:bg-gold-400"
+              >
+                Apply online
+              </Link>
+            ) : null}
             {phone ? (
               <Link
                 href={`tel:${phone.replace(/\s/g, '')}`}
-                className="inline-flex min-h-12 items-center rounded-lg bg-gold-500 px-7 text-sm font-semibold text-ink-950 hover:bg-gold-400"
+                className={
+                  open
+                    ? 'inline-flex min-h-12 items-center rounded-lg border border-white px-7 text-sm font-semibold text-white hover:bg-white hover:text-maroon-800'
+                    : 'inline-flex min-h-12 items-center rounded-lg bg-gold-500 px-7 text-sm font-semibold text-ink-950 hover:bg-gold-400'
+                }
               >
                 Call {phone}
               </Link>

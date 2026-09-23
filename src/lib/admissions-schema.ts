@@ -69,11 +69,10 @@ const baseSchema = z.object({
   guardianName: name.max(80),
   guardianPhone: phone,
   guardianEmail: z.string().trim().email('Enter a valid email address').or(z.literal('')),
-  residence: z.enum(['boarding', 'day']),
-  comment: z.string().trim().max(1000).optional(),
-  /** Ids of files already uploaded through the documents route. */
-  documentIds: z.array(z.string()).max(6).default([]),
-  consent: z.literal(true, { message: 'Please confirm the details are correct' }),
+  residence: z.enum(['boarding', 'day'], { message: 'Choose boarding or day' }),
+  comment: z.string().trim().max(1000, 'Please keep the comment under 1,000 characters').optional(),
+  // `message` alone is ignored for a literal that receives the wrong value, so use errorMap.
+  consent: z.literal(true, { errorMap: () => ({ message: 'Please confirm the details are correct' }) }),
   /** Must stay empty: filled in only by bots. */
   website: z.literal('').optional(),
 })

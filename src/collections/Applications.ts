@@ -135,6 +135,7 @@ export const Applications: CollectionConfig = {
             { name: 'pleAggregate', type: 'number', label: 'Total aggregate', min: 4, max: 36, admin: { width: '50%' } },
           ],
         },
+        { name: 'pleYear', type: 'number', label: 'Year PLE was sat' },
         {
           name: 'pleGrades',
           type: 'array',
@@ -159,6 +160,7 @@ export const Applications: CollectionConfig = {
             { name: 'combination', type: 'text', label: 'Combination sought', admin: { width: '50%' } },
           ],
         },
+        { name: 'uceYear', type: 'number', label: 'Year UCE was sat' },
         {
           name: 'uceResults',
           type: 'array',
