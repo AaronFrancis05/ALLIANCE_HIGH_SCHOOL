@@ -59,8 +59,7 @@ left until launch (the school owner's call, 2026-09-23).
 ### Known gaps and loose ends
 - The contact page says the enquiry form "is being finished" (P2-T9 not built).
 - Library filters (P3-T1) and bulk upload (P3-T2) are not built.
-- Signing out only deletes the cookie; the session row stays valid on the server until it expires (2 hours). Revoking it on sign-out would matter on shared phones.
-- The per-account sign-in lock (`src/lib/key-lock.ts`) is in memory, so it only protects a single server process.
+- Rate limits (`src/lib/rate-limit.ts`) are still in memory per process. Fine for one VPS; several servers would need a shared store.
 - There is no `.ics` route for events, no site search, and no admissions submit, upload or tracking flow.
 - The `import:students` script points to a file that does not exist: `scripts/import-students.ts`.
 - There is no `docs/DEPLOYMENT-VPS.md` and no CI pipeline.
@@ -79,6 +78,11 @@ left until launch (the school owner's call, 2026-09-23).
 ---
 
 ## Log
+
+### 2026-09-23 (portal session hardening)
+- **Sign-out now revokes the session on the server** (FR-10): `signOutAction` runs Payload's `logoutOperation`, which removes that session from the student's record, then deletes the cookie. A new e2e test replays a copied cookie after sign-out and is refused; run against the old code, the same test got into `/portal/results`. Sign-outs are audited as `student.logout`.
+- **The per-account lock now works across servers**: `withSharedKeyLock` in `src/lib/key-lock.ts` adds a Postgres advisory lock (transaction-scoped, 10 s timeout) under the in-process queue. Sign-in and sign-out share the lock, since both rewrite the session list. Proved against real Postgres in `tests/int/key-lock.int.spec.ts`. No new dependency: it uses Payload's own pool.
+- Verified: typecheck, lint, unit tests, portal e2e 10/10, lock integration test.
 
 ### 2026-09-23 (P3-T1 and two fixes)
 - **Filters** (FR-06): subject, class, type and year on `/resources` and `/portal/library`, as a plain GET form. Query values are Zod-validated in `src/lib/resource-filters.ts`; the filter only narrows, since Payload ANDs it with `readResources`. Subject and year options come from the visible shelf, so no restricted subject is revealed. `/resources` is now rendered per request (it reads the query string).

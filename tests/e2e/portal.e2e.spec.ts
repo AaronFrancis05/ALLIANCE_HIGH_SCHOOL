@@ -129,6 +129,29 @@ test.describe('Student portal', () => {
     await Promise.all(contexts.map((context) => context.close()))
   })
 
+  test('signing out revokes the session, so a copied cookie stops working', async ({
+    browser,
+    page,
+  }) => {
+    await signIn(page, STUDENTS.senior)
+    const copied = (await page.context().cookies()).filter((cookie) => cookie.name.endsWith('-token'))
+    expect(copied).toHaveLength(1)
+
+    await page.getByRole('button', { name: /sign out/i }).click()
+    await page.waitForURL(/\/portal\/sign-in/)
+
+    // Someone who kept the cookie from a shared phone replays it.
+    const replay = await browser.newContext()
+    await replay.addCookies(copied)
+    const replayPage = await replay.newPage()
+    await replayPage.goto('/portal/results')
+    await expect(replayPage).toHaveURL(/\/portal\/sign-in/)
+
+    const me = await replay.request.get('/api/students/me')
+    expect((await me.json()).user).toBeNull()
+    await replay.close()
+  })
+
   test("the API never hands a student their card's storage key", async ({ page }) => {
     await signIn(page, CLEARED)
 

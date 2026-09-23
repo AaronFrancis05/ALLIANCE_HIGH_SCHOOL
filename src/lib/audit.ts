@@ -17,6 +17,7 @@ export type AuditAction =
   | 'staff.role-changed'
   | 'student.login'
   | 'student.login-failed'
+  | 'student.logout'
   | 'student.password-changed'
   | 'clearance.changed'
   | 'clearance.imported'
