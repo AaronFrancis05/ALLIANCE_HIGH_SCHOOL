@@ -6,7 +6,8 @@
  * progress, and that lookup is rate-limited.
  *
  * Applications hold a child's personal data, so only the admissions team can read them,
- * and rejected applications are deleted after twelve months by the retention job.
+ * and every application is deleted twelve months after its last status change by the
+ * retention job (src/lib/retention.ts).
  */
 
 import { APIError, type CollectionConfig } from 'payload'

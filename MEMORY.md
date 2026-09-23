@@ -83,6 +83,11 @@ left until launch (the school owner's call, 2026-09-23).
 
 ## Log
 
+### 2026-09-23 (P5-T5 retention)
+- `pnpm retention` (dry run) / `pnpm retention --apply`: deletes applications 12 months after their last status change, with their documents, plus documents left unlinked for over a day. Reports references and counts only. Logic in `src/lib/retention.ts`; audited as `retention.applied`.
+- Verified against real Postgres and MinIO (`tests/int/retention.int.spec.ts`): the dry run deletes nothing; `--apply` removes exactly the old application, its document (the file leaves the bucket too) and the orphan, and keeps the fresh one.
+- Left for launch: a weekly cron on the server.
+
 ### 2026-09-23 (P5-T4)
 - **Review workflow** (FR-19): allowed steps live in `src/lib/application-status.ts` (`NEXT_STATUSES`); `canChangeApplicationStatus` in `src/access/admissions.ts` lets the admissions team take them and only the super admin reverse a decision. Every change is stamped into `history` and `statusChangedAt` (both locked against hand edits).
 - **Notifications**: `src/lib/application-notify.ts` builds the messages; the family gets an email with the reference when the application arrives and at every stage change. SMS goes through the existing notifier only when `NOTIFY_SMS_ENABLED=true`.

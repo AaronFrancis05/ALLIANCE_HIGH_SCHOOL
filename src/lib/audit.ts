@@ -31,6 +31,7 @@ export type AuditAction =
   | 'application.status-changed'
   | 'application.document-opened'
   | 'application.document-refused'
+  | 'retention.applied'
 
 export interface AuditEntry {
   action: AuditAction

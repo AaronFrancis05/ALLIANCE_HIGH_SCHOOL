@@ -85,7 +85,8 @@ them before you open a branch.
 - [x] **P5-T2** Document uploads (PLE slip, birth certificate, photo): allow-listed type, magic-byte check, size cap, EXIF stripped (FR-17)
 - [x] **P5-T3** Reference number and public tracking page, rate-limited (FR-18)
 - [x] **P5-T4** Officer review workflow and family notification (FR-19)
-- [ ] Retention job for applications and their documents, with a dry run (SRS §6)
+- [x] **P5-T5** Retention job for applications and their documents, with a dry run (SRS §6).
+      Still to do at launch: schedule `pnpm retention --apply` (weekly cron) on the server.
 
 ### P6: hardening
 - [ ] Site-wide search across pages, news and resources (FR-22)
