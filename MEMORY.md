@@ -60,7 +60,7 @@ left until launch (the school owner's call, 2026-09-23).
 ### Known gaps and loose ends
 - `TURNSTILE_*` settings exist in `.env.example` and `env.ts` but nothing uses them; the enquiry and application forms rely on a honeypot and rate limits (and a link cap for enquiries).
 - Rate limits (`src/lib/rate-limit.ts`) are still in memory per process. Fine for one VPS; several servers would need a shared store.
-- There is no `.ics` route for events and no site search. Admissions has no document upload, tracking page or family notification yet (P5-T2 to P5-T4).
+- There is no site search. Admissions has no document upload, tracking page or family notification yet (P5-T2 to P5-T4).
 - The header's "Apply now" link (Navigation global) still points to `/admissions`, which now links on to `/admissions/apply`.
 - The `import:students` script points to a file that does not exist: `scripts/import-students.ts`.
 - There is no `docs/DEPLOYMENT-VPS.md` and no CI pipeline.
@@ -81,6 +81,10 @@ left until launch (the school owner's call, 2026-09-23).
 ---
 
 ## Log
+
+### 2026-09-23 (P2-T10 calendar)
+- **Add to calendar** on every event page: `/api/calendar/event/[slug]` serves an RFC 5545 file (escaped text, 75-octet folding, UTC times, stable UID so a second download updates the entry). Published events only; drafts and unknown slugs are a plain 404. No end time is invented when an event has none.
+- Verified: unit 148/148; calendar e2e 2/2 (real download from a seeded event; draft refused).
 
 ### 2026-09-23 (P2-T9)
 - **Enquiry form** on `/contact#enquiry` (FR-21): a general question, visit request, alumni registration or job enquiry. Shared schema in `src/lib/enquiry-schema.ts` (browser and server), needs an email or a phone, at most 2 links, honeypot; the server rate-limits (5 per 10 min), saves to Enquiries with `overrideAccess` (public create stays denied) and emails the first address in School details. Works without JavaScript.

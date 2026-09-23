@@ -9,7 +9,7 @@ import React from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, CalendarDays, MapPin, Users } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CalendarPlus, MapPin, Users } from 'lucide-react'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { Container, Section, Card, Prose, Badge } from '../../../../components/ui'
 import { MediaImage, PlaceholderNote, isMedia } from '../../../../components/ui/MediaImage'
@@ -139,6 +139,14 @@ export default async function EventPage({ params }: Params) {
                 </div>
               ) : null}
             </dl>
+            <a
+              href={`/api/calendar/event/${event.slug ?? slug}`}
+              download
+              className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-lg border border-maroon-700 px-4 text-sm font-semibold text-maroon-700 hover:bg-maroon-50"
+            >
+              <CalendarPlus className="h-4 w-4" aria-hidden />
+              Add to calendar
+            </a>
           </Card>
         </Container>
       </Section>
