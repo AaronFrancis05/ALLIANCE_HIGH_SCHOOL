@@ -63,3 +63,22 @@ export const STATUS_FOR_FAMILY: Record<ApplicationStatus, StatusForFamily> = {
 export function statusForFamily(status: string): StatusForFamily {
   return STATUS_FOR_FAMILY[status as ApplicationStatus] ?? STATUS_FOR_FAMILY.submitted
 }
+
+/**
+ * The steps the admissions office may take from each stage (FR-19). Most applications go
+ * submitted, under review, then a decision; the interview and the waiting list are optional
+ * stops. A decision is final: only the super admin may reverse one, to correct a mistake.
+ */
+export const NEXT_STATUSES: Record<ApplicationStatus, readonly ApplicationStatus[]> = {
+  submitted: ['review', 'rejected'],
+  review: ['interview', 'admitted', 'waitlisted', 'rejected'],
+  interview: ['admitted', 'waitlisted', 'rejected'],
+  waitlisted: ['admitted', 'rejected'],
+  admitted: [],
+  rejected: [],
+}
+
+export function canMoveStatus(from: string, to: string): boolean {
+  if (from === to) return true
+  return (NEXT_STATUSES[from as ApplicationStatus] ?? []).includes(to as ApplicationStatus)
+}

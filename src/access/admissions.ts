@@ -9,6 +9,7 @@
 
 import type { Access } from 'payload'
 import { hasRole, type StaffUser, type StudentUser } from './roles'
+import { canMoveStatus } from '../lib/application-status'
 
 type AnyUser = StaffUser | StudentUser | null | undefined
 
@@ -22,4 +23,15 @@ export const readAdmissions: Access = ({ req }) => isAdmissionsTeam(req.user as 
 /** The same rule, for the route that hands out a document's signed link. */
 export function canOpenApplicationDocument(user: AnyUser): boolean {
   return isAdmissionsTeam(user)
+}
+
+/**
+ * May this person move an application from one stage to another (FR-19)? The admissions
+ * team may take the allowed next steps; only the super admin may go anywhere else, which is
+ * how a decision made by mistake is reversed.
+ */
+export function canChangeApplicationStatus(user: AnyUser, from: string, to: string): boolean {
+  if (!isAdmissionsTeam(user)) return false
+  if (canMoveStatus(from, to)) return true
+  return (user as StaffUser).role === 'superAdmin'
 }

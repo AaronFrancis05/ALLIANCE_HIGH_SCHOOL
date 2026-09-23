@@ -9,11 +9,24 @@
  * and rejected applications are deleted after twelve months by the retention job.
  */
 
-import type { CollectionConfig } from 'payload'
+import { APIError, type CollectionConfig } from 'payload'
 import { denyAll, hasRole, roles, type StaffUser } from '../access/roles'
-import { readAdmissions } from '../access/admissions'
+import { canChangeApplicationStatus, readAdmissions } from '../access/admissions'
 import { APPLICATION_STATUSES } from '../lib/application-status'
 import { recordAudit } from '../lib/audit'
+import { createNotifier } from '../lib/notify'
+import { notifyFamily, receivedMessage, statusMessage } from '../lib/application-notify'
+
+function statusLabel(value: string): string {
+  return APPLICATION_STATUSES.find((status) => status.value === value)?.label ?? value
+}
+
+/** Who made a change, for the history. Staff by name; anything else is the website itself. */
+function actorLabel(user: unknown): string {
+  const staff = user as (StaffUser & { name?: string; email?: string }) | null
+  if (staff?.collection === 'users') return staff.name ?? staff.email ?? 'Staff'
+  return 'Online form'
+}
 
 export const Applications: CollectionConfig = {
   slug: 'applications',
@@ -47,7 +60,10 @@ export const Applications: CollectionConfig = {
       defaultValue: 'submitted',
       options: [...APPLICATION_STATUSES],
       index: true,
-      admin: { position: 'sidebar', description: 'The applicant is notified on every change.' },
+      admin: {
+        position: 'sidebar',
+        description: 'The family is emailed on every change, and sent an SMS when SMS is switched on.',
+      },
     },
     {
       name: 'applicantType',
@@ -244,8 +260,20 @@ export const Applications: CollectionConfig = {
     },
     { name: 'interviewDate', type: 'date', admin: { position: 'sidebar' } },
     {
+      name: 'statusChangedAt',
+      type: 'date',
+      index: true,
+      access: { create: () => false, update: () => false },
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Set automatically. The application is deleted twelve months after this.',
+      },
+    },
+    {
       name: 'history',
       type: 'array',
+      access: { create: () => false, update: () => false },
       admin: { readOnly: true, description: 'Every status change.' },
       fields: [
         { name: 'status', type: 'text' },
@@ -255,15 +283,52 @@ export const Applications: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeChange: [
+      ({ req, data, originalDoc, operation }) => {
+        const now = new Date().toISOString()
+        const by = actorLabel(req.user)
+
+        if (operation === 'create') {
+          return { ...data, statusChangedAt: now, history: [{ status: data.status ?? 'submitted', at: now, by }] }
+        }
+
+        const from = originalDoc?.status
+        const to = data.status
+        if (!to || !from || to === from) return data
+
+        // With no user this is the system itself (a script or the retention job), not a person.
+        if (req.user && !canChangeApplicationStatus(req.user as StaffUser, from, to)) {
+          throw new APIError(
+            `An application cannot move from "${statusLabel(from)}" to "${statusLabel(to)}". ` +
+              'Only the super admin can reverse a decision.',
+            400,
+          )
+        }
+
+        return {
+          ...data,
+          statusChangedAt: now,
+          history: [...(originalDoc?.history ?? []), { status: to, at: now, by }],
+        }
+      },
+    ],
     afterChange: [
       async ({ req, doc, previousDoc, operation }) => {
-        if (operation === 'update' && previousDoc?.status !== doc.status) {
+        const notifier = createNotifier(req.payload)
+
+        if (operation === 'create') {
+          await notifyFamily(notifier, doc, receivedMessage(doc.trackingCode))
+          return
+        }
+
+        if (previousDoc?.status !== doc.status) {
           await recordAudit(req, {
             action: 'application.status-changed',
             targetType: 'applications',
             targetId: String(doc.id),
             detail: `${previousDoc?.status} to ${doc.status}`,
           })
+          await notifyFamily(notifier, doc, statusMessage(doc.trackingCode, doc.status))
         }
       },
     ],

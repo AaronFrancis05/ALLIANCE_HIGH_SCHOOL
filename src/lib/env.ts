@@ -59,6 +59,8 @@ export const env = {
     username: optional('AT_USERNAME'),
     apiKey: optional('AT_API_KEY'),
     senderId: optional('AT_SENDER_ID'),
+    /** Families are told about their application by SMS only when this is on (FR-19). */
+    familyNotifications: flag('NOTIFY_SMS_ENABLED', false),
   },
 
   turnstile: {

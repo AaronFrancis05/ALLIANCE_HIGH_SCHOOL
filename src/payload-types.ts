@@ -1020,7 +1020,7 @@ export interface Application {
   id: number;
   trackingCode: string;
   /**
-   * The applicant is notified on every change.
+   * The family is emailed on every change, and sent an SMS when SMS is switched on.
    */
   status: 'submitted' | 'review' | 'interview' | 'admitted' | 'waitlisted' | 'rejected';
   applicantType: 's1' | 's5' | 'transfer';
@@ -1085,6 +1085,10 @@ export interface Application {
       }[]
     | null;
   interviewDate?: string | null;
+  /**
+   * Set automatically. The application is deleted twelve months after this.
+   */
+  statusChangedAt?: string | null;
   /**
    * Every status change.
    */
@@ -1964,6 +1968,7 @@ export interface ApplicationsSelect<T extends boolean = true> {
         id?: T;
       };
   interviewDate?: T;
+  statusChangedAt?: T;
   history?:
     | T
     | {

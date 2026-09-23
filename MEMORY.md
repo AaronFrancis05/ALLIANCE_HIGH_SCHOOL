@@ -70,6 +70,8 @@ left until launch (the school owner's call, 2026-09-23).
 ---
 
 ## Decisions (and why)
+- **Family notifications: email now, SMS built but off** (the school owner's call, 2026-09-23). `NOTIFY_SMS_ENABLED=false` until the school has an Africa's Talking account; each SMS costs money. Messages carry the reference and stage only, never the child's name.
+- **Applications are kept 12 months after their last status change**, whatever the outcome, then deleted with their documents (the school owner's call, 2026-09-23).
 - **Payload inside Next.js**, not a separate CMS, so there is one app, one database and one place to secure.
 - **Students and staff are separate collections**, so a student session can never pass a staff check.
 - **The bursar cannot read report cards.** The bursar only sets clearance.
@@ -80,6 +82,11 @@ left until launch (the school owner's call, 2026-09-23).
 ---
 
 ## Log
+
+### 2026-09-23 (P5-T4)
+- **Review workflow** (FR-19): allowed steps live in `src/lib/application-status.ts` (`NEXT_STATUSES`); `canChangeApplicationStatus` in `src/access/admissions.ts` lets the admissions team take them and only the super admin reverse a decision. Every change is stamped into `history` and `statusChangedAt` (both locked against hand edits).
+- **Notifications**: `src/lib/application-notify.ts` builds the messages; the family gets an email with the reference when the application arrives and at every stage change. SMS goes through the existing notifier only when `NOTIFY_SMS_ENABLED=true`.
+- Verified: unit 131/131; review e2e 3/3 (skipping review refused, decision final, editor gets 403, three emails read back from Mailpit, none naming the child).
 
 ### 2026-09-23 (P5-T3)
 - **Tracking page** `/admissions/track` (FR-18): reference plus the guardian's phone number, both required; a wrong half and an unknown reference get the identical message. Rate-limited (10/min), a POST so nothing lands in a URL, and it shows no name (shared phones): stage, class, date submitted, interview date.
