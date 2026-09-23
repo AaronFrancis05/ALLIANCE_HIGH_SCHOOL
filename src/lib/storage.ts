@@ -38,6 +38,15 @@ export interface SignedFileOptions {
 }
 
 /**
+ * The bucket key of an uploaded document. The storage plugin files every upload under its
+ * collection's prefix, so the filename alone does not name the object.
+ */
+export function privateObjectKey(doc: { prefix?: string | null; filename?: string | null }): string | null {
+  if (!doc.filename) return null
+  return doc.prefix ? `${doc.prefix}/${doc.filename}` : doc.filename
+}
+
+/**
  * A short-lived link to a private object. Callers must have already decided that this
  * particular person may have this particular file.
  */

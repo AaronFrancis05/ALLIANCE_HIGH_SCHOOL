@@ -10,25 +10,16 @@
  * AHSN/25/002 is blocked.
  */
 
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
+import { STUDENTS, signInStudent as signIn } from '../helpers/student'
 
-const PASSWORD = 'AllianceDev1!'
-const CLEARED = 'AHSN/25/001'
-const BLOCKED = 'AHSN/25/002'
+const CLEARED = STUDENTS.cleared
+const BLOCKED = STUDENTS.blocked
 
 const DOWNLOAD_LINK = 'a[href^="/api/files/report-card/"]'
 
 // The portal and the file route are compiled on first request in dev.
 test.setTimeout(180_000)
-
-async function signIn(page: Page, admissionNo: string) {
-  await page.goto('/portal/sign-in')
-  await page.locator('#admissionNo').waitFor({ state: 'visible' })
-  await page.locator('#admissionNo').fill(admissionNo)
-  await page.locator('#password').fill(PASSWORD)
-  await page.locator('button[type="submit"]').click()
-  await page.waitForURL(/\/portal$/)
-}
 
 test.describe('Student portal', () => {
   test('signed-out visitors are sent to sign in, not to the records', async ({ page }) => {
@@ -74,6 +65,12 @@ test.describe('Student portal', () => {
     const location = response.headers()['location'] ?? ''
     expect(location).toContain('X-Amz-Signature')
     expect(Number(new URL(location).searchParams.get('X-Amz-Expires'))).toBeLessThanOrEqual(300)
+
+    // And the signed URL names a real object: the student actually gets the PDF.
+    // MinIO runs in Docker; under a full parallel run its first reply can pass the 30 s default.
+    const file = await page.request.get(location, { timeout: 120_000 })
+    expect(file.status()).toBe(200)
+    expect(file.headers()['content-type']).toContain('pdf')
   })
 
   test('a blocked student is told why, and offered no download', async ({ page }) => {

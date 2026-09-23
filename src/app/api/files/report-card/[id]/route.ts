@@ -17,7 +17,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { getPayloadClient } from '../../../../../lib/payload'
 import { currentSession } from '../../../../../lib/session'
 import { evaluateReportCardAccess } from '../../../../../access/report-cards'
-import { signedPrivateUrl } from '../../../../../lib/storage'
+import { privateObjectKey, signedPrivateUrl } from '../../../../../lib/storage'
 import { recordAudit } from '../../../../../lib/audit'
 import { checkRateLimit, clientIdentifier } from '../../../../../lib/rate-limit'
 import { logger } from '../../../../../lib/logger'
@@ -112,7 +112,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     return refuse(decision.message, decision.reason === 'not-owner' ? 404 : 403)
   }
 
-  if (!card.filename) {
+  const key = privateObjectKey(card)
+  if (!key) {
     logger.error('Report card has no stored file', { cardId: String(card.id) })
     return refuse('This report card file is missing. Please tell the school office.', 500)
   }
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     .replace(/\s+/g, ' ')
     .trim()
 
-  const url = await signedPrivateUrl(card.filename, {
+  const url = await signedPrivateUrl(key, {
     downloadName: `${downloadName}.pdf`,
     asAttachment: true,
     ttlSeconds: SIGNED_URL_TTL_SECONDS,

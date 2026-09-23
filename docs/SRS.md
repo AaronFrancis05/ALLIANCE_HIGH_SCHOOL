@@ -60,7 +60,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 |---|---|---|
 | FR-06 | Students find resources by subject, class, type (notes, past paper, textbook, scheme) and year. | Partial |
 | FR-07 | A head of department manages their own department's resources and no other. | Built |
-| FR-08 | A restricted file is served only through a route that re-checks the session and returns a signed URL valid for five minutes; the storage key never reaches the browser. | Built (report cards) / Planned (library) |
+| FR-08 | A restricted file is served only through a route that re-checks the session and returns a signed URL valid for five minutes; the storage key never reaches the browser. | Built |
 | FR-09 | A resource records its subject, class list, visibility, file size and page count, so a student knows what they are downloading before they spend data. | Built |
 
 ### Accounts
@@ -141,7 +141,7 @@ period, with a dry-run before any deletion job runs.
 | P0 | Repository, services, environment, brand, image pipeline | Done |
 | P1 | CMS core: collections, roles, media, design system, home page | Done |
 | P2 | The rest of the public site: about, academics, news, events, gallery, contact | Done (sub-pages and enquiry form outstanding) |
-| P3 | e-Library: browse, filter, gated download | Started (rules and storage in place) |
+| P3 | e-Library: browse, filter, gated download | Started (gated download built; filters and bulk upload outstanding) |
 | P4 | Student portal: sign-in, report cards, clearance messages | Done |
 | P5 | Admissions: form, documents, tracking, review | Started (schema in place) |
 | P6 | SEO, performance and security hardening | Started (structured data, headers) |

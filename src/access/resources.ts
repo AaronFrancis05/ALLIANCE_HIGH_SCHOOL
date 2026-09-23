@@ -92,3 +92,18 @@ export function canStudentOpenResource(
   }
   return false
 }
+
+/**
+ * True when whoever is asking may have this resource's file: anyone for a public item,
+ * active staff for everything, otherwise the student rule above. The download route calls
+ * this after loading the resource, so the decision is made twice by two different paths.
+ */
+export function canOpenResource(
+  user: unknown,
+  resource: { visibility: 'public' | 'students' | 'classes'; classes?: SchoolClass[] | null },
+): boolean {
+  if (resource.visibility === 'public') return true
+  if (isStaff(user as StaffUser)) return true
+  if (isStudent(user as StudentUser)) return canStudentOpenResource(user as StudentWithClass, resource)
+  return false
+}

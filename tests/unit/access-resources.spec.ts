@@ -8,6 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 import {
+  canOpenResource,
   canStudentOpenResource,
   readResources,
   visibleResourcesWhere,
@@ -126,5 +127,35 @@ describe('canStudentOpenResource', () => {
     expect(canStudentOpenResource(student({ class: undefined }), { visibility: 'classes', classes: ['S4'] })).toBe(
       false,
     )
+  })
+})
+
+describe('canOpenResource', () => {
+  const restricted = { visibility: 'classes' as const, classes: ['S4' as const] }
+
+  it('opens a public item for a visitor', () => {
+    expect(canOpenResource(null, { visibility: 'public' })).toBe(true)
+  })
+
+  it('refuses every restricted item to a visitor', () => {
+    expect(canOpenResource(null, { visibility: 'students' })).toBe(false)
+    expect(canOpenResource(null, restricted)).toBe(false)
+  })
+
+  it('opens restricted items for active staff', () => {
+    expect(canOpenResource(staff('teacher'), restricted)).toBe(true)
+  })
+
+  it('refuses restricted items to a deactivated staff account', () => {
+    expect(canOpenResource({ ...staff('editor'), active: false }, restricted)).toBe(false)
+  })
+
+  it("refuses another class's item to a student", () => {
+    expect(canOpenResource(student({ class: 'S2' }), restricted)).toBe(false)
+    expect(canOpenResource(student(), restricted)).toBe(true)
+  })
+
+  it('refuses a restricted item to a suspended student', () => {
+    expect(canOpenResource(student({ status: 'suspended' }), { visibility: 'students' })).toBe(false)
   })
 })

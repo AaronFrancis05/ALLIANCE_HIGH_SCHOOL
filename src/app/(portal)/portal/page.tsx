@@ -67,10 +67,10 @@ export default async function PortalHomePage() {
             Notes, past papers and textbooks for your class.
           </p>
           <Link
-            href="/resources"
+            href="/portal/library"
             className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-maroon-700 hover:text-maroon-900"
           >
-            Browse the library →
+            Open my library →
           </Link>
         </Card>
       </div>
