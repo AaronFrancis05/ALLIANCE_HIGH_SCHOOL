@@ -11,6 +11,7 @@
 
 import type { CollectionConfig } from 'payload'
 import { denyAll, hasRole, roles, type StaffUser } from '../access/roles'
+import { readAdmissions } from '../access/admissions'
 import { recordAudit } from '../lib/audit'
 
 export const APPLICATION_STATUSES = [
@@ -34,8 +35,8 @@ export const Applications: CollectionConfig = {
   access: {
     // Applications are created by the public form through a server route, never directly.
     create: denyAll,
-    read: roles('superAdmin', 'admissions'),
-    update: roles('superAdmin', 'admissions'),
+    read: readAdmissions,
+    update: readAdmissions,
     delete: roles('superAdmin'),
   },
   fields: [
@@ -216,6 +217,11 @@ export const Applications: CollectionConfig = {
           ],
         },
         { name: 'file', type: 'relationship', relationTo: 'applicationDocuments', required: true },
+        {
+          name: 'open',
+          type: 'ui',
+          admin: { components: { Field: '/components/admin/OpenDocumentLink#OpenDocumentLink' } },
+        },
       ],
     },
     {

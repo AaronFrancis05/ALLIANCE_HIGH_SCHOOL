@@ -82,8 +82,7 @@ them before you open a branch.
 
 ### P5: admissions
 - [x] **P5-T1** Submit the application end to end, with the same schema in the browser and on the server (FR-16)
-- [ ] **P5-T2** *(proposed)* Document uploads (PLE slip, birth certificate, photo): allow-listed type, magic-byte check, size cap, EXIF stripped (FR-17).
-      P5-T1 removed the schema's unchecked `documentIds`; link uploads to an application only with proof the uploader made them.
+- [x] **P5-T2** Document uploads (PLE slip, birth certificate, photo): allow-listed type, magic-byte check, size cap, EXIF stripped (FR-17)
 - [ ] **P5-T3** *(proposed)* Reference number and public tracking page, rate-limited (FR-18)
 - [ ] **P5-T4** *(proposed)* Officer review workflow and family notification (FR-19)
 - [ ] Retention job for applications and their documents, with a dry run (SRS §6)

@@ -8,6 +8,7 @@
 
 import type { CollectionConfig } from 'payload'
 import { denyAll, roles } from '../access/roles'
+import { readAdmissions } from '../access/admissions'
 import { assertAllowedUpload } from '../lib/upload-safety'
 import { hideStorageKey } from '../access/private-files'
 
@@ -22,7 +23,7 @@ export const ApplicationDocuments: CollectionConfig = {
   access: {
     // Created by the application route on the applicant's behalf.
     create: denyAll,
-    read: roles('superAdmin', 'admissions'),
+    read: readAdmissions,
     update: denyAll,
     delete: roles('superAdmin'),
   },
@@ -31,6 +32,11 @@ export const ApplicationDocuments: CollectionConfig = {
     disableLocalStorage: true,
   },
   fields: [
+    {
+      name: 'open',
+      type: 'ui',
+      admin: { components: { Field: '/components/admin/OpenDocumentLink#OpenDocumentLink' } },
+    },
     {
       name: 'kind',
       type: 'select',

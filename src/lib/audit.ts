@@ -29,6 +29,8 @@ export type AuditAction =
   | 'resource.refused'
   | 'application.submitted'
   | 'application.status-changed'
+  | 'application.document-opened'
+  | 'application.document-refused'
 
 export interface AuditEntry {
   action: AuditAction

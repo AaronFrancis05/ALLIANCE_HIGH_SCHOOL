@@ -9,7 +9,16 @@ import { parseApplicationForm, readApplicationForm } from '../../src/lib/applica
 /** Fifteen years ago, safely inside the accepted age range. */
 const DATE_OF_BIRTH = `${new Date().getFullYear() - 15}-03-14`
 
-function form(entries: Record<string, string>): FormData {
+const pdf = () => new File(['%PDF-1.4 %%EOF'], 'document.pdf', { type: 'application/pdf' })
+
+/** The three documents; the checks here only read what a file claims to be. */
+const documents = () => ({
+  'documents.birth': pdf(),
+  'documents.results': pdf(),
+  'documents.photo': pdf(),
+})
+
+function form(entries: Record<string, string | File>): FormData {
   const data = new FormData()
   for (const [name, value] of Object.entries(entries)) data.set(name, value)
   return data
@@ -27,6 +36,7 @@ const base = {
   residence: 'boarding',
   consent: 'on',
   website: '',
+  ...documents(),
 }
 
 const seniorOne = {
@@ -99,6 +109,22 @@ describe('parseApplicationForm', () => {
     for (const message of Object.values(result.errors)) {
       expect(message).not.toMatch(/invalid|expected|received|required/i)
     }
+  })
+
+  it('refuses an application without the required documents', () => {
+    const { 'documents.photo': _omitted, ...rest } = seniorOne
+    const result = parseApplicationForm(form(rest))
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.errors['documents.photo']).toMatch(/passport photograph/)
+  })
+
+  it('hands the server the chosen documents once everything is valid', () => {
+    const result = parseApplicationForm(form(seniorOne))
+    expect(result.success && result.documents.map((document) => document.kind)).toEqual([
+      'birth',
+      'results',
+      'photo',
+    ])
   })
 
   it('refuses a submission with the honeypot filled in', () => {

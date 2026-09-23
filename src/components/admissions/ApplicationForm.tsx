@@ -24,6 +24,7 @@ import {
   UCE_GRADES,
 } from '../../lib/admissions-schema'
 import { parseApplicationForm, UCE_RESULT_ROWS, type FieldErrors } from '../../lib/application-form'
+import { APPLICATION_DOCUMENT_ACCEPT, APPLICATION_DOCUMENTS } from '../../lib/application-documents'
 import { submitApplicationAction, type ApplyState } from '../../app/(site)/admissions/apply/actions'
 import { Card } from '../ui'
 import { cn } from '../../lib/cn'
@@ -257,6 +258,47 @@ function TransferSection() {
   )
 }
 
+/** A file input. It cannot be refilled after a round trip; the error message says so. */
+function FileField({ name, label, hint }: { name: string; label: string; hint: string }) {
+  const { errors } = React.useContext(Context)
+  const invalid = Boolean(errors[name])
+  return (
+    <div>
+      <Label name={name}>{label}</Label>
+      <p id={`${inputId(name)}-hint`} className="mt-0.5 text-sm text-[var(--text-muted)]">
+        {hint}
+      </p>
+      <input
+        type="file"
+        id={inputId(name)}
+        name={name}
+        accept={APPLICATION_DOCUMENT_ACCEPT}
+        aria-invalid={invalid || undefined}
+        aria-describedby={[`${inputId(name)}-hint`, invalid ? errorId(name) : null].filter(Boolean).join(' ')}
+        className={cn(
+          'mt-1.5 block w-full rounded-lg border bg-white p-2 text-sm text-ink-900 file:mr-3 file:min-h-10 file:rounded-md file:border-0 file:bg-maroon-50 file:px-3 file:font-medium file:text-maroon-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-maroon-600',
+          invalid ? 'border-maroon-700' : 'border-cream-300',
+        )}
+      />
+      <FieldError name={name} />
+    </div>
+  )
+}
+
+function DocumentsSection() {
+  return (
+    <Group title="Documents">
+      <p className="text-[var(--text-body)]">
+        A PDF or a clear photo of each, up to 5 MB. Photos taken on a phone are fine; hold the
+        phone straight above the page in good light.
+      </p>
+      {APPLICATION_DOCUMENTS.map((document) => (
+        <FileField key={document.kind} name={document.field} label={document.label} hint={document.hint} />
+      ))}
+    </Group>
+  )
+}
+
 function SubmitButton() {
   const { pending } = useFormStatus()
   return (
@@ -395,6 +437,8 @@ export function ApplicationForm() {
             <TextField name="guardianEmail" label="Email" type="email" autoComplete="email" optional />
           </div>
         </Group>
+
+        <DocumentsSection />
 
         <Group title="Anything else">
           <TextArea name="comment" label="Anything the admissions office should know" optional />

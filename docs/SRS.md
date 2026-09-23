@@ -84,7 +84,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 | ID | Requirement | Status |
 |---|---|---|
 | FR-16 | A family applies online in one form, validated identically in the browser and on the server. | Built |
-| FR-17 | An applicant uploads required documents (PLE slip, birth certificate, photograph), type- and size-checked. | Planned |
+| FR-17 | An applicant uploads required documents (PLE slip, birth certificate, photograph), type- and size-checked. | Built |
 | FR-18 | Each application gets a reference the family can use to track progress. | Partial |
 | FR-19 | The admissions officer moves an application through submitted → under review → offered / not offered, and the family is notified. | Partial |
 

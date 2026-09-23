@@ -81,6 +81,12 @@ left until launch (the school owner's call, 2026-09-23).
 
 ## Log
 
+### 2026-09-23 (P5-T2)
+- **Documents with the application** (FR-17): birth certificate and photo for everyone, result slip for S1/S5. They are sent with the form, so the server attaches them itself; no document id ever comes from the browser. `src/lib/application-documents.ts` (shared with the browser) checks presence, declared type and the 5 MB cap; `src/lib/document-intake.ts` checks magic bytes, refuses incomplete PDFs, re-encodes photos with sharp (EXIF and GPS gone, auto-rotated, max 2000 px) and gives every file a random name. Stored files are deleted again if the application cannot be saved.
+- **New delivery route** `/api/files/application-document/[id]`: until now officers had no way to open these files (private files carry no URL). Rule `canOpenApplicationDocument` in `src/access/admissions.ts` (unit-tested), five-minute signed link, every opening and refusal audited. An "Open document" link sits in the admin panel.
+- **Config**: server actions accept 16 MB; `proxyClientMaxBodySize` is 52 MB. That second one fixes a latent bug: the proxy buffered bodies only to 10 MB, so staff uploads above 10 MB (the cap is 50 MB) would have arrived cut off.
+- Verified: unit 117/117 (EXIF strip, fake-photo refusal, truncated PDF, access rule), admissions e2e (officer opens the photo and it has no EXIF; public and student get 404, no signed link).
+
 ### 2026-09-23 (P5-T1)
 - **Online application** (FR-16) at `/admissions/apply`: one form for Senior One, Senior Five and transfer applicants. `src/lib/application-form.ts` turns the posted form into the schema's shape; the browser and the server action both run it and then `applicationSchema`, so they cannot disagree. Works without JavaScript: sections switch with CSS `:has(:checked)`, and server errors come back with the typed answers kept.
 - The server works out the PLE aggregate from the four grades; it never trusts a posted aggregate. The submission is rate-limited (5/min), has a honeypot, respects the applications-open switch, writes with `overrideAccess` (public create stays denied), audits `application.submitted` and returns an `AHSN-XXXXXX` reference.

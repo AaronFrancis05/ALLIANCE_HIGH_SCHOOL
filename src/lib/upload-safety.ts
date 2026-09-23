@@ -6,12 +6,15 @@
  */
 
 import { APIError } from 'payload'
+import { APPLICATION_DOCUMENT_MAX_BYTES, APPLICATION_DOCUMENT_TYPES } from './application-documents'
 
-export type UploadKind = 'image' | 'document'
+/** `applicantDocument` is a file sent by the public with an application (FR-17). */
+export type UploadKind = 'image' | 'document' | 'applicantDocument'
 
 const MAX_BYTES: Record<UploadKind, number> = {
   image: 15 * 1024 * 1024,
   document: 50 * 1024 * 1024,
+  applicantDocument: APPLICATION_DOCUMENT_MAX_BYTES,
 }
 
 interface Signature {
@@ -49,6 +52,13 @@ const DOCUMENT_MIMES = [
   ...IMAGE_MIMES,
 ]
 
+/** From the public: no SVG (it can carry script) and nothing without a magic number. */
+const ALLOWED_MIMES: Record<UploadKind, readonly string[]> = {
+  image: IMAGE_MIMES,
+  document: DOCUMENT_MIMES,
+  applicantDocument: APPLICATION_DOCUMENT_TYPES,
+}
+
 export interface IncomingFile {
   name: string
   mimetype: string
@@ -63,20 +73,18 @@ function matches(signature: Signature, data: Buffer): boolean {
   return signature.at.bytes.every((byte, index) => data[signature.at!.offset + index] === byte)
 }
 
-/**
- * Throws an APIError, which Payload turns into a clear message in the admin panel,
- * when the file is not something we are willing to store.
- */
-export async function assertAllowedUpload(file: IncomingFile, kind: UploadKind): Promise<void> {
-  const allowedMimes = kind === 'image' ? IMAGE_MIMES : DOCUMENT_MIMES
-
-  if (!allowedMimes.includes(file.mimetype)) {
-    throw new APIError(`Files of type ${file.mimetype} cannot be uploaded here.`, 415)
+/** Why a file may not be stored, with the HTTP status that fits, or null when it may. */
+export function uploadProblem(
+  file: IncomingFile,
+  kind: UploadKind,
+): { message: string; status: 413 | 415 } | null {
+  if (!ALLOWED_MIMES[kind].includes(file.mimetype)) {
+    return { message: `Files of type ${file.mimetype} cannot be uploaded here.`, status: 415 }
   }
 
   if (file.size > MAX_BYTES[kind]) {
     const limit = Math.round(MAX_BYTES[kind] / (1024 * 1024))
-    throw new APIError(`That file is too large. The limit is ${limit} MB.`, 413)
+    return { message: `That file is too large. The limit is ${limit} MB.`, status: 413 }
   }
 
   // SVG has no magic number and can carry script, so it is only allowed from staff and
@@ -84,15 +92,25 @@ export async function assertAllowedUpload(file: IncomingFile, kind: UploadKind):
   if (file.mimetype === 'image/svg+xml') {
     const head = file.data.subarray(0, 1024).toString('utf8').toLowerCase()
     if (head.includes('<script') || head.includes('javascript:') || head.includes('onload=')) {
-      throw new APIError('That SVG contains script and cannot be uploaded.', 415)
+      return { message: 'That SVG contains script and cannot be uploaded.', status: 415 }
     }
-    return
+    return null
   }
 
-  if (file.mimetype === 'image/avif') return // container check not worth the false negatives
+  if (file.mimetype === 'image/avif') return null // container check not worth the false negatives
 
   const candidates = SIGNATURES.filter((s) => s.mime === file.mimetype)
   if (candidates.length && !candidates.some((signature) => matches(signature, file.data))) {
-    throw new APIError('That file does not look like the type it claims to be.', 415)
+    return { message: 'That file does not look like the type it claims to be.', status: 415 }
   }
+  return null
+}
+
+/**
+ * Throws an APIError, which Payload turns into a clear message in the admin panel,
+ * when the file is not something we are willing to store.
+ */
+export async function assertAllowedUpload(file: IncomingFile, kind: UploadKind): Promise<void> {
+  const problem = uploadProblem(file, kind)
+  if (problem) throw new APIError(problem.message, problem.status)
 }

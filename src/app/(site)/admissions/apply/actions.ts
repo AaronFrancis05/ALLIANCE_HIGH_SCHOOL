@@ -10,6 +10,8 @@
  *   - nothing is accepted while the admissions office has applications switched off;
  *   - the public cannot create applications through the API (create is denied), so this
  *     action writes with overrideAccess after doing its own checks;
+ *   - documents come in with the form, so they are attached by the server and never by an
+ *     id the browser supplies; each is checked, cleaned and renamed first (document-intake.ts);
  *   - the submission is audited, and no personal data goes into a log line or error (NFR-05).
  */
 
@@ -21,6 +23,9 @@ import { checkRateLimit, clientIdentifier } from '../../../../lib/rate-limit'
 import { logger } from '../../../../lib/logger'
 import { classSoughtFor, generateTrackingCode, PLE_SUBJECTS, type ApplicationInput } from '../../../../lib/admissions-schema'
 import { parseApplicationForm, type FieldErrors } from '../../../../lib/application-form'
+import { APPLICATION_DOCUMENTS, chosenFile, type ChosenDocument } from '../../../../lib/application-documents'
+import { prepareApplicantDocument } from '../../../../lib/document-intake'
+import type { IncomingFile } from '../../../../lib/upload-safety'
 import type { Application } from '../../../../payload-types'
 
 export type ApplyState =
@@ -36,6 +41,9 @@ export type ApplyState =
 
 const UNAVAILABLE =
   'Your application could not be sent just now. Please try again in a few minutes, or contact the admissions office.'
+
+/** A browser cannot refill a file input, so say so whenever the form comes back. */
+const CHOOSE_FILES_AGAIN = ' Please choose the documents again.'
 
 /** Tries a few codes in the unlikely case one is already taken. */
 const TRACKING_CODE_ATTEMPTS = 5
@@ -98,7 +106,54 @@ function toApplicationData(input: ApplicationInput): ApplicationData {
   }
 }
 
-async function unusedTrackingCode(payload: Awaited<ReturnType<typeof getPayloadClient>>) {
+type Payload = Awaited<ReturnType<typeof getPayloadClient>>
+
+/** Checks and cleans every document. Returns the problems keyed by input name, if any. */
+async function prepareDocuments(documents: ChosenDocument[]) {
+  const prepared: { kind: ChosenDocument['kind']; file: IncomingFile }[] = []
+  const errors: FieldErrors = {}
+  for (const document of documents) {
+    const result = await prepareApplicantDocument(document.file)
+    if ('problem' in result) errors[document.field] = result.problem
+    else prepared.push({ kind: document.kind, file: result.file })
+  }
+  return { prepared, errors }
+}
+
+async function storeDocuments(payload: Payload, prepared: { kind: ChosenDocument['kind']; file: IncomingFile }[]) {
+  const stored: { kind: ChosenDocument['kind']; id: number }[] = []
+  try {
+    for (const { kind, file } of prepared) {
+      const document = await payload.create({
+        collection: 'applicationDocuments',
+        data: { kind },
+        file,
+        // Public create is denied on the collection; the file has been checked above.
+        overrideAccess: true,
+      })
+      stored.push({ kind, id: document.id })
+    }
+    return stored
+  } catch (error) {
+    await removeDocuments(payload, stored.map((document) => document.id))
+    throw error
+  }
+}
+
+/** Removes stored documents when the application they belong to could not be saved. */
+async function removeDocuments(payload: Payload, ids: number[]) {
+  if (!ids.length) return
+  await payload
+    .delete({ collection: 'applicationDocuments', where: { id: { in: ids } }, overrideAccess: true })
+    .catch((error: unknown) => {
+      logger.error('Orphaned application documents could not be removed', {
+        count: ids.length,
+        reason: error instanceof Error ? error.name : 'unknown',
+      })
+    })
+}
+
+async function unusedTrackingCode(payload: Payload) {
   for (let attempt = 0; attempt < TRACKING_CODE_ATTEMPTS; attempt += 1) {
     const code = generateTrackingCode()
     const { totalDocs } = await payload.count({
@@ -116,11 +171,13 @@ export async function submitApplicationAction(
   formData: FormData,
 ): Promise<ApplyState> {
   const values = postedValues(formData)
+  const choseFiles = APPLICATION_DOCUMENTS.some((rule) => chosenFile(formData, rule.field))
+  const again = choseFiles ? CHOOSE_FILES_AGAIN : ''
 
   // Real visitors never see this field, so anything in it came from a bot.
   if (typeof formData.get('website') === 'string' && formData.get('website') !== '') {
     logger.warn('Application honeypot filled; submission dropped')
-    return { status: 'error', message: UNAVAILABLE, values }
+    return { status: 'error', message: UNAVAILABLE + again, values }
   }
 
   const requestHeaders = await headers()
@@ -129,7 +186,7 @@ export async function submitApplicationAction(
   if (!rate.allowed) {
     return {
       status: 'error',
-      message: `Too many applications have been sent from this connection. Please wait ${rate.retryAfter} seconds and try again.`,
+      message: `Too many applications have been sent from this connection. Please wait ${rate.retryAfter} seconds and try again.${again}`,
       values,
     }
   }
@@ -148,17 +205,34 @@ export async function submitApplicationAction(
   if (!parsed.success) {
     return {
       status: 'error',
-      message: 'Some answers need attention. Please check the highlighted questions.',
+      message: `Some answers need attention. Please check the highlighted questions.${again}`,
       errors: parsed.errors,
       values,
     }
   }
 
+  const { prepared, errors: documentErrors } = await prepareDocuments(parsed.documents)
+  if (Object.keys(documentErrors).length) {
+    return {
+      status: 'error',
+      message: `A document could not be accepted.${CHOOSE_FILES_AGAIN}`,
+      errors: documentErrors,
+      values,
+    }
+  }
+
+  let stored: { kind: ChosenDocument['kind']; id: number }[] = []
   try {
+    stored = await storeDocuments(payload, prepared)
     const trackingCode = await unusedTrackingCode(payload)
     const application = await payload.create({
       collection: 'applications',
-      data: { ...toApplicationData(parsed.data), trackingCode, status: 'submitted' },
+      data: {
+        ...toApplicationData(parsed.data),
+        trackingCode,
+        status: 'submitted',
+        documents: stored.map((document) => ({ kind: document.kind, file: document.id })),
+      },
       // Public create is denied on the collection; every check has been made above.
       overrideAccess: true,
     })
@@ -175,9 +249,10 @@ export async function submitApplicationAction(
 
     return { status: 'submitted', trackingCode }
   } catch (error) {
+    await removeDocuments(payload, stored.map((document) => document.id))
     logger.error('Application could not be saved', {
       reason: error instanceof Error ? error.name : 'unknown',
     })
-    return { status: 'error', message: UNAVAILABLE, values }
+    return { status: 'error', message: UNAVAILABLE + again, values }
   }
 }

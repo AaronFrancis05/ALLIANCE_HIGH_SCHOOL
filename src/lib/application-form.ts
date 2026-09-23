@@ -17,6 +17,7 @@ import {
   pleAggregateFromGrades,
   type ApplicationInput,
 } from './admissions-schema'
+import { readDocuments, type ChosenDocument } from './application-documents'
 
 /** How many subject rows the UCE results table offers. Blank rows are ignored. */
 export const UCE_RESULT_ROWS = 10
@@ -117,13 +118,15 @@ export function fieldErrorsFrom(error: z.ZodError): FieldErrors {
 }
 
 export type ParsedApplication =
-  | { success: true; data: ApplicationInput }
+  | { success: true; data: ApplicationInput; documents: ChosenDocument[] }
   | { success: false; errors: FieldErrors }
 
-/** The one check the browser and the server both run. */
+/** The one check the browser and the server both run: the answers, then the documents. */
 export function parseApplicationForm(form: FormEntries): ParsedApplication {
   const result = applicationSchema.safeParse(readApplicationForm(form))
-  return result.success
-    ? { success: true, data: result.data }
-    : { success: false, errors: fieldErrorsFrom(result.error) }
+  const { documents, errors: documentErrors } = readDocuments(form, text(form, 'applicantType'))
+
+  const errors = { ...(result.success ? {} : fieldErrorsFrom(result.error)), ...documentErrors }
+  if (!result.success || Object.keys(errors).length) return { success: false, errors }
+  return { success: true, data: result.data, documents }
 }
