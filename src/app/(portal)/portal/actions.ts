@@ -9,6 +9,8 @@
  *   - a failure never says whether the admission number exists, so accounts cannot be
  *     enumerated;
  *   - every attempt, successful or not, is written to the audit log;
+ *   - sign-ins for one admission number run one at a time, so a second device signing in
+ *     at the same moment cannot wipe out the first one's session (see key-lock.ts);
  *   - no personal data is put in a log line or an error message (NFR-05).
  */
 
@@ -19,6 +21,7 @@ import { getPayloadClient } from '../../../lib/payload'
 import { recordAudit } from '../../../lib/audit'
 import { checkRateLimit, clientIdentifier } from '../../../lib/rate-limit'
 import { logger } from '../../../lib/logger'
+import { withKeyLock } from '../../../lib/key-lock'
 
 const signInSchema = z.object({
   admissionNo: z
@@ -63,10 +66,12 @@ export async function signInAction(_previous: SignInState, formData: FormData): 
   >[0]
 
   try {
-    const result = await payload.login({
-      collection: 'students',
-      data: { username: parsed.data.admissionNo, password: parsed.data.password },
-    })
+    const result = await withKeyLock(`student-login:${parsed.data.admissionNo.toLowerCase()}`, () =>
+      payload.login({
+        collection: 'students',
+        data: { username: parsed.data.admissionNo, password: parsed.data.password },
+      }),
+    )
 
     if (!result.token || !result.user) {
       await recordAudit(auditReq, { action: 'student.login-failed', detail: 'no token issued' })
