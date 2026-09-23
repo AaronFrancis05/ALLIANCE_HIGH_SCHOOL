@@ -813,7 +813,10 @@ export interface Subject {
  */
 export interface Resource {
   id: number;
-  title: string;
+  /**
+   * Leave empty to use the file name, which helps when uploading many at once.
+   */
+  title?: string | null;
   /**
    * One or two lines so students know what is inside.
    */

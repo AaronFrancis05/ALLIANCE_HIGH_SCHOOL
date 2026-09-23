@@ -6,10 +6,11 @@
  * signed URL.
  */
 
-import type { CollectionConfig } from 'payload'
-import { CLASS_LABELS, SCHOOL_CLASSES, readResources, writeResources } from '../access/resources'
+import { APIError, ValidationError, type CollectionConfig } from 'payload'
+import { CLASS_LABELS, SCHOOL_CLASSES, canFileInDepartment, readResources, writeResources } from '../access/resources'
 import { departmentId, hasRole, type StaffUser } from '../access/roles'
 import { assertAllowedUpload } from '../lib/upload-safety'
+import { titleFromFilename } from '../lib/resource-title'
 import { hideStorageKey } from '../access/private-files'
 import { RESOURCE_TYPES } from '../lib/resource-filters'
 
@@ -40,7 +41,11 @@ export const Resources: CollectionConfig = {
     disableLocalStorage: true,
   },
   fields: [
-    { name: 'title', type: 'text', required: true },
+    {
+      name: 'title',
+      type: 'text',
+      admin: { description: 'Leave empty to use the file name, which helps when uploading many at once.' },
+    },
     {
       name: 'description',
       type: 'textarea',
@@ -131,12 +136,30 @@ export const Resources: CollectionConfig = {
   hooks: {
     afterRead: [hideStorageKey],
     beforeValidate: [
-      async ({ req, data, operation }) => {
+      async ({ req, data, operation, originalDoc }) => {
         if (req.file) await assertAllowedUpload(req.file, 'document')
-        if (operation === 'create' && req.user?.collection === 'users') {
-          return { ...data, uploadedBy: req.user.id }
+
+        // FR-07: a head of department files only under their own department, on create and
+        // on every update, so a resource can never be moved out to another one.
+        if (req.user?.collection === 'users') {
+          const department = data?.department ?? originalDoc?.department
+          if ((operation === 'create' || data?.department !== undefined) && !canFileInDepartment(req.user, department)) {
+            throw new APIError(
+              'Heads of department can only add resources to their own department.',
+              403,
+              undefined,
+              true,
+            )
+          }
         }
-        return data
+
+        const title = data?.title?.trim() || titleFromFilename(req.file?.name ?? originalDoc?.filename ?? '')
+        if (!title) throw new ValidationError({ errors: [{ message: 'Give the resource a title.', path: 'title' }] })
+
+        if (operation === 'create' && req.user?.collection === 'users') {
+          return { ...data, title, uploadedBy: req.user.id }
+        }
+        return { ...data, title }
       },
     ],
   },

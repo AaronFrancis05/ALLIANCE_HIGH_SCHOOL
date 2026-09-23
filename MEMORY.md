@@ -59,7 +59,6 @@ left until launch (the school owner's call, 2026-09-23).
 
 ### Known gaps and loose ends
 - The contact page says the enquiry form "is being finished" (P2-T9 not built).
-- Library bulk upload (P3-T2) is not built.
 - Rate limits (`src/lib/rate-limit.ts`) are still in memory per process. Fine for one VPS; several servers would need a shared store.
 - There is no `.ics` route for events and no site search. Admissions has no document upload, tracking page or family notification yet (P5-T2 to P5-T4).
 - The header's "Apply now" link (Navigation global) still points to `/admissions`, which now links on to `/admissions/apply`.
@@ -82,6 +81,11 @@ left until launch (the school owner's call, 2026-09-23).
 ---
 
 ## Log
+
+### 2026-09-23 (P3-T2, and an FR-07 security fix)
+- **Security bug found and fixed (FR-07)**: a head of department could create a resource in *another* department (proved: HOD Sciences got 201 filing under "Vocational and Creative"), and could move their own resource out by update. `writeResources` returns a `where` filter, which Payload cannot apply to a create. New rule `canFileInDepartment` in `src/access/resources.ts` (unit-tested) is enforced in the Resources `beforeValidate` hook on create and on every update that touches the department; refusals are a 403 with a plain message.
+- **Bulk upload** uses the admin's built-in Bulk Upload drawer (one create per file, so the same rule applies). An empty title is now filled from the file name (`src/lib/resource-title.ts`), so a folder of papers needs no typing; the department defaults to the head's own.
+- Verified: unit 136/136; `tests/e2e/library-bulk.e2e.spec.ts` (REST refusals for create and move; the real drawer files two papers titled from their names).
 
 ### 2026-09-23 (P5-T5 retention)
 - `pnpm retention` (dry run) / `pnpm retention --apply`: deletes applications 12 months after their last status change, with their documents, plus documents left unlinked for over a day. Reports references and counts only. Logic in `src/lib/retention.ts`; audited as `retention.applied`.

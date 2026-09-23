@@ -8,6 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 import {
+  canFileInDepartment,
   canOpenResource,
   canStudentOpenResource,
   readResources,
@@ -15,6 +16,7 @@ import {
   writeResources,
 } from '../../src/access/resources'
 import type { StaffUser } from '../../src/access/roles'
+import { titleFromFilename } from '../../src/lib/resource-title'
 
 const staff = (role: StaffUser['role'], department?: number): StaffUser => ({
   id: 1,
@@ -157,5 +159,38 @@ describe('canOpenResource', () => {
 
   it('refuses a restricted item to a suspended student', () => {
     expect(canOpenResource(student({ status: 'suspended' }), { visibility: 'students' })).toBe(false)
+  })
+})
+
+describe('canFileInDepartment', () => {
+  it('lets a head of department file under their own department only', () => {
+    expect(canFileInDepartment(staff('hod', 3), 3)).toBe(true)
+    expect(canFileInDepartment(staff('hod', 3), { id: 3 })).toBe(true)
+    expect(canFileInDepartment(staff('hod', 3), 4)).toBe(false)
+  })
+
+  it('refuses a head of department with no department, or no department given', () => {
+    expect(canFileInDepartment(staff('hod'), 3)).toBe(false)
+    expect(canFileInDepartment(staff('hod', 3), undefined)).toBe(false)
+  })
+
+  it('lets editors and registrars file anywhere, and nobody else at all', () => {
+    expect(canFileInDepartment(staff('editor'), 4)).toBe(true)
+    expect(canFileInDepartment(staff('registrar'), 4)).toBe(true)
+    expect(canFileInDepartment(staff('teacher', 3), 3)).toBe(false)
+    expect(canFileInDepartment(student(), 3)).toBe(false)
+    expect(canFileInDepartment(null, 3)).toBe(false)
+  })
+})
+
+describe('titleFromFilename', () => {
+  it('turns a file name into a readable title', () => {
+    expect(titleFromFilename('S4_Physics_Paper1_2024.pdf')).toBe('S4 Physics Paper1 2024')
+    expect(titleFromFilename('chemistry-notes-term-2.docx')).toBe('Chemistry notes term 2')
+  })
+
+  it('gives nothing for an empty name, so the resource must be titled by hand', () => {
+    expect(titleFromFilename('')).toBe('')
+    expect(titleFromFilename('.pdf')).toBe('')
   })
 })

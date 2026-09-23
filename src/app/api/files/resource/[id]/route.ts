@@ -100,7 +100,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
   }
 
   // Titles are typed by editors; keep the saved name to characters every header accepts.
-  const safeTitle = resource.title.replace(/[^\w .,()-]+/g, ' ').replace(/\s+/g, ' ').trim()
+  const safeTitle = (resource.title ?? '').replace(/[^\w .,()-]+/g, ' ').replace(/\s+/g, ' ').trim()
   const extension = path.extname(resource.filename ?? '') || '.pdf'
   const url = await signedPrivateUrl(key, {
     downloadName: `${safeTitle || 'Resource'}${extension}`,

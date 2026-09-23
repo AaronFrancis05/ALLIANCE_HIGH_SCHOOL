@@ -76,6 +76,21 @@ export const writeResources: Access = ({ req }) => {
 }
 
 /**
+ * May this person file a resource under this department (FR-07)? Checked on every create
+ * and update, because `writeResources` can only narrow which existing resources a head of
+ * department may edit: a create has no existing row to filter, and an update could move a
+ * resource into another department.
+ */
+export function canFileInDepartment(user: unknown, department: unknown): boolean {
+  const staff = user as StaffUser | null
+  if (hasRole(staff, 'superAdmin', 'editor', 'registrar')) return true
+  if (!hasRole(staff, 'hod')) return false
+  const own = departmentId(staff)
+  const target = typeof department === 'object' && department !== null ? (department as { id: unknown }).id : department
+  return own !== null && target !== null && target !== undefined && String(target) === String(own)
+}
+
+/**
  * True when this student may open this resource. Used by the download route before a
  * signed URL is issued, so the check never depends on what the browser sent.
  */
