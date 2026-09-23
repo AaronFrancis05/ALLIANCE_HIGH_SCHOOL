@@ -61,6 +61,9 @@ then performance, then visual ambition.
 5. **Definition of done**: `pnpm lint && pnpm typecheck && pnpm test && pnpm e2e` all pass, the page is checked at 360 px, the browser console is clean, and no placeholder text is left where real content belongs.
 6. **Never invent school facts.** Founding year, results, fees, phone numbers, names: if the school has not supplied it, use a bracketed placeholder such as `[Founding year]` and add a line to `docs/CONTENT_TODO.md`.
 7. **Ask when unsure.** A short question beats a wrong assumption baked into 20 files.
+8. **Keep the record current.** Start every session by reading `PLAN.md` (roadmap) and `MEMORY.md`
+   (progress log). End it by updating MEMORY.md's current status and adding a dated log entry,
+   ticking off finished tasks in PLAN.md, and updating the matching status in `docs/SRS.md`.
 
 ---
 

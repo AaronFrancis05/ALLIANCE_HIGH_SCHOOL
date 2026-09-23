@@ -2,6 +2,9 @@
 
 The working rules for this repository live in [AGENTS.md](./AGENTS.md). Read that file first, every session.
 
+Then read [PLAN.md](./PLAN.md) (roadmap, what is next) and [MEMORY.md](./MEMORY.md) (progress log, current status).
+Before finishing a session, update MEMORY.md's status and log, and tick off anything completed in PLAN.md.
+
 Quick reminders:
 
 - Requirements and their IDs: `docs/SRS.md`. Build only the scope of the task you were given.
