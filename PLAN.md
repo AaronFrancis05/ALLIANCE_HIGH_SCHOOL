@@ -46,7 +46,7 @@ Out of scope for now: paying fees online, a full school management system, a mob
 | **P0** | Repository, Docker services, environment, brand, image pipeline | ✅ Done |
 | **P1** | CMS core: collections, roles, media, design system, home page | ✅ Done |
 | **P2** | Public site: about, academics, news, events, gallery, contact | 🟡 Mostly done: enquiry form, sub-pages and `.ics` outstanding |
-| **P3** | e-Library: browse, filter, gated download | 🟡 Started: gated download and portal library done; filters and bulk upload not |
+| **P3** | e-Library: browse, filter, gated download | 🟡 Started: browse, filters, gated download and portal library done; bulk upload (P3-T2) not |
 | **P4** | Student portal: sign-in, report cards, clearance messages | ✅ Done, except the bulk report-card import (FR-12) |
 | **P5** | Admissions: form, documents, tracking, review | 🟡 Started: schema and form validation only |
 | **P6** | SEO, performance and security hardening | 🟡 Started: structured data and security headers done |
@@ -72,7 +72,7 @@ them before you open a branch.
       (see docs/CONTENT_TODO.md §3)
 
 ### P3: e-Library
-- [ ] **P3-T1** *(proposed)* Browse and filter by subject, class, type and year (FR-06)
+- [x] **P3-T1** Browse and filter by subject, class, type and year (FR-06)
 - [ ] **P3-T2** Bulk resource upload for heads of department (FR-06, FR-07)
 - [x] **P3-T3** Gated download route for restricted resources: re-check the session, return a
       5-minute signed URL (FR-08)

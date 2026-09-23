@@ -11,9 +11,10 @@ entry short: what changed, what was verified, what is left.
 
 ## Current status (as of 2026-09-23)
 
-**Where we are:** P0, P1 and P4 are done. P2 is mostly done. P3 has its gated download (P3-T3); P5 and P6 have started. P7 has not started.
-**Next up:** **P3-T1** (library filters) or **P5-T1** (online application), plus the
-`import:students` loose end.
+**Where we are:** P0, P1 and P4 are done. P2 is mostly done. P3 has browse, filters and gated download (P3-T1, P3-T3), bulk upload left; P5 and P6 have started. P7 has not started.
+**Next up:** **P5-T1** (online application) or **P3-T2** (bulk upload for heads of department),
+plus the `import:students` loose end. Contact details in docs/CONTENT_TODO.md are deliberately
+left until launch (the school owner's call, 2026-09-23).
 
 ### Health checks
 | Check | Result | When |
@@ -26,7 +27,8 @@ entry short: what changed, what was verified, what is left.
 
 ### Git
 - `main` holds only `064eda3 feat: initial commit`. P0 to P4 is on `feat/P0-P4-foundation-and-portal`;
-  P3-T3 is on `feat/P3-library-downloads`, branched from it. Neither is merged or pushed.
+  P3-T3 is on `feat/P3-library-downloads`, and P3-T1 on `feat/P3-T1-library-filters`, each branched
+  from the one before. None is merged or pushed.
 
 ---
 
@@ -57,7 +59,8 @@ entry short: what changed, what was verified, what is left.
 ### Known gaps and loose ends
 - The contact page says the enquiry form "is being finished" (P2-T9 not built).
 - Library filters (P3-T1) and bulk upload (P3-T2) are not built.
-- Payload's REST API still returns `prefix`/`filename` of private uploads to anyone who may read the row. The bucket is private, so this is not a leak of the file, but FR-08 says the key never reaches the browser.
+- Signing out only deletes the cookie; the session row stays valid on the server until it expires (2 hours). Revoking it on sign-out would matter on shared phones.
+- The per-account sign-in lock (`src/lib/key-lock.ts`) is in memory, so it only protects a single server process.
 - There is no `.ics` route for events, no site search, and no admissions submit, upload or tracking flow.
 - The `import:students` script points to a file that does not exist: `scripts/import-students.ts`.
 - There is no `docs/DEPLOYMENT-VPS.md` and no CI pipeline.
@@ -76,6 +79,11 @@ entry short: what changed, what was verified, what is left.
 ---
 
 ## Log
+
+### 2026-09-23 (P3-T1 and two fixes)
+- **Filters** (FR-06): subject, class, type and year on `/resources` and `/portal/library`, as a plain GET form. Query values are Zod-validated in `src/lib/resource-filters.ts`; the filter only narrows, since Payload ANDs it with `readResources`. Subject and year options come from the visible shelf, so no restricted subject is revealed. `/resources` is now rendered per request (it reads the query string).
+- **Storage key hidden from the API** (FR-08): `src/access/private-files.ts` strips `prefix`, `filename`, `url` from REST and GraphQL reads of resources, report cards and admission documents for anyone but active staff. Local API reads keep them for the download routes.
+- **Fixed a sign-in race**: Payload rewrites a student's session list on each sign-in, so simultaneous sign-ins dropped all but one session (proved: 3 concurrent logins, 1 valid token). The portal sign-in now queues per admission number. This was also why two e2e tests failed intermittently.
 
 ### 2026-09-23 (P3-T3)
 - Built `/api/files/resource/[id]`: reads as the requester, re-checks with `canOpenResource`, 5-minute signed URL, audits restricted downloads and refusals, counts downloads.

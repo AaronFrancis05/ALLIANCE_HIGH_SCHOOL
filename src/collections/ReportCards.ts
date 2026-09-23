@@ -11,6 +11,7 @@ import { readReportCards, writeReportCards } from '../access/report-cards'
 import { hasRole, type StaffUser } from '../access/roles'
 import { assertAllowedUpload } from '../lib/upload-safety'
 import { recordAudit } from '../lib/audit'
+import { hideStorageKey } from '../access/private-files'
 
 export const ReportCards: CollectionConfig = {
   slug: 'reportCards',
@@ -70,6 +71,7 @@ export const ReportCards: CollectionConfig = {
   ],
   indexes: [{ fields: ['student', 'term'], unique: true }],
   hooks: {
+    afterRead: [hideStorageKey],
     beforeValidate: [
       async ({ req, data, operation }) => {
         if (req.file) await assertAllowedUpload(req.file, 'document')

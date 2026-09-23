@@ -9,6 +9,7 @@
 import type { CollectionConfig } from 'payload'
 import { denyAll, roles } from '../access/roles'
 import { assertAllowedUpload } from '../lib/upload-safety'
+import { hideStorageKey } from '../access/private-files'
 
 export const ApplicationDocuments: CollectionConfig = {
   slug: 'applicationDocuments',
@@ -43,6 +44,7 @@ export const ApplicationDocuments: CollectionConfig = {
     },
   ],
   hooks: {
+    afterRead: [hideStorageKey],
     beforeValidate: [
       async ({ req, data }) => {
         if (req.file) await assertAllowedUpload(req.file, 'document')

@@ -10,15 +10,8 @@ import type { CollectionConfig } from 'payload'
 import { CLASS_LABELS, SCHOOL_CLASSES, readResources, writeResources } from '../access/resources'
 import { departmentId, hasRole, type StaffUser } from '../access/roles'
 import { assertAllowedUpload } from '../lib/upload-safety'
-
-export const RESOURCE_TYPES = [
-  { label: 'Notes', value: 'notes' },
-  { label: 'Past paper', value: 'pastPaper' },
-  { label: 'Textbook', value: 'textbook' },
-  { label: 'Scheme of work', value: 'scheme' },
-  { label: 'Video lesson', value: 'video' },
-  { label: 'Other', value: 'other' },
-] as const
+import { hideStorageKey } from '../access/private-files'
+import { RESOURCE_TYPES } from '../lib/resource-filters'
 
 export const Resources: CollectionConfig = {
   slug: 'resources',
@@ -136,6 +129,7 @@ export const Resources: CollectionConfig = {
     },
   ],
   hooks: {
+    afterRead: [hideStorageKey],
     beforeValidate: [
       async ({ req, data, operation }) => {
         if (req.file) await assertAllowedUpload(req.file, 'document')

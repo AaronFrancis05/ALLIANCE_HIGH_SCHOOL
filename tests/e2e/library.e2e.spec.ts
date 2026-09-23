@@ -109,6 +109,54 @@ test.describe('e-Library', () => {
     await anonContext.close()
   })
 
+  test('the public filters narrow the shelf and offer no restricted subject', async ({ page }) => {
+    await page.goto('/resources')
+
+    // Physics exists only among restricted items, so a visitor is never offered it.
+    const subjects = await page.locator('#filter-subject option').allTextContents()
+    expect(subjects).not.toContain('Physics')
+
+    await page.locator('#filter-type').selectOption('pastPaper')
+    await page.getByRole('button', { name: 'Show resources' }).click()
+
+    await expect(page).toHaveURL(/type=pastPaper/)
+    await expect(page.getByText('Nothing matches these filters')).toBeVisible()
+    await expect(page.getByRole('heading', { name: READING_LIST })).toHaveCount(0)
+
+    await page.getByRole('link', { name: 'Clear filters' }).click()
+    await expect(page.getByRole('heading', { name: READING_LIST })).toBeVisible()
+  })
+
+  test("a filter narrows a student's shelf and can never widen it", async ({ page }) => {
+    await signInStudent(page, STUDENTS.cleared)
+
+    await page.goto('/portal/library?class=S4&type=pastPaper')
+    await expect(page.getByRole('heading', { name: S4_PHYSICS })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Chemistry/ })).toHaveCount(0)
+
+    // Asking for another class's shelf by hand still shows none of its restricted items.
+    await page.goto('/portal/library?class=S6')
+    await expect(page.getByRole('heading', { name: S6_MATHS })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: READING_LIST })).toBeVisible()
+  })
+
+  test('the API never hands out the storage key of a library file', async ({ page, request }) => {
+    const anonymous = await request.get('/api/resources?depth=0')
+    expect(anonymous.status()).toBe(200)
+    const anonymousBody = await anonymous.json()
+    expect(anonymousBody.docs.length).toBeGreaterThan(0)
+    for (const doc of anonymousBody.docs) {
+      expect(doc).not.toHaveProperty('filename')
+      expect(doc).not.toHaveProperty('prefix')
+    }
+
+    await signInStudent(page, STUDENTS.cleared)
+    const asStudent = await page.request.get('/api/resources?depth=0')
+    const studentBody = await asStudent.json()
+    expect(studentBody.docs.length).toBeGreaterThan(anonymousBody.docs.length)
+    expect(JSON.stringify(studentBody)).not.toMatch(/\.pdf|"prefix"|"filename"/)
+  })
+
   test('signed-out visitors are sent to sign in from the portal library', async ({ page }) => {
     await page.goto('/portal/library')
     await expect(page).toHaveURL(/\/portal\/sign-in/)

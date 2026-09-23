@@ -12,16 +12,8 @@ import Link from 'next/link'
 import { BookOpen, Download, FileText, GraduationCap, Layers, Video } from 'lucide-react'
 import { Badge, Card } from '../ui'
 import { CLASS_LABELS, type SchoolClass } from '../../access/resources'
+import { resourceTypeLabel } from '../../lib/resource-filters'
 import type { Resource, Subject } from '../../payload-types'
-
-const TYPE_LABELS: Record<string, string> = {
-  notes: 'Notes',
-  pastPaper: 'Past paper',
-  textbook: 'Textbook',
-  scheme: 'Scheme of work',
-  video: 'Video lesson',
-  other: 'Other',
-}
 
 const TYPE_ICONS: Record<string, typeof BookOpen> = {
   notes: FileText,
@@ -54,7 +46,7 @@ export function ResourceCard({ resource }: { resource: Resource }) {
     <Card as="li" className="flex flex-col p-6">
       <div className="flex items-start justify-between gap-3">
         <Icon className="h-7 w-7 shrink-0 text-maroon-700" aria-hidden />
-        <Badge tone="muted">{TYPE_LABELS[resource.type] ?? resource.type}</Badge>
+        <Badge tone="muted">{resourceTypeLabel(resource.type)}</Badge>
       </div>
 
       <h2 className="mt-4 font-display text-lg">{resource.title}</h2>

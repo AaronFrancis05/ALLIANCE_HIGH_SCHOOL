@@ -11,7 +11,7 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { STUDENTS, signInStudent as signIn } from '../helpers/student'
+import { STUDENTS, STUDENT_PASSWORD, signInStudent as signIn } from '../helpers/student'
 
 const CLEARED = STUDENTS.cleared
 const BLOCKED = STUDENTS.blocked
@@ -105,6 +105,42 @@ test.describe('Student portal', () => {
     expect(body).not.toContain('.pdf')
 
     await otherContext.close()
+  })
+
+  test('signing in on two devices at once keeps both signed in', async ({ browser }) => {
+    // Payload rewrites a student's session list on each sign-in; unqueued, one of two
+    // simultaneous sign-ins silently loses its session.
+    const contexts = await Promise.all([browser.newContext(), browser.newContext()])
+    const pages = await Promise.all(contexts.map((context) => context.newPage()))
+
+    for (const page of pages) {
+      await page.goto('/portal/sign-in')
+      await page.locator('#admissionNo').fill(STUDENTS.senior)
+      await page.locator('#password').fill(STUDENT_PASSWORD)
+    }
+    await Promise.all(pages.map((page) => page.locator('button[type="submit"]').click()))
+    await Promise.all(pages.map((page) => page.waitForURL(/\/portal$/)))
+
+    for (const page of pages) {
+      await page.goto('/portal/results')
+      await expect(page).toHaveURL(/\/portal\/results$/)
+    }
+
+    await Promise.all(contexts.map((context) => context.close()))
+  })
+
+  test("the API never hands a student their card's storage key", async ({ page }) => {
+    await signIn(page, CLEARED)
+
+    const response = await page.request.get('/api/reportCards?depth=0')
+    expect(response.status()).toBe(200)
+    const body = await response.json()
+    expect(body.docs.length).toBeGreaterThan(0)
+    for (const doc of body.docs) {
+      expect(doc).not.toHaveProperty('filename')
+      expect(doc).not.toHaveProperty('prefix')
+      expect(doc).not.toHaveProperty('url')
+    }
   })
 
   test('an anonymous request for a real card gets no file', async ({ browser, page }) => {
