@@ -1,43 +1,68 @@
-version: '3'
+# Local development services. The Next.js + Payload app runs on the host (`pnpm dev`).
+# Production on a VPS uses docker-compose.prod.yml (see docs/DEPLOYMENT-VPS.md).
+name: ahsn
 
 services:
-  payload:
-    image: node:20-alpine
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ahsn
+      POSTGRES_PASSWORD: ahsn_dev_pw
+      POSTGRES_DB: ahsn
     ports:
-      - '3000:3000'
+      - '5433:5432'
     volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ahsn -d ahsn']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # S3-compatible object storage. Stands in for Cloudflare R2 locally.
+  minio:
+    image: quay.io/minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ':9001'
+    environment:
+      MINIO_ROOT_USER: ahsn_minio
+      MINIO_ROOT_PASSWORD: ahsn_minio_dev_pw
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Creates the two buckets once. Media is publicly readable; private files are never public.
+  minio-init:
+    image: quay.io/minio/mc:latest
     depends_on:
-      - mongo
-      # - postgres
-    env_file:
-      - .env
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 ahsn_minio ahsn_minio_dev_pw &&
+      mc mb --ignore-existing local/alliance-media &&
+      mc mb --ignore-existing local/alliance-private &&
+      mc anonymous set download local/alliance-media &&
+      mc anonymous set none local/alliance-private &&
+      mc version enable local/alliance-private
+      "
 
-  # Ensure your DATABASE_URL uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
-  mongo:
-    image: mongo:latest
+  # Catches every outgoing email. Web UI at http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
     ports:
-      - '27017:27017'
-    command:
-      - --storageEngine=wiredTiger
-    volumes:
-      - data:/data/db
-    logging:
-      driver: none
-
-  # Uncomment the following to use postgres
-  # postgres:
-  #   restart: always
-  #   image: postgres:latest
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
+      - '1025:1025'
+      - '8025:8025'
 
 volumes:
-  data:
-  # pgdata:
-  node_modules:
+  pgdata:
+  miniodata:

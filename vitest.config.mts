@@ -7,6 +7,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
-    include: ['tests/int/**/*.int.spec.ts'],
+    // Unit tests are pure and always run. The integration tests need a live database,
+    // so they are opt-in via `pnpm test:int`.
+    include: ['tests/unit/**/*.spec.ts'],
   },
 })
