@@ -712,7 +712,7 @@ export interface Album {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Shown on the About page. A photograph is optional: initials are used instead.
+ * Shown on the Leadership and Our staff pages. Lower order numbers appear first; the first person in each leadership group is featured.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "staffProfiles".
@@ -727,11 +727,15 @@ export interface StaffProfile {
    * For example Head Teacher.
    */
   title: string;
-  group: 'administration' | 'board' | 'hods' | 'teaching' | 'support';
+  group: 'director' | 'administration' | 'board' | 'hods' | 'teaching' | 'support';
   department?: (number | null) | Department;
+  /**
+   * For heads of subject: the Our staff page lists O-Level and A-Level separately.
+   */
+  level?: ('o' | 'a') | null;
   bio?: string | null;
   /**
-   * Square headshot, same neutral background for everyone. Optional.
+   * Square headshot, same neutral background for everyone. Until one is added, a silhouette is shown.
    */
   photo?: (number | null) | Media;
   /**
@@ -1751,6 +1755,7 @@ export interface StaffProfilesSelect<T extends boolean = true> {
   title?: T;
   group?: T;
   department?: T;
+  level?: T;
   bio?: T;
   photo?: T;
   order?: T;

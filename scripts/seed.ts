@@ -737,37 +737,8 @@ async function main() {
 
   // ------------------------------------------------------------- staff directory
   log('Creating the staff directory')
-  const directory = [
-    { name: '[Head Teacher’s name]', title: 'Head Teacher', group: 'administration', order: 1 },
-    {
-      name: '[Deputy Head Teacher’s name]',
-      title: 'Deputy Head Teacher, Academics',
-      group: 'administration',
-      order: 2,
-    },
-    {
-      name: '[Director of Studies’ name]',
-      title: 'Director of Studies',
-      group: 'administration',
-      order: 3,
-    },
-    { name: '[Bursar’s name]', title: 'Bursar', group: 'administration', order: 4 },
-    { name: '[Senior Woman’s name]', title: 'Senior Woman', group: 'support', order: 10 },
-    {
-      name: '[Head of Sciences’ name]',
-      title: 'Head of Department, Sciences',
-      group: 'hods',
-      order: 20,
-    },
-    {
-      name: '[Head of Languages’ name]',
-      title: 'Head of Department, Languages',
-      group: 'hods',
-      order: 21,
-    },
-  ] as const
 
-  for (const person of directory) {
+  for (const person of content.staffDirectory) {
     const existing = await payload.find({
       collection: 'staffProfiles',
       where: { title: { equals: person.title } },
@@ -778,7 +749,14 @@ async function main() {
 
     await payload.create({
       collection: 'staffProfiles',
-      data: { name: person.name, title: person.title, group: person.group, order: person.order },
+      data: {
+        name: person.name,
+        title: person.title,
+        group: person.group,
+        order: person.order,
+        department: person.department ? departmentIds[person.department] : undefined,
+        level: person.level,
+      },
       overrideAccess: true,
     })
   }

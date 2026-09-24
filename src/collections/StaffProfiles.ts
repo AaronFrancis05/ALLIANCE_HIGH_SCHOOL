@@ -14,7 +14,7 @@ export const StaffProfiles: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'title', 'group', 'order'],
     group: 'Content',
-    description: 'Shown on the About page. A photograph is optional: initials are used instead.',
+    description: 'Shown on the Leadership and Our staff pages. Lower order numbers appear first; the first person in each leadership group is featured.',
   },
   access: {
     read: anyone,
@@ -32,6 +32,7 @@ export const StaffProfiles: CollectionConfig = {
       required: true,
       defaultValue: 'teaching',
       options: [
+        { label: 'Director and Founder', value: 'director' },
         { label: 'School administration', value: 'administration' },
         { label: 'Board of Governors', value: 'board' },
         { label: 'Heads of Department', value: 'hods' },
@@ -40,12 +41,21 @@ export const StaffProfiles: CollectionConfig = {
       ],
     },
     { name: 'department', type: 'relationship', relationTo: 'departments' },
+    {
+      name: 'level',
+      type: 'select',
+      options: [
+        { label: 'O-Level', value: 'o' },
+        { label: 'A-Level', value: 'a' },
+      ],
+      admin: { description: 'For heads of subject: the Our staff page lists O-Level and A-Level separately.' },
+    },
     { name: 'bio', type: 'textarea', maxLength: 400 },
     {
       name: 'photo',
       type: 'upload',
       relationTo: 'media',
-      admin: { description: 'Square headshot, same neutral background for everyone. Optional.' },
+      admin: { description: 'Square headshot, same neutral background for everyone. Until one is added, a silhouette is shown.' },
     },
     {
       name: 'order',
@@ -54,5 +64,5 @@ export const StaffProfiles: CollectionConfig = {
       admin: { position: 'sidebar', description: 'Lower numbers appear first.' },
     },
   ],
-  hooks: { afterChange: [revalidateAfterChange(() => ['/about', '/about/staff'])] },
+  hooks: { afterChange: [revalidateAfterChange(() => ['/about', '/about/leadership', '/about/staff'])] },
 }

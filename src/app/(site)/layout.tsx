@@ -35,7 +35,15 @@ const dmSans = DM_Sans({
  */
 const DEFAULT_NAV: NavItem[] = [
   { label: 'Home', href: '/' },
-  { label: 'About', href: '/about' },
+  {
+    label: 'About',
+    href: '/about',
+    children: [
+      { label: 'About the school', href: '/about', description: 'History, vision and values' },
+      { label: 'Leadership', href: '/about/leadership', description: 'The Director and the administration' },
+      { label: 'Our staff', href: '/about/staff', description: 'Heads of department and teachers' },
+    ],
+  },
   {
     label: 'Academics',
     href: '/academics',
@@ -50,6 +58,8 @@ const DEFAULT_NAV: NavItem[] = [
     href: '/admissions',
     children: [
       { label: 'How to apply', href: '/admissions', description: 'Requirements and steps' },
+      { label: 'Apply online', href: '/admissions/apply', description: 'The application form' },
+      { label: 'Track an application', href: '/admissions/track', description: 'Check its progress' },
       { label: 'Fees structure', href: '/admissions/fees', description: 'What each class pays' },
       { label: 'Questions', href: '/admissions#faqs', description: 'Answers to the common ones' },
     ],
@@ -80,6 +90,7 @@ const DEFAULT_FOOTER = [
     heading: 'Explore',
     links: [
       { label: 'About the school', href: '/about' },
+      { label: 'Leadership', href: '/about/leadership' },
       { label: 'Academics', href: '/academics' },
       { label: 'News', href: '/news' },
       { label: 'Events', href: '/events' },
@@ -91,6 +102,7 @@ const DEFAULT_FOOTER = [
     links: [
       { label: 'e-Library', href: '/resources' },
       { label: 'Admissions', href: '/admissions' },
+      { label: 'Apply online', href: '/admissions/apply' },
       { label: 'Fees structure', href: '/admissions/fees' },
       { label: 'Contact the school', href: '/contact' },
     ],

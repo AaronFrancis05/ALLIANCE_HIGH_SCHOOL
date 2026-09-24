@@ -36,7 +36,6 @@ wrong, it is wrong on every page.
 |---|---|---|
 | `[Founding year]` | About page, structured data | Head Teacher's office |
 | `[Theme of the year]` | Home page identity cards | Head Teacher's office |
-| `[Head Teacher's name]` | Welcome message on the home page | Head Teacher's office |
 | `[0]` Students enrolled | Home page statistics | Registrar |
 | `[0]` Teaching staff | Home page statistics | Head Teacher's office |
 | `[0]` Years of service | Home page statistics | Head Teacher's office |
@@ -57,8 +56,8 @@ publish, including a parent's consent where a student is named.
 | A larger copy of the school crest | The genuine artwork is now in use (`assets/brand/originallogo.jpg`), but it is only 204×192 px, so the crest is soft at large sizes and unreadable as a 32 px favicon. A vector (SVG, AI, EPS or PDF) or a PNG of 1000 px or more would fix both. Drop it in `assets/brand/` and run `pnpm crest` |
 | A simplified mark for the favicon | Any detailed crest turns to mush at 32×32. A single element — the elephant head alone, or the letter A — would be legible in a browser tab. Needed only if the school wants a sharp tab icon |
 | UNEB results, last three years | The academics results page |
-| Leadership: names, titles, photographs | About → leadership |
-| Staff directory: names, subjects, qualifications | About → staff |
+| Leadership: the Deputy Head Teacher's name; photographs of everyone (names supplied 2026-09-23) | About → leadership |
+| Staff directory: teaching and support staff names (heads of subject supplied 2026-09-23); photographs | About → staff |
 | Fees structure document (PDF) | Downloads, admissions |
 | Admission requirements per class | Admissions |
 | Term dates for the coming year | Events, admissions |

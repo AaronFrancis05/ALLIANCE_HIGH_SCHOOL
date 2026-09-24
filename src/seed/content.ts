@@ -64,7 +64,7 @@ export const siteSettings = {
 export const homePage = {
   welcome: {
     heading: 'Welcome from the Head Teacher',
-    name: CONTENT_PLACEHOLDER('Head Teacher’s name'),
+    name: 'Mrs. Ainesaasi Oliver',
     title: 'Head Teacher',
     message: [
       'Thank you for visiting Alliance High School Nansana. Choosing a secondary school is one of the most important decisions a family makes, and we do not take lightly the trust parents place in us.',
@@ -304,4 +304,80 @@ export const albums = [
   { title: 'Clubs and societies', category: 'clubs' as const, imageKeys: ['clubs-debate-group', 'clubs-journalism', 'ph-mdd'] },
   { title: 'Sports', category: 'sports' as const, imageKeys: ['ph-football'] },
   { title: 'Boarding life', category: 'campus' as const, imageKeys: ['ph-dining-hall', 'ph-dormitory'] },
+]
+
+/**
+ * Heads of subject, O-Level and A-Level, from the school's printed list (supplied by the
+ * school owner, 2026-09-23). Names are exactly as printed. Departments follow the
+ * department descriptions above; Economics and General Paper are not listed under one.
+ */
+const headsOfSubject: { subject: string; name: string; level: 'o' | 'a'; department?: string }[] = [
+  { level: 'o', subject: 'Mathematics', name: 'Mr. Mumbere Richard', department: 'SCI' },
+  { level: 'o', subject: 'Entrepreneurship', name: 'Ms. Kimulinya Sarah', department: 'HUM' },
+  { level: 'o', subject: 'History and Political Education', name: 'Ms. Nakyanzi Mwajuma', department: 'HUM' },
+  { level: 'o', subject: 'CRE', name: 'Ms. Nagadya Irene', department: 'HUM' },
+  { level: 'o', subject: 'Fine Art', name: 'Mr. Okitoi Alvin', department: 'VOC' },
+  { level: 'o', subject: 'English Language', name: 'Mr. Odong Innocent', department: 'LAN' },
+  { level: 'o', subject: 'Literature in English', name: 'Mr. Odong Innocent', department: 'LAN' },
+  { level: 'o', subject: 'Luganda', name: 'Mr. Sekate John', department: 'LAN' },
+  { level: 'o', subject: 'Kiswahili', name: 'Mr. Saturday Innocent', department: 'LAN' },
+  { level: 'o', subject: 'Biology', name: 'Mr. Mivule Ronald', department: 'SCI' },
+  { level: 'o', subject: 'Physics', name: 'Mr. Komakech Denish', department: 'SCI' },
+  { level: 'o', subject: 'Geography', name: 'Ms. Nakimuli Vivian', department: 'HUM' },
+  { level: 'o', subject: 'Agriculture', name: 'Mr. Ssegirinya William', department: 'VOC' },
+  { level: 'o', subject: 'Computer', name: 'Mr. Sande Caleb', department: 'VOC' },
+  { level: 'o', subject: 'Chemistry', name: 'Mr. Tulyakira Justus Byamuto', department: 'SCI' },
+  { level: 'a', subject: 'Chemistry', name: 'Mr. Tulyakira Justus Byamuto', department: 'SCI' },
+  { level: 'a', subject: 'Mathematics', name: 'Mr. Kamugisha Alex', department: 'SCI' },
+  { level: 'a', subject: 'Geography', name: 'Mr. Mudde Godfrey', department: 'HUM' },
+  { level: 'a', subject: 'Entrepreneurship', name: 'Ms. Salwa Abdallah', department: 'HUM' },
+  { level: 'a', subject: 'Art', name: 'Mr. Okitoi Alvin', department: 'VOC' },
+  { level: 'a', subject: 'Literature', name: 'Ms. Mpumwire Jailah', department: 'LAN' },
+  { level: 'a', subject: 'Economics', name: 'Mr. Ngororano Vicent' },
+  { level: 'a', subject: 'Physics', name: 'Mr. Tumusiime Nicholas', department: 'SCI' },
+  { level: 'a', subject: 'Divinity', name: 'Ms. Mwesigye Rhonah', department: 'HUM' },
+  { level: 'a', subject: 'Biology', name: 'Mr. Mukubuya Ronald', department: 'SCI' },
+  { level: 'a', subject: 'Agriculture', name: 'Ms. Nalutaaya Joanita', department: 'VOC' },
+  { level: 'a', subject: 'Luganda', name: 'Ms. Kalunda Prim', department: 'LAN' },
+  { level: 'a', subject: 'History', name: 'Mr. Mukama Musa', department: 'HUM' },
+  { level: 'a', subject: 'General Paper', name: 'Mr. Agodo Walter' },
+]
+
+/**
+ * The staff directory (About: Leadership and Our staff). Names in brackets are placeholders
+ * the office replaces in the admin panel; photographs are uploaded there too.
+ * Leadership names supplied by the school owner, 2026-09-23.
+ */
+export const staffDirectory: {
+  name: string
+  title: string
+  group: 'director' | 'administration' | 'board' | 'hods' | 'teaching' | 'support'
+  order: number
+  /** Department code, from `departments` above. */
+  department?: string
+  level?: 'o' | 'a'
+}[] = [
+  { name: 'Mr. TURYAKIRA NJENJEKA', title: 'Director and Founder', group: 'director', order: 1 },
+  { name: 'Mrs. Ainesaasi Oliver', title: 'Head Teacher', group: 'administration', order: 1 },
+  { name: '[Deputy Head Teacher’s name]', title: 'Deputy Head Teacher', group: 'administration', order: 2 },
+  { name: 'Mr. Kiwanuka Asuman', title: 'School Dean', group: 'administration', order: 3 },
+  { name: 'Mr. Odong Innocent', title: 'Director of Studies, A-Level', group: 'administration', order: 4 },
+  { name: 'Mr. Turyagenda Bardon', title: 'Director of Studies, O-Level', group: 'administration', order: 5 },
+  { name: '[Bursar’s name]', title: 'Bursar', group: 'support', order: 200 },
+  { name: '[Senior Woman’s name]', title: 'Senior Woman', group: 'support', order: 201 },
+  ...headsOfSubject.map((head, index) => ({
+    name: head.name,
+    title: `Head of ${head.subject}, ${head.level === 'o' ? 'O-Level' : 'A-Level'}`,
+    group: 'hods' as const,
+    order: 10 + index,
+    department: head.department,
+    level: head.level,
+  })),
+  ...subjects.map((subject, index) => ({
+    name: `[${subject.name} teacher’s name]`,
+    title: `Teacher, ${subject.name}`,
+    group: 'teaching' as const,
+    order: 100 + index,
+    department: subject.department,
+  })),
 ]

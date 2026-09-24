@@ -45,3 +45,16 @@ export const getMediaBySlug = cache(async (slug: string) => {
   })
   return result.docs[0] ?? null
 })
+
+/** The public staff directory, in the order the office set. */
+export const getStaffProfiles = cache(async () => {
+  const payload = await getPayloadClient()
+  const result = await payload.find({
+    collection: 'staffProfiles',
+    sort: 'order',
+    depth: 1,
+    limit: 200,
+    overrideAccess: false,
+  })
+  return result.docs
+})

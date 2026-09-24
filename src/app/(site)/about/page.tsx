@@ -7,8 +7,9 @@
 
 import React from 'react'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { Compass, Target, HeartHandshake, Sparkles } from 'lucide-react'
-import { Container, Card, Section, SectionHeading, ButtonLink, EmptyState, isContentPlaceholder } from '../../../components/ui'
+import { Container, Card, Section, SectionHeading, ButtonLink, isContentPlaceholder } from '../../../components/ui'
 import { MediaImage, PlaceholderNote } from '../../../components/ui/MediaImage'
 import { PageHeader } from '../../../components/layout/PageHeader'
 import { BreadcrumbJsonLd } from '../../../components/seo/JsonLd'
@@ -155,10 +156,20 @@ export default async function AboutPage() {
             title="The people who run the school"
             lead="Names, photographs and responsibilities."
           />
-          <EmptyState
-            title="The staff directory is being prepared"
-            body="Leadership and teaching staff will be listed here once the school supplies names, titles and photographs."
-          />
+          <div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
+            <Link href="/about/leadership" className="group block">
+              <Card className="h-full p-6 transition-colors group-hover:border-maroon-600">
+                <h3 className="font-display text-xl text-maroon-700">Leadership</h3>
+                <p className="mt-2 text-[var(--text-body)]">The school administration and the Board of Governors.</p>
+              </Card>
+            </Link>
+            <Link href="/about/staff" className="group block">
+              <Card className="h-full p-6 transition-colors group-hover:border-maroon-600">
+                <h3 className="font-display text-xl text-maroon-700">Our staff</h3>
+                <p className="mt-2 text-[var(--text-body)]">Heads of department, teachers and support staff.</p>
+              </Card>
+            </Link>
+          </div>
         </Container>
       </Section>
     </>
