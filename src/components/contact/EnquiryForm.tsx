@@ -95,7 +95,11 @@ function Sent() {
   )
 }
 
-export function EnquiryForm() {
+/**
+ * `preset` starts the form on a topic, for example careers with the post already filled
+ * in on a vacancy page. The visitor can still change either.
+ */
+export function EnquiryForm({ preset }: { preset?: Record<string, string> } = {}) {
   const [state, formAction] = useActionState<EnquiryState, FormData>(sendEnquiryAction, { status: 'idle' })
   const [clientErrors, setClientErrors] = useState<EnquiryErrors>({})
   const summary = useRef<HTMLDivElement>(null)
@@ -107,7 +111,7 @@ export function EnquiryForm() {
   if (state.status === 'sent') return <Sent />
 
   const errors = Object.keys(clientErrors).length ? clientErrors : state.status === 'error' ? (state.errors ?? {}) : {}
-  const values = state.status === 'error' ? (state.values ?? {}) : {}
+  const values = state.status === 'error' ? (state.values ?? {}) : (preset ?? {})
   const message = Object.keys(clientErrors).length
     ? 'Some answers need attention. Please check the highlighted questions.'
     : state.status === 'error'

@@ -9,6 +9,7 @@
 import type { MetadataRoute } from 'next'
 import { getPayloadClient } from '../lib/payload'
 import { env } from '../lib/env'
+import { isVacancyOpen } from '../lib/vacancies'
 
 /** Recomputed daily; publishing also revalidates the affected pages. */
 export const revalidate = 86400
@@ -29,6 +30,7 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataR
     { path: '/events', priority: 0.7, changeFrequency: 'weekly' },
     { path: '/gallery', priority: 0.6, changeFrequency: 'monthly' },
     { path: '/resources', priority: 0.6, changeFrequency: 'weekly' },
+    { path: '/careers', priority: 0.5, changeFrequency: 'weekly' },
     { path: '/contact', priority: 0.7, changeFrequency: 'yearly' },
     { path: '/privacy', priority: 0.3, changeFrequency: 'yearly' },
   ]
@@ -47,10 +49,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const payload = await getPayloadClient()
     const published = { _status: { equals: 'published' } }
 
-    const [posts, events, albums] = await Promise.all([
+    const [posts, events, albums, vacancies] = await Promise.all([
       payload.find({ collection: 'posts', where: published, limit: 500, depth: 0 }),
       payload.find({ collection: 'events', where: published, limit: 500, depth: 0 }),
       payload.find({ collection: 'albums', where: published, limit: 500, depth: 0 }),
+      payload.find({ collection: 'vacancies', where: published, limit: 100, depth: 0 }),
     ])
 
     for (const post of posts.docs) {
@@ -70,6 +73,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(event.updatedAt),
         changeFrequency: 'monthly',
         priority: 0.5,
+      })
+    }
+
+    // Closed posts are marked noindex on their pages, so leave them out here too.
+    for (const vacancy of vacancies.docs) {
+      if (!vacancy.slug || !isVacancyOpen(vacancy)) continue
+      entries.push({
+        url: `${base}/careers/${vacancy.slug}`,
+        lastModified: new Date(vacancy.updatedAt),
+        changeFrequency: 'weekly',
+        priority: 0.4,
       })
     }
 

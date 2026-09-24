@@ -78,6 +78,7 @@ export interface Config {
     staffProfiles: StaffProfile;
     testimonials: Testimonial;
     downloads: Download;
+    vacancies: Vacancy;
     departments: Department;
     subjects: Subject;
     resources: Resource;
@@ -108,6 +109,7 @@ export interface Config {
     staffProfiles: StaffProfilesSelect<false> | StaffProfilesSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     downloads: DownloadsSelect<false> | DownloadsSelect<true>;
+    vacancies: VacanciesSelect<false> | VacanciesSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
     subjects: SubjectsSelect<false> | SubjectsSelect<true>;
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
@@ -793,6 +795,72 @@ export interface Download {
   focalY?: number | null;
 }
 /**
+ * Posts the school is recruiting for. Each one leaves the careers page after its closing date.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vacancies".
+ */
+export interface Vacancy {
+  id: number;
+  /**
+   * For example "Biology teacher, A-Level".
+   */
+  title: string;
+  /**
+   * The web address. Changing it breaks links that already exist.
+   */
+  slug: string;
+  summary: string;
+  employment: 'fullTime' | 'partTime' | 'contract';
+  /**
+   * Leave empty if the post stays open until filled.
+   */
+  closingDate?: string | null;
+  /**
+   * The duties, the qualifications asked for, and anything else applicants should know.
+   */
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Optional. For example "Hand in a CV and copies of certificates at the school office." The enquiry form is always shown below it.
+   */
+  howToApply?: string | null;
+  meta?: {
+    /**
+     * Up to 60 characters shows in full on Google. Leave empty to use the page title.
+     */
+    title?: string | null;
+    /**
+     * Up to 155 characters. This is the grey text under the link on Google.
+     */
+    description?: string | null;
+    /**
+     * Shown when the page is shared on WhatsApp or Facebook. 1200x630 works best.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Keep this page out of search results.
+     */
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "subjects".
  */
@@ -1334,6 +1402,10 @@ export interface PayloadLockedDocument {
         value: number | Download;
       } | null)
     | ({
+        relationTo: 'vacancies';
+        value: number | Vacancy;
+      } | null)
+    | ({
         relationTo: 'departments';
         value: number | Department;
       } | null)
@@ -1797,6 +1869,30 @@ export interface DownloadsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vacancies_select".
+ */
+export interface VacanciesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  employment?: T;
+  closingDate?: T;
+  body?: T;
+  howToApply?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -95,6 +95,7 @@ const DEFAULT_FOOTER = [
       { label: 'News', href: '/news' },
       { label: 'Events', href: '/events' },
       { label: 'Gallery', href: '/gallery' },
+      { label: 'Careers', href: '/careers' },
     ],
   },
   {

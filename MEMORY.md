@@ -9,21 +9,19 @@ entry short: what changed, what was verified, what is left.
 
 ---
 
-## Current status (as of 2026-09-23)
+## Current status (as of 2026-09-24)
 
-**Where we are:** P0, P1 and P4 are done. P2 is mostly done. P3 has browse, filters and gated download (P3-T1, P3-T3), bulk upload left. P5 has the online form (P5-T1); P6 has started. P7 has not started.
-**Next up:** **P5-T2** (document uploads) then **P5-T3** (tracking page), or **P3-T2** (bulk upload),
-plus the `import:students` loose end. Contact details in docs/CONTENT_TODO.md are deliberately
-left until launch (the school owner's call, 2026-09-23).
+**Where we are:** P0–P4 done; P2 now done (P2-T11 leadership/staff, P2-T12 careers); P3 done; P5 done (P5-T1 to P5-T5). P6 hardening and P7 launch remain.
+**Next up:** P6 site-wide search and performance budget, or P4-T bulk report-card import (FR-12), plus the `import:students` loose end. Contact details in docs/CONTENT_TODO.md deliberately left until launch (school owner's call, 2026-09-23).
 
 ### Health checks
 | Check | Result | When |
 |---|---|---|
-| `pnpm typecheck` | ✅ passes | 2026-09-23 |
-| `pnpm test` (unit) | ✅ 62 / 62 pass | 2026-09-23 |
-| `pnpm lint` | ✅ passes | 2026-09-23 |
-| `pnpm e2e` | ✅ 20 / 20 pass (public 5, admin 3, portal 7, library 5) | 2026-09-23 |
-| 360 px visual check | ✅ /resources and /portal/library: no sideways scroll, console clean | 2026-09-23 |
+| `pnpm typecheck` | ✅ passes | 2026-09-24 |
+| `pnpm test` (unit) | ✅ 66 / 66 pass (includes 4 vacancies) | 2026-09-24 |
+| `pnpm lint` | ✅ passes | 2026-09-24 |
+| `pnpm e2e` | ✅ careers 2/2, about 3/3, enquiry 3/3 (reused dev server) | 2026-09-24 |
+| 360 px visual check | ✅ /careers and /careers/[slug]: no sideways scroll, console clean | 2026-09-24 |
 
 ### Git
 - `main` holds only `064eda3 feat: initial commit`. P0 to P4 is on `feat/P0-P4-foundation-and-portal`;
@@ -81,6 +79,14 @@ left until launch (the school owner's call, 2026-09-23).
 ---
 
 ## Log
+
+### 2026-09-24 (P2-T12 Careers)
+- **Vacancies collection** (`vacancies`, drafts, `publishedOrStaff`, editor-only writes) with title, slug, summary, employment (fullTime/partTime/contract), closingDate (dayOnly), body and howToApply. Revalidates `/careers` and `/careers/[slug]`.
+- **/careers** lists only open posts (closingDate absent or ≥ start of today in Kampala, UTC+3); empty state when none. **/careers/[slug]** stays up after closing and shows “This post has closed” with no form; drafts are 404; closed posts are `noindex` and omitted from sitemap. Open posts show preset enquiry form (`careers` topic, position filled).
+- **EnquiryForm preset** (`preset?: Record<string,string>`) so a vacancy can start the form on careers with the post name; values still come from server state on error.
+- **Kampala day logic** in `src/lib/vacancies.ts` (`closesAt`, `isVacancyOpen`, `openVacancyCutoff`) unit-tested; sitemap adds only open vacancies.
+- **Menus**: Careers added as top-level nav and footer link; About dropdown keeps Leadership/Our staff.
+- Verified: typecheck, lint, unit 4/4; careers e2e 2/2 (open/closed/draft, preset); 360 px no scroll, console clean.
 
 ### 2026-09-24 (P2-T11 About sub-pages)
 - **/about/leadership** (Director and Founder, then the Head Teacher featured, then the administration) and **/about/staff** (heads of subject split O-Level / A-Level, teaching and support staff), all from the Staff directory, so the office edits them in the CMS. A bracketed placeholder name shows as "Name to be confirmed"; a missing photo shows a silhouette. New `director` group and `level` field on staff profiles.

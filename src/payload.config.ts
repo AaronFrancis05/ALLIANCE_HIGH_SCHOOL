@@ -21,6 +21,7 @@ import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { Categories } from './collections/Categories'
 import { Events } from './collections/Events'
+import { Vacancies } from './collections/Vacancies'
 import { Albums } from './collections/Albums'
 import { Videos } from './collections/Videos'
 import { Pages } from './collections/Pages'
@@ -79,6 +80,7 @@ export default buildConfig({
     StaffProfiles,
     Testimonials,
     Downloads,
+    Vacancies,
     // Academics and library
     Departments,
     Subjects,

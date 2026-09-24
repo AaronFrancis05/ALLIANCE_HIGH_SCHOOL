@@ -70,7 +70,7 @@ them before you open a branch.
 - [x] **P2-T10** Events: `.ics` download route under `src/app/api/` (FR-20)
 - [x] **P2-T11** About sub-pages: /about/leadership and /about/staff from the Staff directory.
       Leadership and heads of subject supplied; the deputy, teachers and photos are still placeholders
-- [ ] **P2-T12** Careers page with vacancies the office manages in the CMS
+- [x] **P2-T12** Careers page with vacancies the office manages in the CMS (`Vacancies` collection, `/careers` and `/careers/[slug]`)
 
 ### P3: e-Library
 - [x] **P3-T1** Browse and filter by subject, class, type and year (FR-06)
