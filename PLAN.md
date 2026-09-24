@@ -68,8 +68,9 @@ them before you open a branch.
 - [x] **P2-T9** Contact, alumni and careers enquiry form: Zod on the server, rate-limited,
       spam-protected, saved to `FormSubmissions` (FR-21)
 - [x] **P2-T10** Events: `.ics` download route under `src/app/api/` (FR-20)
-- [ ] About sub-pages (leadership, staff). Blocked until the school supplies names and photos
-      (see docs/CONTENT_TODO.md §3)
+- [x] **P2-T11** About sub-pages: /about/leadership and /about/staff from the Staff directory.
+      Leadership and heads of subject supplied; the deputy, teachers and photos are still placeholders
+- [ ] **P2-T12** Careers page with vacancies the office manages in the CMS
 
 ### P3: e-Library
 - [x] **P3-T1** Browse and filter by subject, class, type and year (FR-06)

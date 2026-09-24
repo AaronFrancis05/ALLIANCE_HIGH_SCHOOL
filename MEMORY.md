@@ -82,6 +82,12 @@ left until launch (the school owner's call, 2026-09-23).
 
 ## Log
 
+### 2026-09-24 (P2-T11 About sub-pages)
+- **/about/leadership** (Director and Founder, then the Head Teacher featured, then the administration) and **/about/staff** (heads of subject split O-Level / A-Level, teaching and support staff), all from the Staff directory, so the office edits them in the CMS. A bracketed placeholder name shows as "Name to be confirmed"; a missing photo shows a silhouette. New `director` group and `level` field on staff profiles.
+- **Content from the school owner**: leadership names with honorifics, and the printed heads-of-subject list (29 posts, names exactly as printed; spellings such as "Ngororano Vicent" and "Tulyakira Justus Byamuto" should be checked against the school's records). The home page welcome now names Mrs. Ainesaasi Oliver. Still placeholders: the Deputy Head Teacher, teaching and support staff, all photographs.
+- Menus: About now has Leadership and Our staff; Admissions has Apply online and Track an application.
+- Verified: typecheck, lint, about e2e 3/3; 360 px screenshots of both pages, no sideways scroll, console clean.
+
 ### 2026-09-23 (P2-T10 calendar)
 - **Add to calendar** on every event page: `/api/calendar/event/[slug]` serves an RFC 5545 file (escaped text, 75-octet folding, UTC times, stable UID so a second download updates the entry). Published events only; drafts and unknown slugs are a plain 404. No end time is invented when an event has none.
 - Verified: unit 148/148; calendar e2e 2/2 (real download from a seeded event; draft refused).
