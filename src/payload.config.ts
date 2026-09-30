@@ -113,18 +113,19 @@ export default buildConfig({
 
   sharp,
 
-  email: nodemailerAdapter({
-    defaultFromAddress: env.email.fromAddress,
-    defaultFromName: env.email.fromName,
-    transportOptions: {
-      host: env.email.host,
-      port: env.email.port,
-      secure: env.email.port === 465,
-      auth: env.email.user ? { user: env.email.user, pass: env.email.pass } : undefined,
-      // Mailpit accepts anything; production uses real credentials.
-      ignoreTLS: !env.isProduction,
-    },
-  }),
+  email: env.isProduction || process.env.SMTP_HOST
+    ? nodemailerAdapter({
+        defaultFromAddress: env.email.fromAddress,
+        defaultFromName: env.email.fromName,
+        transportOptions: {
+          host: env.email.host,
+          port: env.email.port,
+          secure: env.email.port === 465,
+          auth: env.email.user ? { user: env.email.user, pass: env.email.pass } : undefined,
+          ignoreTLS: !env.isProduction,
+        },
+      })
+    : false,
 
   plugins: [
     s3Storage({
