@@ -5,7 +5,8 @@
 
 import React from 'react'
 import type { Metadata } from 'next'
-import { DM_Sans, Playfair_Display } from 'next/font/google'
+import '@fontsource-variable/dm-sans'
+import '@fontsource/playfair-display'
 import './brand.css'
 import { getNavigation, getSiteSettings } from '../../lib/payload'
 import { Header, type NavItem } from '../../components/layout/Header'
@@ -13,18 +14,6 @@ import { TopBar } from '../../components/layout/TopBar'
 import { Footer } from '../../components/layout/Footer'
 import { OrganisationJsonLd } from '../../components/seo/JsonLd'
 import { env } from '../../lib/env'
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-playfair',
-})
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-dm-sans',
-})
 
 /**
  * Menu used until the office edits it in the CMS.
@@ -161,7 +150,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const emails = settings?.emails ?? []
 
   return (
-    <html lang="en-UG" className={`${playfair.variable} ${dmSans.variable}`}>
+    <html lang="en-UG" className="font-playfair-display font-dm-sans-variable">
       <body className="flex min-h-screen flex-col">
         <a href="#main" className="skip-link">
           Skip to content

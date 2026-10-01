@@ -125,7 +125,7 @@ export default buildConfig({
           ignoreTLS: !env.isProduction,
         },
       })
-    : false,
+    : undefined,
 
   plugins: [
     s3Storage({
