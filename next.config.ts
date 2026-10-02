@@ -33,9 +33,10 @@ const nextConfig: NextConfig = {
       { pathname: '/photos/**' },
     ],
     remotePatterns: [
-      // MinIO locally, the media subdomain in production.
+      // MinIO locally
       { protocol: 'http', hostname: 'localhost', port: '9000', pathname: '/alliance-media/**' },
-      { protocol: 'https', hostname: 'media.alliancehigh.sc.ug', pathname: '/**' },
+      // Cloudflare R2 public bucket (production)
+      { protocol: 'https', hostname: 'pub-fc9cfd9d0cd0415c99aea43bf4cd64b9.r2.dev', pathname: '/**' },
       // YouTube poster images for the video facade.
       { protocol: 'https', hostname: 'i.ytimg.com', pathname: '/**' },
     ],

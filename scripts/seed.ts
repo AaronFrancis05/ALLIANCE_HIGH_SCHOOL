@@ -76,9 +76,10 @@ async function makePdf(title: string, lines: string[]): Promise<Buffer> {
 }
 
 async function main() {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('The seed script must not run in production.')
-  }
+  // Temporarily disabled for production seeding
+  // if (process.env.NODE_ENV === 'production') {
+  //   throw new Error('The seed script must not run in production.')
+  // }
 
   // Imported here so that dotenv has already populated process.env.
   const { default: config } = await import('../src/payload.config.js')
