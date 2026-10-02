@@ -52,7 +52,11 @@ async function clearCollections(payload: any) {
   ] as const
 
   for (const collection of collections) {
-    await payload.delete({ collection, where: { id: { exists: true } }, overrideAccess: true })
+    try {
+      await payload.delete({ collection, where: { id: { exists: true } }, overrideAccess: true })
+    } catch (e) {
+      log(`  skip clearing ${collection}: ${String(e).slice(0, 100)}`)
+    }
   }
 }
 
