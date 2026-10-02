@@ -43,7 +43,7 @@ async function makePdf(title: string, lines: string[]): Promise<Buffer> {
   return Buffer.from(await pdf.save())
 }
 
-async function clearCollections(payload: any) {
+async function clearCollections(payload: any, log: (msg: string) => void) {
   const collections = [
     'reportCards', 'feeClearances', 'resources', 'applications', 'applicationDocuments',
     'posts', 'events', 'albums', 'videos', 'pages', 'testimonials', 'staffProfiles',
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
   try {
     log('Starting production seed...')
 
-    await clearCollections(payload)
+    await clearCollections(payload, log)
     log('Cleared existing collections')
 
     // Staff accounts
