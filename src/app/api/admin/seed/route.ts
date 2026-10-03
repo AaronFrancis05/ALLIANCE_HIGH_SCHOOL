@@ -209,6 +209,88 @@ export async function POST(req: NextRequest) {
       overrideAccess: true,
     })
     await payload.updateGlobal({ slug: 'admissionsSettings', data: content.admissionsSettings, overrideAccess: true })
+    await payload.updateGlobal({
+      slug: 'navigation',
+      data: {
+        header: [
+          { label: 'Home', href: '/' },
+          {
+            label: 'About',
+            href: '/about',
+            children: [
+              { label: 'About the school', href: '/about', description: 'History, vision and values' },
+              { label: 'Leadership', href: '/about/leadership', description: 'The Director and the administration' },
+              { label: 'Our staff', href: '/about/staff', description: 'Heads of department and teachers' },
+            ],
+          },
+          {
+            label: 'Academics',
+            href: '/academics',
+            children: [
+              { label: 'Departments and subjects', href: '/academics#departments', description: 'What is taught, and by whom' },
+              { label: 'UNEB results', href: '/academics#results', description: 'How our candidates did' },
+              { label: 'e-Library', href: '/resources', description: 'Notes, past papers and textbooks' },
+            ],
+          },
+          {
+            label: 'Admissions',
+            href: '/admissions',
+            children: [
+              { label: 'How to apply', href: '/admissions', description: 'Requirements and steps' },
+              { label: 'Apply online', href: '/admissions/apply', description: 'The application form' },
+              { label: 'Track an application', href: '/admissions/track', description: 'Check its progress' },
+              { label: 'Fees structure', href: '/admissions/fees', description: 'What each class pays' },
+              { label: 'Questions', href: '/admissions#faqs', description: 'Answers to the common ones' },
+            ],
+          },
+          {
+            label: 'Student life',
+            href: '/student-life',
+            children: [
+              { label: 'Clubs and societies', href: '/student-life#clubs' },
+              { label: 'Sport', href: '/student-life#sports' },
+              { label: 'Boarding', href: '/student-life#boarding' },
+            ],
+          },
+          {
+            label: 'News',
+            href: '/news',
+            children: [
+              { label: 'Latest news', href: '/news', description: 'Stories and announcements' },
+              { label: 'Events diary', href: '/events', description: 'Term dates and visiting days' },
+            ],
+          },
+          { label: 'Gallery', href: '/gallery' },
+          { label: 'Contact', href: '/contact' },
+        ],
+        footer: [
+          {
+            heading: 'Explore',
+            links: [
+              { label: 'About the school', href: '/about' },
+              { label: 'Leadership', href: '/about/leadership' },
+              { label: 'Academics', href: '/academics' },
+              { label: 'News', href: '/news' },
+              { label: 'Events', href: '/events' },
+              { label: 'Gallery', href: '/gallery' },
+              { label: 'Careers', href: '/careers' },
+            ],
+          },
+          {
+            heading: 'For students and parents',
+            links: [
+              { label: 'e-Library', href: '/resources' },
+              { label: 'Admissions', href: '/admissions' },
+              { label: 'Apply online', href: '/admissions/apply' },
+              { label: 'Fees structure', href: '/admissions/fees' },
+              { label: 'Contact the school', href: '/contact' },
+            ],
+          },
+        ],
+        announcement: { enabled: false, text: '', href: '' },
+      },
+      overrideAccess: true,
+    })
 
     // Categories
     log('Creating categories')
