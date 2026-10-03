@@ -58,9 +58,18 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
         setOpenMenu(null)
       }
     }
+    const onClickOutside = (event: MouseEvent) => {
+      if (openMenu && !(event.target as HTMLElement).closest('[data-open="true"]')) {
+        setOpenMenu(null)
+      }
+    }
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+    window.addEventListener('click', onClickOutside)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('click', onClickOutside)
+    }
+  }, [openMenu])
 
   const isCurrent = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(`${href}/`))
 
@@ -93,41 +102,43 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
         </Link>
 
         {/* Desktop menu */}
-        {/*
-          `shrink-0` keeps the menu at its natural width, and every item is `whitespace-nowrap`
-          so a two-word label such as "Student life" cannot break onto a second line and throw
-          the row out of alignment. Padding tightens at lg and relaxes again at xl.
-        */}
+{/*
+           `shrink-0` keeps the menu at its natural width, and every item is `whitespace-nowrap`
+           so a two-word label such as "Student life" cannot break onto a second line and throw
+           the row out of alignment. Padding tightens at lg and relaxes again at xl.
+         */}
         <nav aria-label="Main menu" className="hidden shrink-0 items-center gap-0.5 xl:flex xl:gap-1">
           {items.map((item) =>
             item.children?.length ? (
               <div
                 key={item.href}
-                className="relative"
-                onMouseEnter={() => setOpenMenu(item.href)}
-                onMouseLeave={() => setOpenMenu(null)}
+                className="relative group"
+                data-open={openMenu === item.href}
               >
                 <button
                   type="button"
                   aria-expanded={openMenu === item.href}
                   aria-haspopup="true"
                   onClick={() => setOpenMenu(openMenu === item.href ? null : item.href)}
+                  onMouseEnter={() => setOpenMenu(item.href)}
+                  onMouseLeave={() => setOpenMenu(null)}
                   className={cn(
                     'flex shrink-0 items-center gap-1 rounded-md px-2 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-maroon-700 xl:px-3',
                     isCurrent(item.href) && 'text-gold-300',
                   )}
                 >
                   {item.label}
-                  <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[open=true]:rotate-180" aria-hidden="true" />
                 </button>
 
                 {openMenu === item.href ? (
-                  <div className="absolute top-full left-0 w-72 rounded-b-xl border border-cream-300 bg-white p-2 shadow-[var(--shadow-raised)]">
+                  <div className="absolute top-full left-0 z-50 min-w-[20rem] rounded-b-xl border border-cream-300 bg-white p-2 shadow-[0_2px_4px_rgb(20_20_20/0.08),0_16px_40px_-16px_rgb(20_20_20/0.28)] shadow-[var(--shadow-raised)]">
                     {item.children.map((child) => (
                       <Link
                         key={child.href}
                         href={child.href}
                         className="block rounded-lg px-3 py-2 text-ink-800 hover:bg-cream-100"
+                        onClick={() => { setOpenMenu(null); setDrawerOpen(false); }}
                       >
                         <span className="block text-sm font-medium">{child.label}</span>
                         {child.description ? (
