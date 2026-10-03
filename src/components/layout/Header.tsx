@@ -107,13 +107,13 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
            so a two-word label such as "Student life" cannot break onto a second line and throw
            the row out of alignment. Padding tightens at lg and relaxes again at xl.
          */}
-        <nav aria-label="Main menu" className="hidden shrink-0 items-center gap-0.5 xl:flex xl:gap-1">
+        <nav aria-label="Main menu" className="hidden shrink-0 items-center gap-0.5 lg:flex lg:gap-1">
           {items.map((item) =>
             item.children?.length ? (
               <div
                 key={item.href}
                 className="relative group"
-                data-open={openMenu === item.href}
+                data-open={openMenu === item.href ? 'true' : 'false'}
               >
                 <button
                   type="button"
@@ -178,7 +178,7 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
         */}
         <button
           type="button"
-          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg hover:bg-maroon-700 xl:hidden"
+          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg hover:bg-maroon-700 lg:hidden"
           aria-expanded={drawerOpen}
           aria-controls="mobile-menu"
           onClick={() => setDrawerOpen((open) => !open)}
