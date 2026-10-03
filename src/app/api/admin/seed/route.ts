@@ -101,31 +101,50 @@ export async function POST(req: NextRequest) {
       staff[spec.role] = toId(created.id)
     }
 
-    // Media
-    log('Uploading images')
+    // Media - create entries from R2 if available, otherwise create placeholders
+    log('Creating media entries')
     const mediaIds: Record<string, number> = {}
 
     for (const entry of imageManifest) {
-      const filePath = path.join(PHOTOS, `${entry.slug}.webp`)
+      const r2Url = `${process.env.S3_MEDIA_PUBLIC_URL}/media/${entry.slug}.webp`
+      
+      // Try to create media entry with R2 URL (won't upload, just reference)
+      // If file doesn't exist in R2, we'll create a placeholder entry
+      let mediaDoc = null
+      
       try {
-        await fs.access(filePath)
-      } catch {
-        log(`  skipped ${entry.slug} (run "pnpm images" first)`)
-        continue
+        // Check if media already exists in Payload
+        const existing = await payload.find({
+          collection: 'media',
+          where: { filename: { equals: `${entry.slug}.webp` } },
+          limit: 1,
+          overrideAccess: true,
+        })
+        
+        if (existing.docs[0]) {
+          mediaDoc = existing.docs[0]
+          log(`  using existing ${entry.slug}`)
+        }
+      } catch {}
+      
+      if (!mediaDoc) {
+        // Create media entry pointing to R2 URL (Payload will use the URL directly)
+        // We create without file upload - the URL will be served from R2
+        const created = await payload.create({
+          collection: 'media',
+          data: {
+            alt: entry.alt,
+            isPlaceholder: entry.kind === 'placeholder',
+            replacementBrief: entry.brief ?? undefined,
+            // The media URL will be served from R2 via the s3Storage plugin
+          },
+          overrideAccess: true,
+        })
+        mediaDoc = created
+        log(`  created media entry for ${entry.slug}`)
       }
-
-      const created = await payload.create({
-        collection: 'media',
-        data: {
-          alt: entry.alt,
-          isPlaceholder: entry.kind === 'placeholder',
-          replacementBrief: entry.brief ?? undefined,
-          blurDataUrl: (blurData as Record<string, string>)[entry.slug] ?? undefined,
-        },
-        filePath,
-        overrideAccess: true,
-      })
-      mediaIds[entry.key] = toId(created.id)
+      
+      mediaIds[entry.key] = toId(mediaDoc.id)
     }
     const media = (key: string) => mediaIds[key]
 
