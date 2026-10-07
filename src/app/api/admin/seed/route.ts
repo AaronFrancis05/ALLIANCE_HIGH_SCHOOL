@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayload } from 'payload'
+import { getPayload, type Payload } from 'payload'
 import configPromise from '@payload-config'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import * as content from '@/seed/content'
 import { imageManifest } from '@/seed/image-manifest'
-import blurData from '@/seed/blur-data.json' with { type: 'json' }
-import fs from 'node:fs/promises'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const ROOT = path.resolve(__dirname, '..', '..', '..', '..')
-const PHOTOS = path.join(ROOT, 'public', 'photos')
 
 const DEV_PASSWORD = 'AllianceDev1!'
 const SEED_SECRET = process.env.SEED_SECRET
@@ -43,7 +34,7 @@ async function makePdf(title: string, lines: string[]): Promise<Buffer> {
   return Buffer.from(await pdf.save())
 }
 
-async function clearCollections(payload: any, log: (msg: string) => void) {
+async function clearCollections(payload: Payload, log: (msg: string) => void) {
   const collections = [
     'reportCards', 'feeClearances', 'resources', 'applications', 'applicationDocuments',
     'posts', 'events', 'albums', 'videos', 'pages', 'testimonials', 'staffProfiles',
@@ -106,8 +97,6 @@ export async function POST(req: NextRequest) {
     const mediaIds: Record<string, number> = {}
 
     for (const entry of imageManifest) {
-      const r2Url = `${process.env.S3_MEDIA_PUBLIC_URL}/media/${entry.slug}.webp`
-      
       // Try to create media entry with R2 URL (won't upload, just reference)
       // If file doesn't exist in R2, we'll create a placeholder entry
       let mediaDoc = null
