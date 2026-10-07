@@ -18,6 +18,13 @@ const nextConfig: NextConfig = {
     // to this size; anything larger arrives cut off. It must cover the largest upload any
     // collection accepts: 50 MB for staff documents (src/lib/upload-safety.ts).
     proxyClientMaxBodySize: '52mb',
+    // Prerendering reads the CMS, and every build worker opens its own database pool.
+    // The hosted Postgres pooler allows 15 clients, so the default three workers with
+    // eight pages each ran out of connections and failed the build (EMAXCONNSESSION),
+    // more often when two branches built at once. One worker, a few pages at a time.
+    cpus: 1,
+    staticGenerationMaxConcurrency: 4,
+    staticGenerationRetryCount: 2,
   },
 
   images: {
