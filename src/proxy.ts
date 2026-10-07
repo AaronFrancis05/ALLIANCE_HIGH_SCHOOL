@@ -3,20 +3,26 @@
  *
  * In Next.js 16 this file is what earlier versions called `middleware.ts`.
  *
- * The policy uses a per-request nonce rather than 'unsafe-inline', so an injected
- * <script> cannot run even if something slipped through output escaping. The admin panel
- * needs slightly looser rules than the public site, which is why the two are separated.
+ * The portal and the admin panel are rendered per request, so they get a per-request nonce
+ * rather than 'unsafe-inline': an injected <script> cannot run even if something slipped
+ * through output escaping. Next stamps the nonce on its scripts by reading the policy from
+ * the request headers, which is why the policy is set on the request as well as the response.
+ *
+ * The public pages are statically generated (AGENTS.md 2.2), and a static page is built
+ * before any request exists, so its scripts can never carry a nonce. With a nonce and
+ * 'strict-dynamic' in the policy the browser ignores 'self' and blocked every script on
+ * those pages, so nothing interactive worked. They use 'self' 'unsafe-inline' instead,
+ * the policy Next documents for static pages. They hold no personal data.
  */
 
 import { NextResponse, type NextRequest } from 'next/server'
 
 const isProduction = process.env.NODE_ENV === 'production'
 
-function buildCsp(nonce: string, isAdmin: boolean): string {
+function buildCsp(nonce: string | null, isAdmin: boolean): string {
   const scriptSrc = [
     `'self'`,
-    `'nonce-${nonce}'`,
-    `'strict-dynamic'`,
+    ...(nonce ? [`'nonce-${nonce}'`, `'strict-dynamic'`] : [`'unsafe-inline'`]),
     // Next's dev server and the admin panel both need eval; production public pages do not.
     ...(isProduction && !isAdmin ? [] : [`'unsafe-eval'`]),
   ]
@@ -46,15 +52,19 @@ function buildCsp(nonce: string, isAdmin: boolean): string {
 }
 
 export function proxy(request: NextRequest) {
-  const nonce = crypto.randomUUID().replace(/-/g, '')
   const isAdmin = request.nextUrl.pathname.startsWith('/admin')
+  const isPortal = request.nextUrl.pathname.startsWith('/portal')
+  const nonce = isAdmin || isPortal ? crypto.randomUUID().replace(/-/g, '') : null
+  const csp = buildCsp(nonce, isAdmin)
 
   const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-nonce', nonce)
+  if (nonce) {
+    requestHeaders.set('Content-Security-Policy', csp)
+  }
 
   const response = NextResponse.next({ request: { headers: requestHeaders } })
 
-  response.headers.set('Content-Security-Policy', buildCsp(nonce, isAdmin))
+  response.headers.set('Content-Security-Policy', csp)
   response.headers.set('X-Frame-Options', 'DENY')
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
@@ -69,7 +79,7 @@ export function proxy(request: NextRequest) {
   }
 
   // The portal and the admin panel must never be cached by a shared proxy.
-  if (isAdmin || request.nextUrl.pathname.startsWith('/portal')) {
+  if (isAdmin || isPortal) {
     response.headers.set('Cache-Control', 'private, no-store, max-age=0')
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
   }

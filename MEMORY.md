@@ -80,6 +80,12 @@ entry short: what changed, what was verified, what is left.
 
 ## Log
 
+### 2026-10-07 (CSP blocked all JavaScript on the public site)
+- **Symptom on Vercel**: nav dropdowns, hero carousel and lazy images dead. Cause: `src/proxy.ts` sent a nonce + `'strict-dynamic'` policy on every page, but public pages are statically generated, so their scripts carry no nonce and the browser blocked every chunk (seen in headless Chromium). The nonce was also never passed to Next on the request, so it could not have worked on dynamic pages either.
+- **Fix**: public pages get `script-src 'self' 'unsafe-inline'` (Next's documented policy for static pages); `/portal` and `/admin` keep nonce + `'strict-dynamic'`, now set on the request too so Next stamps it. Unit test `tests/unit/proxy-csp.spec.ts`.
+- Seen while debugging: three seeded R2 files return 404 directly (placeholder chemistry lab, dining hall, football match). Lint has 9 errors, already on main, in `src/app/api/admin/seed/route.ts` and a migration.
+- Not run: e2e and a local production build (Docker was not running).
+
 ### 2026-09-24 (P2-T12 Careers)
 - **Vacancies collection** (`vacancies`, drafts, `publishedOrStaff`, editor-only writes) with title, slug, summary, employment (fullTime/partTime/contract), closingDate (dayOnly), body and howToApply. Revalidates `/careers` and `/careers/[slug]`.
 - **/careers** lists only open posts (closingDate absent or ≥ start of today in Kampala, UTC+3); empty state when none. **/careers/[slug]** stays up after closing and shows “This post has closed” with no form; drafts are 404; closed posts are `noindex` and omitted from sitemap. Open posts show preset enquiry form (`careers` topic, position filled).
