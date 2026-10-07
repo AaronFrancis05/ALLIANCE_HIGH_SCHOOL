@@ -110,24 +110,42 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
         <nav aria-label="Main menu" className="hidden shrink-0 items-center gap-0.5 lg:flex lg:gap-1">
           {items.map((item) =>
             item.children?.length ? (
+              /*
+                The label is a link to the section page; the chevron beside it opens the
+                drop-down for touch and keyboard users. Hover is tracked on the whole item,
+                panel included, so the pointer can travel from the label into the panel.
+                Only a real mouse opens it on hover: a tap fires pointerenter just before
+                click, which would otherwise open and immediately close the menu.
+              */
               <div
                 key={item.href}
-                className="relative group"
+                className="group relative flex items-center rounded-md transition-colors hover:bg-maroon-700"
                 data-open={openMenu === item.href ? 'true' : 'false'}
+                onPointerEnter={(event) => {
+                  if (event.pointerType === 'mouse') setOpenMenu(item.href)
+                }}
+                onPointerLeave={(event) => {
+                  if (event.pointerType === 'mouse') setOpenMenu(null)
+                }}
               >
-                <button
-                  type="button"
-                  aria-expanded={openMenu === item.href}
-                  aria-haspopup="true"
-                  onClick={() => setOpenMenu(openMenu === item.href ? null : item.href)}
-                  onMouseEnter={() => setOpenMenu(item.href)}
-                  onMouseLeave={() => setOpenMenu(null)}
+                <Link
+                  href={item.href}
+                  aria-current={isCurrent(item.href) ? 'page' : undefined}
                   className={cn(
-                    'flex shrink-0 items-center gap-1 rounded-md px-2 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-maroon-700 xl:px-3',
+                    'shrink-0 rounded-md py-2 pl-2 text-sm font-medium whitespace-nowrap xl:pl-3',
                     isCurrent(item.href) && 'text-gold-300',
                   )}
                 >
                   {item.label}
+                </Link>
+                <button
+                  type="button"
+                  aria-expanded={openMenu === item.href}
+                  aria-haspopup="true"
+                  aria-label={`${item.label} pages`}
+                  onClick={() => setOpenMenu(openMenu === item.href ? null : item.href)}
+                  className="flex min-h-11 items-center rounded-md pr-2 pl-1 xl:pr-3"
+                >
                   <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[open=true]:rotate-180" aria-hidden="true" />
                 </button>
 
