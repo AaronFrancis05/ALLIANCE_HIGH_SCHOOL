@@ -80,6 +80,11 @@ entry short: what changed, what was verified, what is left.
 
 ## Log
 
+### 2026-10-08 (nav section links, failing Vercel builds)
+- **Nav**: items with a drop-down were a `<button>`, so About, Academics, Admissions, Student life and News never routed, and hover lived on the button alone, so moving into the panel closed it. `src/components/layout/Header.tsx`: the label is now a link, a chevron button (`aria-label="<Item> pages"`) toggles the panel, and mouse-only pointer hover covers the whole item. Verified on a local production build (hover into panel, label and child links route, touch tap on chevron, 360 px drawer with no overflow) and live.
+- **Builds failing on Vercel** (`cbbefa6` and the nav branch): prerendering ran out of Supabase session-pooler clients (EMAXCONNSESSION, limit 15), since each build worker opens its own pool. `next.config.ts` now uses one worker, four pages at a time, two retries; `main` and `dev` then built together without failing. Worth considering: point `DATABASE_URL` on Vercel at the transaction pooler (port 6543), which is meant for serverless. The runtime pool was left at its default because `withAdvisoryLock` holds one connection while sign-in work needs another.
+- No Docker on this machine; the local production build reads the production database (production mode, no schema push).
+
 ### 2026-10-07 (CSP blocked all JavaScript on the public site)
 - **Symptom on Vercel**: nav dropdowns, hero carousel and lazy images dead. Cause: `src/proxy.ts` sent a nonce + `'strict-dynamic'` policy on every page, but public pages are statically generated, so their scripts carry no nonce and the browser blocked every chunk (seen in headless Chromium). The nonce was also never passed to Next on the request, so it could not have worked on dynamic pages either.
 - **Fix**: public pages get `script-src 'self' 'unsafe-inline'` (Next's documented policy for static pages); `/portal` and `/admin` keep nonce + `'strict-dynamic'`, now set on the request too so Next stamps it. Unit test `tests/unit/proxy-csp.spec.ts`.
