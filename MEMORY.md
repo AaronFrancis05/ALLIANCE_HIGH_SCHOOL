@@ -83,7 +83,8 @@ entry short: what changed, what was verified, what is left.
 ### 2026-10-07 (CSP blocked all JavaScript on the public site)
 - **Symptom on Vercel**: nav dropdowns, hero carousel and lazy images dead. Cause: `src/proxy.ts` sent a nonce + `'strict-dynamic'` policy on every page, but public pages are statically generated, so their scripts carry no nonce and the browser blocked every chunk (seen in headless Chromium). The nonce was also never passed to Next on the request, so it could not have worked on dynamic pages either.
 - **Fix**: public pages get `script-src 'self' 'unsafe-inline'` (Next's documented policy for static pages); `/portal` and `/admin` keep nonce + `'strict-dynamic'`, now set on the request too so Next stamps it. Unit test `tests/unit/proxy-csp.spec.ts`.
-- Seen while debugging: three seeded R2 files return 404 directly (placeholder chemistry lab, dining hall, football match). Lint has 9 errors, already on main, in `src/app/api/admin/seed/route.ts` and a migration.
+- Merged to `dev` and `main` (fast-forward); verified live: no console errors, 18/18 images load after scrolling, nav dropdowns open, `/admin/login` loads.
+- **Missing R2 media fixed (2026-10-08)**: four placeholder files had records in the database but no object in the bucket (chemistry lab, dining hall, football match, main gate), because the Vercel seed (`src/app/api/admin/seed/route.ts`) creates media entries without uploading files. Uploaded them from `public/photos/` to `media/` in the `ahsn` bucket; all 34 R2 images across the main pages now return 200. A future re-seed on Vercel can leave files missing again. Lint has 9 errors, already on main, in `src/app/api/admin/seed/route.ts` and a migration.
 - Not run: e2e and a local production build (Docker was not running).
 
 ### 2026-09-24 (P2-T12 Careers)
