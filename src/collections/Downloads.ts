@@ -4,7 +4,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles } from '../access/roles'
 import { assertAllowedUpload } from '../lib/upload-safety'
 
 export const Downloads: CollectionConfig = {
@@ -14,6 +14,7 @@ export const Downloads: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'updatedAt'],
     group: 'Content',
+    hidden: hiddenUnless('editor', 'registrar', 'bursar', 'admissions'),
   },
   access: {
     read: anyone,

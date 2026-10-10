@@ -7,7 +7,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { publishedOrStaff, roles } from '../access/roles'
+import { hiddenUnless, publishedOrStaff, roles } from '../access/roles'
 import { revalidateAfterChange } from '../lib/revalidate'
 import { slugField } from '../fields/slug'
 import { seoFields } from '../fields/seo'
@@ -19,6 +19,7 @@ export const Vacancies: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'employment', 'closingDate', '_status'],
     group: 'Content',
+    hidden: hiddenUnless('editor'),
     description: 'Posts the school is recruiting for. Each one leaves the careers page after its closing date.',
   },
   access: {

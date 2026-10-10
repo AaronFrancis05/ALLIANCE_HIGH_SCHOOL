@@ -6,7 +6,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { publishedOrStaff, roles } from '../access/roles'
+import { hiddenUnless, publishedOrStaff, roles } from '../access/roles'
 import { revalidateAfterChange } from '../lib/revalidate'
 import { slugField } from '../fields/slug'
 import { seoFields } from '../fields/seo'
@@ -19,6 +19,7 @@ export const Pages: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
     group: 'Content',
+    hidden: hiddenUnless('editor'),
     livePreview: { url: ({ data }) => `${process.env.NEXT_PUBLIC_SITE_URL}/${data?.slug}` },
   },
   access: {

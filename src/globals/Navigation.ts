@@ -3,7 +3,7 @@
  */
 
 import type { GlobalConfig } from 'payload'
-import { anyone, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles } from '../access/roles'
 import { revalidateGlobalAfterChange } from '../lib/revalidate'
 
 const linkFields = [
@@ -14,7 +14,7 @@ const linkFields = [
 export const Navigation: GlobalConfig = {
   slug: 'navigation',
   label: 'Menus',
-  admin: { group: 'Settings', description: 'The top menu and the footer links.' },
+  admin: { group: 'Settings', hidden: hiddenUnless('editor'), description: 'The top menu and the footer links.' },
   access: { read: anyone, update: roles('superAdmin', 'editor') },
   fields: [
     {

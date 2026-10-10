@@ -567,7 +567,7 @@ async function main() {
               stream: 'East',
               residence: 'boarding',
               status: 'active',
-              mustChangePassword: false,
+              portalSetUp: true,
               phone: '+256700000000',
               guardians: [
                 { name: 'Sample Guardian', relationship: 'Parent', phone: '+256700000000' },

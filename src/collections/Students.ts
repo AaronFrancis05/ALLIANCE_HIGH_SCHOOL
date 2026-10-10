@@ -4,21 +4,38 @@
  * A separate auth collection from staff, so the two sessions can never be confused.
  * Students sign in with their admission number, not an email address, because most do
  * not have a school email.
+ *
+ * The registrar creates each record from the details the school holds, with the admission
+ * number in the school's own format. Nobody types a student's password: the record gets one
+ * nobody knows, and the student sets their own through first-time sign-in, with a code
+ * emailed to the addresses on the record (see student-setup.ts).
  */
 
 import type { CollectionConfig } from 'payload'
-import { hasRole, isStudent, roles, type StaffUser, type StudentUser } from '../access/roles'
+import { hasRole, hiddenUnless, passwordNeverOnCreate, roles, type StaffUser } from '../access/roles'
 import { CLASS_LABELS, SCHOOL_CLASSES } from '../access/resources'
+import {
+  STUDENT_RECORD_KEEPERS,
+  fieldStudentRecordKeepers,
+  manageStudents,
+  readStudents,
+} from '../access/students'
 import { recordAudit } from '../lib/audit'
+import { unusablePassword } from '../lib/staff-invite'
+
+/** Hidden, system-only fields: nobody reads or writes them through the API. */
+const systemOnly = { read: () => false, create: () => false, update: () => false }
 
 export const Students: CollectionConfig = {
   slug: 'students',
   labels: { singular: 'Student', plural: 'Students' },
   admin: {
     useAsTitle: 'admissionNo',
-    defaultColumns: ['admissionNo', 'fullName', 'class', 'stream', 'status'],
+    defaultColumns: ['admissionNo', 'fullName', 'class', 'stream', 'status', 'portalSetUp'],
     group: 'People',
-    description: 'Student records and portal sign-in details.',
+    description:
+      'Student records. Each student sets their own portal password the first time they sign in, with a code emailed to the addresses below.',
+    hidden: hiddenUnless(...STUDENT_RECORD_KEEPERS),
   },
   auth: {
     // Sign-in is by admission number; Payload still needs a unique login field.
@@ -35,29 +52,56 @@ export const Students: CollectionConfig = {
     },
   },
   access: {
-    create: roles('superAdmin', 'registrar'),
+    create: manageStudents,
     delete: roles('superAdmin'),
-    update: ({ req, id }) => {
-      if (hasRole(req.user as StaffUser, 'registrar')) return true
-      // A student may only touch their own record (and only some fields, see below).
-      if (isStudent(req.user as StudentUser)) return String(req.user!.id) === String(id)
-      return false
-    },
-    read: ({ req }) => {
-      if (hasRole(req.user as StaffUser, 'registrar', 'bursar', 'admissions', 'teacher', 'hod')) return true
-      if (isStudent(req.user as StudentUser)) return { id: { equals: req.user!.id } }
-      return false
-    },
+    update: manageStudents,
+    read: readStudents,
     admin: ({ req }) => req.user?.collection === 'users',
   },
   fields: [
+    {
+      // Payload adds the password itself; declaring it here means nobody can type one.
+      // The student sets it through first-time sign-in, which writes it on the server.
+      name: 'password',
+      type: 'text',
+      virtual: true,
+      // Never rendered (Payload draws its own password boxes). Not `hidden: true`, which
+      // would drop it from the permissions that decide who sees "Change password".
+      admin: { disabled: true },
+      access: { create: passwordNeverOnCreate, update: passwordNeverOnCreate },
+    },
+    {
+      // Kept equal to the admission number by the hook below; never typed separately.
+      name: 'username',
+      type: 'text',
+      admin: { hidden: true },
+    },
+    {
+      // Hides the password boxes on a new account and fills the form's hidden fields.
+      name: 'accountFormHelper',
+      type: 'ui',
+      admin: { components: { Field: '/components/admin/AccountFormHelper#AccountFormHelper' } },
+    },
     {
       name: 'admissionNo',
       type: 'text',
       required: true,
       unique: true,
       index: true,
-      admin: { description: 'For example AHSN/25/030. This is also the portal username.' },
+      access: { update: fieldStudentRecordKeepers },
+      admin: {
+        description:
+          'Exactly as the school issues it, in its own format (for example AHSN/25/030). The student signs in with it.',
+      },
+    },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Student email',
+      admin: {
+        description:
+          'Optional. The first-time sign-in code goes here and to every guardian email below.',
+      },
     },
     { name: 'regNo', type: 'text', admin: { description: 'UNEB registration number, when issued.' } },
     { name: 'firstName', type: 'text', required: true },
@@ -117,16 +161,64 @@ export const Students: CollectionConfig = {
       access: { update: ({ req }) => hasRole(req.user as StaffUser, 'registrar') },
     },
     {
-      name: 'mustChangePassword',
+      name: 'portalSetUp',
       type: 'checkbox',
-      defaultValue: true,
+      label: 'Portal set up',
+      defaultValue: false,
+      access: { create: () => false, update: fieldStudentRecordKeepers },
       admin: {
         position: 'sidebar',
-        description: 'Forces a new password at the next sign-in (FR-10).',
+        description:
+          'Ticked once the student has chosen a password. Untick it if they have forgotten it: the old password stops working and they set a new one through first-time sign-in.',
       },
     },
+    // The current first-time sign-in code, as a keyed hash. System only.
+    { name: 'setupCodeHash', type: 'text', hidden: true, access: systemOnly },
+    { name: 'setupCodeExpiresAt', type: 'date', hidden: true, access: systemOnly },
+    { name: 'setupCodeAttempts', type: 'number', hidden: true, access: systemOnly },
+    { name: 'setupCodeSentAt', type: 'date', hidden: true, access: systemOnly },
   ],
   hooks: {
+    beforeValidate: [
+      ({ data, operation }) => {
+        if (!data) return data
+        const next = { ...data }
+        // The admission number is the sign-in name, whatever format the school uses.
+        if (typeof next.admissionNo === 'string') {
+          next.admissionNo = next.admissionNo.trim()
+          next.username = next.admissionNo
+        }
+        // Runs after field access has removed any typed password, so only a trusted
+        // server call (the seed, first-time sign-in) gets here with one.
+        if (operation === 'create' && !next.password) next.password = unusablePassword()
+        return next
+      },
+    ],
+    afterChange: [
+      async ({ req, doc, previousDoc, operation }) => {
+        if (operation !== 'update' || !previousDoc?.portalSetUp || doc.portalSetUp) return
+        // The registrar unticked "Portal set up": the old password and every signed-in
+        // device stop working, and the student starts again with first-time sign-in.
+        await req.payload.db.updateOne({
+          collection: 'students',
+          id: doc.id,
+          data: { sessions: [] },
+          req,
+        })
+        await req.payload.update({
+          collection: 'students',
+          id: doc.id,
+          data: { password: unusablePassword() },
+          overrideAccess: true,
+          req,
+        })
+        await recordAudit(req, {
+          action: 'student.portal-reset',
+          targetType: 'students',
+          targetId: String(doc.id),
+        })
+      },
+    ],
     afterLogin: [
       async ({ req, user }) => {
         await recordAudit(req, {

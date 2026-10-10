@@ -7,7 +7,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, staffOnly } from '../access/roles'
+import { anyone, hiddenUnless, roles, staffOnly } from '../access/roles'
 import { assertAllowedUpload } from '../lib/upload-safety'
 
 export const Media: CollectionConfig = {
@@ -17,13 +17,15 @@ export const Media: CollectionConfig = {
     useAsTitle: 'alt',
     defaultColumns: ['filename', 'alt', 'isPlaceholder', 'updatedAt'],
     group: 'Content',
+    hidden: hiddenUnless('editor', 'teacher', 'hod'),
     description: 'Photographs and graphics used across the website.',
   },
   access: {
     read: anyone,
     create: staffOnly,
     update: staffOnly,
-    delete: staffOnly,
+    // Removing a photo can break pages across the site, so only the content editor may.
+    delete: roles('editor'),
   },
   upload: {
     mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'],

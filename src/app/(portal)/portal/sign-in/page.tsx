@@ -5,7 +5,8 @@
 import React from 'react'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { HelpCircle } from 'lucide-react'
+import Link from 'next/link'
+import { HelpCircle, KeyRound } from 'lucide-react'
 import { Container, Card } from '../../../../components/ui'
 import { SignInForm } from '../../../../components/portal/SignInForm'
 import { currentStudent } from '../../../../lib/session'
@@ -23,27 +24,28 @@ export default async function SignInPage() {
     <Container className="max-w-md">
       <h1 className="text-center text-3xl">Sign in</h1>
       <p className="mt-2 text-center text-[var(--text-muted)]">
-        Use the admission number printed on your school identity card.
+        Use the number on your school ID card.
       </p>
 
       <Card className="mt-8 p-6 sm:p-8">
         <SignInForm />
+
+        <div className="mt-6 border-t border-cream-200 pt-5 text-center">
+          <p className="text-sm text-[var(--text-muted)]">Signing in for the first time?</p>
+          <Link
+            href="/portal/first-time"
+            className="mt-2 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border-2 border-maroon-700 px-6 text-sm font-semibold text-maroon-700 transition-colors hover:bg-maroon-50"
+          >
+            <KeyRound className="h-4 w-4" aria-hidden />
+            First-time sign-in
+          </Link>
+        </div>
       </Card>
 
-      <Card className="mt-6 p-5">
-        <h2 className="flex items-center gap-2 font-display text-base">
-          <HelpCircle className="h-5 w-5 text-maroon-700" aria-hidden />
-          Trouble signing in?
-        </h2>
-        <ul className="mt-2 space-y-1.5 text-sm text-[var(--text-body)]">
-          <li>Type the admission number exactly as it appears, including the slashes.</li>
-          <li>After five wrong attempts the account locks for fifteen minutes.</li>
-          <li>
-            If you have forgotten your password, ask at the school office. Staff can reset it for
-            you — nobody can tell you what your old one was.
-          </li>
-        </ul>
-      </Card>
+      <p className="mt-5 flex items-center justify-center gap-2 text-sm text-[var(--text-muted)]">
+        <HelpCircle className="h-4 w-4 shrink-0 text-maroon-700" aria-hidden />
+        Forgot your password? Ask at the school office.
+      </p>
     </Container>
   )
 }

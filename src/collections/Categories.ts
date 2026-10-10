@@ -1,13 +1,13 @@
 /** News categories, for example Academics, Sports, Announcements. */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles } from '../access/roles'
 import { slugField } from '../fields/slug'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
   labels: { singular: 'Category', plural: 'Categories' },
-  admin: { useAsTitle: 'name', defaultColumns: ['name', 'slug'], group: 'Content' },
+  admin: { useAsTitle: 'name', defaultColumns: ['name', 'slug'], group: 'Content', hidden: hiddenUnless('editor') },
   access: {
     read: anyone,
     create: roles('superAdmin', 'editor'),

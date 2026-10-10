@@ -547,11 +547,14 @@ export interface Category {
   createdAt: string;
 }
 /**
+ * Add a staff member with their email address and role. They are emailed an invitation to choose their own password.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
+  password?: string | null;
   /**
    * Full name as it should appear in the staff directory.
    */
@@ -568,6 +571,8 @@ export interface User {
    * Unchecked accounts keep their history but cannot sign in.
    */
   active?: boolean | null;
+  invitedAt?: string | null;
+  firstSignedInAt?: string | null;
   twoFactor?: {
     /**
      * Set up from the staff profile page.
@@ -592,7 +597,6 @@ export interface User {
         expiresAt: string;
       }[]
     | null;
-  password?: string | null;
   collection: 'users';
 }
 /**
@@ -991,15 +995,16 @@ export interface FeeClearance {
   createdAt: string;
 }
 /**
- * Student records and portal sign-in details.
+ * Student records. Each student sets their own portal password the first time they sign in, with a code emailed to the addresses below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "students".
  */
 export interface Student {
   id: number;
+  password?: string | null;
   /**
-   * For example AHSN/25/030. This is also the portal username.
+   * Exactly as the school issues it, in its own format (for example AHSN/25/030). The student signs in with it.
    */
   admissionNo: string;
   /**
@@ -1031,11 +1036,18 @@ export interface Student {
   phone?: string | null;
   status: 'active' | 'suspended' | 'alumni';
   /**
-   * Forces a new password at the next sign-in (FR-10).
+   * Ticked once the student has chosen a password. Untick it if they have forgotten it: the old password stops working and they set a new one through first-time sign-in.
    */
-  mustChangePassword?: boolean | null;
+  portalSetUp?: boolean | null;
+  setupCodeHash?: string | null;
+  setupCodeExpiresAt?: string | null;
+  setupCodeAttempts?: number | null;
+  setupCodeSentAt?: string | null;
   updatedAt: string;
   createdAt: string;
+  /**
+   * Optional. The first-time sign-in code goes here and to every guardian email below.
+   */
   email?: string | null;
   username: string;
   resetPasswordToken?: string | null;
@@ -1052,7 +1064,6 @@ export interface Student {
         expiresAt: string;
       }[]
     | null;
-  password?: string | null;
   collection: 'students';
 }
 /**
@@ -2109,10 +2120,13 @@ export interface ApplicationDocumentsSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  password?: T;
   name?: T;
   role?: T;
   department?: T;
   active?: T;
+  invitedAt?: T;
+  firstSignedInAt?: T;
   twoFactor?:
     | T
     | {
@@ -2142,6 +2156,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "students_select".
  */
 export interface StudentsSelect<T extends boolean = true> {
+  password?: T;
   admissionNo?: T;
   regNo?: T;
   firstName?: T;
@@ -2162,7 +2177,11 @@ export interface StudentsSelect<T extends boolean = true> {
       };
   phone?: T;
   status?: T;
-  mustChangePassword?: T;
+  portalSetUp?: T;
+  setupCodeHash?: T;
+  setupCodeExpiresAt?: T;
+  setupCodeAttempts?: T;
+  setupCodeSentAt?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

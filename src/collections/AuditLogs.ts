@@ -6,7 +6,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { denyAll, roles } from '../access/roles'
+import { denyAll, hiddenUnless, roles } from '../access/roles'
 
 export const AuditLogs: CollectionConfig = {
   slug: 'auditLogs',
@@ -15,6 +15,7 @@ export const AuditLogs: CollectionConfig = {
     useAsTitle: 'action',
     defaultColumns: ['createdAt', 'action', 'actorLabel', 'targetType', 'ip'],
     group: 'Administration',
+    hidden: hiddenUnless('superAdmin'),
     description: 'Logins, permission changes, fee clearance changes and report card access.',
   },
   access: {

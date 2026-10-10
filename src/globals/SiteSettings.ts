@@ -7,7 +7,7 @@
  */
 
 import type { GlobalConfig } from 'payload'
-import { anyone, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles } from '../access/roles'
 import { revalidateGlobalAfterChange } from '../lib/revalidate'
 
 export const SiteSettings: GlobalConfig = {
@@ -15,6 +15,7 @@ export const SiteSettings: GlobalConfig = {
   label: 'School details',
   admin: {
     group: 'Settings',
+    hidden: hiddenUnless('editor'),
     description: 'Name, contacts, identity statements and the numbers shown on the home page.',
   },
   access: {

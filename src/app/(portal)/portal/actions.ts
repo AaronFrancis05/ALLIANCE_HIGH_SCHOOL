@@ -19,14 +19,18 @@
 
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createLocalReq, logoutOperation, type Payload } from 'payload'
+import { createLocalReq, logoutOperation } from 'payload'
 import { z } from 'zod'
 import { getPayloadClient } from '../../../lib/payload'
 import { recordAudit } from '../../../lib/audit'
 import { checkRateLimit, clientIdentifier } from '../../../lib/rate-limit'
 import { logger } from '../../../lib/logger'
-import { withSharedKeyLock, type LockPool } from '../../../lib/key-lock'
 import { currentStudent } from '../../../lib/session'
+import {
+  sessionCookieName,
+  setStudentSessionCookie,
+  withStudentSessionLock,
+} from '../../../lib/student-session'
 
 const signInSchema = z.object({
   admissionNo: z
@@ -42,17 +46,11 @@ export interface SignInState {
 }
 
 /**
- * Runs work that rewrites a student's session list, one at a time per account. Keyed on the
- * lower-cased admission number, which is also the portal username.
+ * Deliberately identical for a wrong number, a wrong password and an account that has not
+ * been set up yet, so nobody can learn which admission numbers exist.
  */
-function withStudentSessionLock<T>(payload: Payload, admissionNo: string, work: () => Promise<T>) {
-  // The Postgres adapter keeps its node-postgres pool here; the type does not expose it.
-  const { pool } = payload.db as unknown as { pool: LockPool }
-  return withSharedKeyLock(pool, `student-sessions:${admissionNo.toLowerCase()}`, work)
-}
-
-/** Deliberately identical for a wrong number and a wrong password. */
-const CREDENTIALS_REJECTED = 'That admission number and password do not match. Please try again.'
+const CREDENTIALS_REJECTED =
+  'That admission number and password do not match. If this is your first time, use first-time sign-in below.'
 
 export async function signInAction(_previous: SignInState, formData: FormData): Promise<SignInState> {
   const parsed = signInSchema.safeParse({
@@ -107,16 +105,7 @@ export async function signInAction(_previous: SignInState, formData: FormData): 
       }
     }
 
-    const store = await cookies()
-    store.set({
-      name: `${payload.config.cookiePrefix ?? 'payload'}-token`,
-      value: result.token,
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      maxAge: result.exp ? result.exp - Math.floor(Date.now() / 1000) : 60 * 60 * 2,
-    })
+    await setStudentSessionCookie(payload, result.token, result.exp)
 
     await recordAudit(
       { ...auditReq, user: result.user } as unknown as Parameters<typeof recordAudit>[0],
@@ -159,6 +148,6 @@ export async function signOutAction(): Promise<void> {
   }
 
   const store = await cookies()
-  store.delete(`${payload.config.cookiePrefix ?? 'payload'}-token`)
+  store.delete(sessionCookieName(payload))
   redirect('/portal/sign-in')
 }

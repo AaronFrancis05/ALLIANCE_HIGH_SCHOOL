@@ -4,7 +4,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles } from '../access/roles'
 
 export const Departments: CollectionConfig = {
   slug: 'departments',
@@ -13,6 +13,7 @@ export const Departments: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'code', 'head'],
     group: 'Academics',
+    hidden: hiddenUnless('editor', 'registrar'),
   },
   access: {
     read: anyone,

@@ -373,7 +373,7 @@ export async function POST(req: NextRequest) {
     for (const spec of studentSpecs) {
       const created = await payload.create({
         collection: 'students',
-        data: { admissionNo: spec.admissionNo, username: spec.admissionNo, password: DEV_PASSWORD, firstName: spec.firstName, lastName: spec.lastName, class: spec.class, stream: 'East', residence: 'boarding', status: 'active', mustChangePassword: false, phone: '+256700000000', guardians: [{ name: 'Sample Guardian', relationship: 'Parent', phone: '+256700000000' }] },
+        data: { admissionNo: spec.admissionNo, username: spec.admissionNo, password: DEV_PASSWORD, firstName: spec.firstName, lastName: spec.lastName, class: spec.class, stream: 'East', residence: 'boarding', status: 'active', portalSetUp: true, phone: '+256700000000', guardians: [{ name: 'Sample Guardian', relationship: 'Parent', phone: '+256700000000' }] },
         overrideAccess: true,
       })
       studentIds[spec.admissionNo] = toId(created.id)

@@ -4,7 +4,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles } from '../access/roles'
 import { revalidateAfterChange } from '../lib/revalidate'
 
 export const StaffProfiles: CollectionConfig = {
@@ -14,6 +14,7 @@ export const StaffProfiles: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'title', 'group', 'order'],
     group: 'Content',
+    hidden: hiddenUnless('editor'),
     description: 'Shown on the Leadership and Our staff pages. Lower order numbers appear first; the first person in each leadership group is featured.',
   },
   access: {

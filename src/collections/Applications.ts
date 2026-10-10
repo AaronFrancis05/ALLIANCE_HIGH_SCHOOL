@@ -11,7 +11,7 @@
  */
 
 import { APIError, type CollectionConfig } from 'payload'
-import { denyAll, hasRole, roles, type StaffUser } from '../access/roles'
+import { denyAll, hasRole, hiddenUnless, roles, type StaffUser } from '../access/roles'
 import { canChangeApplicationStatus, readAdmissions } from '../access/admissions'
 import { APPLICATION_STATUSES } from '../lib/application-status'
 import { recordAudit } from '../lib/audit'
@@ -36,6 +36,7 @@ export const Applications: CollectionConfig = {
     useAsTitle: 'trackingCode',
     defaultColumns: ['trackingCode', 'applicantName', 'applicantType', 'classSought', 'status', 'createdAt'],
     group: 'Admissions',
+    hidden: hiddenUnless('admissions'),
     description: 'Applications submitted through the website.',
   },
   access: {

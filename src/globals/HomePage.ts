@@ -4,13 +4,13 @@
  */
 
 import type { GlobalConfig } from 'payload'
-import { anyone, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles } from '../access/roles'
 import { revalidateGlobalAfterChange } from '../lib/revalidate'
 
 export const HomePage: GlobalConfig = {
   slug: 'homePage',
   label: 'Home page',
-  admin: { group: 'Settings', description: 'Hero slides, welcome message and the feature cards.' },
+  admin: { group: 'Settings', hidden: hiddenUnless('editor'), description: 'Hero slides, welcome message and the feature cards.' },
   access: { read: anyone, update: roles('superAdmin', 'editor') },
   fields: [
     {

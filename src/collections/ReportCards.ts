@@ -8,7 +8,7 @@
 
 import type { CollectionConfig } from 'payload'
 import { readReportCards, writeReportCards } from '../access/report-cards'
-import { hasRole, type StaffUser } from '../access/roles'
+import { hasRole, hiddenUnless, type StaffUser } from '../access/roles'
 import { assertAllowedUpload } from '../lib/upload-safety'
 import { recordAudit } from '../lib/audit'
 import { hideStorageKey } from '../access/private-files'
@@ -20,6 +20,7 @@ export const ReportCards: CollectionConfig = {
     useAsTitle: 'label',
     defaultColumns: ['label', 'student', 'term', 'published', 'updatedAt'],
     group: 'Results',
+    hidden: hiddenUnless('registrar'),
     description: 'Uploaded by the registrar. Students see theirs once the term is released and fees are cleared.',
   },
   access: {

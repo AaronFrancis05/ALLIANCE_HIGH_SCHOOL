@@ -95,3 +95,33 @@ export function fieldRoles(...allowed: StaffRole[]): FieldAccess {
 }
 
 export const fieldSuperAdminOnly: FieldAccess = ({ req }) => hasRole(req.user as AnyUser, 'superAdmin')
+
+/**
+ * Passwords are never typed in for someone else. New staff set theirs from an invitation
+ * and students from first-time sign-in, so nobody else ever knows them. A staff member may
+ * change their own from the account page.
+ */
+export const passwordNeverOnCreate: FieldAccess = () => false
+
+export const ownPasswordOnly: FieldAccess = ({ req, id }) =>
+  isStaff(req.user as AnyUser) && id !== undefined && String(req.user!.id) === String(id)
+
+// ---------------------------------------------------------------- admin navigation
+
+/**
+ * Hides a collection or global from the admin menu and dashboard unless the signed-in staff
+ * member holds one of these roles, so each role sees only the work it can do.
+ *
+ * This is only what the menu shows. The access functions above still decide every read
+ * and write, so hiding a section never grants or removes a permission.
+ */
+export function hiddenUnless(...allowed: StaffRole[]) {
+  return ({ user }: { user: unknown }): boolean => !hasRole(user as AnyUser, ...allowed)
+}
+
+// ---------------------------------------------------------------- staff invitations
+
+/** Only the super admin adds staff, and so only the super admin sends invitations. */
+export function canInviteStaff(user: unknown): boolean {
+  return hasRole(user as AnyUser, 'superAdmin')
+}

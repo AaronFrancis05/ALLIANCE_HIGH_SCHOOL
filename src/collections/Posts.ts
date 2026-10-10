@@ -3,7 +3,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { publishedOrStaff, roles } from '../access/roles'
+import { hiddenUnless, publishedOrStaff, roles } from '../access/roles'
 import { revalidateAfterChange } from '../lib/revalidate'
 import { slugField } from '../fields/slug'
 import { seoFields } from '../fields/seo'
@@ -15,6 +15,7 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'publishedAt', '_status'],
     group: 'Content',
+    hidden: hiddenUnless('editor', 'teacher', 'hod'),
     livePreview: {
       url: ({ data }) => `${process.env.NEXT_PUBLIC_SITE_URL}/news/${data?.slug}`,
     },
