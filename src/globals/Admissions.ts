@@ -4,13 +4,13 @@
  */
 
 import type { GlobalConfig } from 'payload'
-import { anyone, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles } from '../access/roles'
 import { revalidateGlobalAfterChange } from '../lib/revalidate'
 
 export const AdmissionsSettings: GlobalConfig = {
   slug: 'admissionsSettings',
   label: 'Admissions settings',
-  admin: { group: 'Settings', description: 'Requirements, fees and the online application switch.' },
+  admin: { group: 'Settings', hidden: hiddenUnless('editor', 'admissions', 'bursar'), description: 'Requirements, fees and the online application switch.' },
   access: { read: anyone, update: roles('superAdmin', 'editor', 'admissions', 'bursar') },
   fields: [
     {

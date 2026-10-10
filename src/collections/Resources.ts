@@ -8,7 +8,7 @@
 
 import { APIError, ValidationError, type CollectionConfig } from 'payload'
 import { CLASS_LABELS, SCHOOL_CLASSES, canFileInDepartment, readResources, writeResources } from '../access/resources'
-import { departmentId, hasRole, type StaffUser } from '../access/roles'
+import { departmentId, hasRole, hiddenUnless, type StaffUser } from '../access/roles'
 import { assertAllowedUpload } from '../lib/upload-safety'
 import { titleFromFilename } from '../lib/resource-title'
 import { hideStorageKey } from '../access/private-files'
@@ -21,6 +21,7 @@ export const Resources: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'type', 'subject', 'classes', 'visibility', 'downloads'],
     group: 'e-Library',
+    hidden: hiddenUnless('editor', 'registrar', 'hod'),
     description: 'Notes, past papers, textbooks and schemes of work for students.',
   },
   access: {

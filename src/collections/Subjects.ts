@@ -3,7 +3,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles } from '../access/roles'
 import { CLASS_LABELS, SCHOOL_CLASSES } from '../access/resources'
 
 export const Subjects: CollectionConfig = {
@@ -13,6 +13,7 @@ export const Subjects: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'code', 'department', 'level'],
     group: 'Academics',
+    hidden: hiddenUnless('editor', 'registrar', 'hod'),
   },
   access: {
     read: anyone,

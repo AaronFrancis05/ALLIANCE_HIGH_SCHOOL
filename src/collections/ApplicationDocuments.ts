@@ -7,7 +7,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { denyAll, roles } from '../access/roles'
+import { denyAll, hiddenUnless, roles } from '../access/roles'
 import { readAdmissions } from '../access/admissions'
 import { assertAllowedUpload } from '../lib/upload-safety'
 import { hideStorageKey } from '../access/private-files'
@@ -18,7 +18,7 @@ export const ApplicationDocuments: CollectionConfig = {
   admin: {
     useAsTitle: 'filename',
     group: 'Admissions',
-    hidden: ({ user }) => !['superAdmin', 'admissions'].includes((user as { role?: string })?.role ?? ''),
+    hidden: hiddenUnless('admissions'),
   },
   access: {
     // Created by the application route on the applicant's behalf.

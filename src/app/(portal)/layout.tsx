@@ -24,6 +24,11 @@ const dmSans = DM_Sans({ subsets: ['latin'], display: 'swap', variable: '--font-
 export const metadata: Metadata = {
   title: { default: 'Student portal', template: '%s — Student portal' },
   robots: { index: false, follow: false, nocache: true },
+  // Without these the browser asks for /favicon.ico, which does not exist.
+  icons: {
+    icon: [{ url: '/favicon-32.png', sizes: '32x32', type: 'image/png' }],
+    apple: [{ url: '/apple-touch-icon.png' }],
+  },
 }
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {

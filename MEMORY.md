@@ -12,7 +12,8 @@ entry short: what changed, what was verified, what is left.
 ## Current status (as of 2026-10-10)
 
 **Where we are:** P0–P4 done; P2 now done (P2-T11 leadership/staff, P2-T12 careers); P3 done; P5 done (P5-T1 to P5-T5). P6 hardening and P7 launch remain.
-**Next up:** P6 site-wide search and performance budget, or P4-T bulk report-card import (FR-12), plus the `import:students` loose end. Contact details in docs/CONTENT_TODO.md deliberately left until launch (school owner's call, 2026-09-23).
+**Latest:** P4-T5 staff invitations, role-scoped admin, branded admin and first-time student sign-in (branch `feat/P4-T5-invites-roles-first-signin`, not committed).
+**Next up:** student bulk import (CSV, dry run; fills the `import:students` loose end), P6 site-wide search and performance budget, or P4-T bulk report-card import (FR-12). Contact details in docs/CONTENT_TODO.md deliberately left until launch (school owner's call, 2026-09-23).
 
 ### Health checks
 | Check | Result | When |
@@ -67,6 +68,8 @@ entry short: what changed, what was verified, what is left.
 ---
 
 ## Decisions (and why)
+- **Nobody types a password for someone else** (school owner's call, 2026-10-10). Only the super admin adds staff; each gets an emailed invitation (Payload reset token, 72 h) to choose their own. Students are created by the registrar without one and set it through first-time sign-in, with a 6-digit code emailed to the student's and guardians' addresses on the record. Admission numbers are typed in the school's own format; there is no generated pattern.
+- **The admin menu shows each role only its sections** (`hiddenUnless` in `src/access/roles.ts`). Hidden sections also 404 by URL, but access functions still decide every read and write.
 - **Family notifications: email now, SMS built but off** (the school owner's call, 2026-09-23). `NOTIFY_SMS_ENABLED=false` until the school has an Africa's Talking account; each SMS costs money. Messages carry the reference and stage only, never the child's name.
 - **Applications are kept 12 months after their last status change**, whatever the outcome, then deleted with their documents (the school owner's call, 2026-09-23).
 - **Payload inside Next.js**, not a separate CMS, so there is one app, one database and one place to secure.
@@ -79,6 +82,22 @@ entry short: what changed, what was verified, what is left.
 ---
 
 ## Log
+
+### 2026-10-10 (P4-T5: invitations, role-scoped admin, first-time sign-in)
+- **Staff invitations** (FR-05): `src/lib/staff-invite.ts`. A new staff account gets an unusable random password and an invitation email linking to `/admin/reset/<token>`; `invitedAt` and `firstSignedInAt` track it, and the sidebar panel `InvitationStatus` offers "Send invitation again" (`POST /api/users/:id/invite`, super admin only via `canInviteStaff`). A virtual `password` field with access rules means a password typed for someone else is dropped, and the super admin cannot change another person's password; staff change only their own.
+- **Gotcha**: Payload's auth panel always demands a password on a new document (`requirePassword: !id`), whatever the field access says. `AccountFormHelper` hides the boxes on create (CSS in custom.scss), fills them with a throwaway value the server discards, and keeps a student's hidden username equal to the admission number.
+- **Role-scoped admin**: every collection and global has `admin.hidden: hiddenUnless(...)` mirroring its write roles. Media delete is now editor-only (was any staff).
+- **Students** (FR-10): rules moved to `src/access/students.ts`. Fixed: a student could PATCH their own record (admission number, class, names) through the API; updates are now registrar-only. `mustChangePassword` (never enforced) replaced by `portalSetUp`; unticking it resets the password and signs out every device.
+- **First-time sign-in**: `/portal/first-time` (`src/lib/student-setup.ts`, actions in `portal/first-time/actions.ts`). Same answer whether or not the number exists; codes HMAC-hashed, 15 min, 5 tries, one per minute, one email per address. Sign-in page has a "First-time sign-in" button.
+- **Admin design**: `custom.scss` (brand tokens repeated, since the admin does not load brand.css), welcome panel with role shortcuts (`Welcome.tsx`), sign-in note, unfinished 2FA box hidden.
+- **Migration** `20261010_095523_invites_first_signin`: new columns; `portal_set_up` backfilled from `NOT must_change_password`.
+- Also: portal layout declares its favicon (it 404'd on /favicon.ico).
+
+### 2026-10-10 (grid backgrounds)
+- Two CSS-only patterns in `brand.css`, faded at the edges: `.pattern-grid` (fine maroon-tinted lines, light sections) and `.pattern-plus` (cream crosshairs on faint lines, dark sections). `Section` takes `pattern` and picks the variant from its tone.
+- Applied to: home "Why choose us", the stats strip, the closing call to action, and inner-page headers that have no photo.
+- Gotcha: `cn` runs tailwind-merge, which treats any `bg-*` class as a background colour and drops the real one. That is why the classes are `pattern-*`, not `bg-grid`.
+- Verified: typecheck, lint; screenshots at 360 px and 1366 px, no sideways scroll, console clean. Not committed.
 
 ### 2026-10-10 (branded 404 for unknown URLs, map on the contact page, production DB pool)
 - **404**: unknown URLs showed Next's bare page because the app has three root layouts. Added `src/app/global-not-found.tsx` (flag `experimental.globalNotFound`), with the crest header, no CMS read. Both 404s share `src/components/layout/NotFoundContent.tsx`; e-Library added to its suggestions.

@@ -1,0 +1,246 @@
+/*
+ * The school's look for the admin panel.
+ *
+ * The admin is its own root layout and does not load brand.css (which brings Tailwind with
+ * it), so the few brand colours it needs are repeated here as tokens. Keep them in step
+ * with src/app/(site)/brand.css. Payload's own styles sit in the `payload-default` layer,
+ * so these unlayered rules win without !important.
+ */
+
+:root {
+  --ahsn-maroon: #8b1a1a; /* maroon-700 */
+  --ahsn-maroon-strong: #5c1013; /* maroon-900 */
+  --ahsn-maroon-hover: #741417; /* maroon-800 */
+  --ahsn-maroon-soft: #fdf3f3; /* maroon-50 */
+  --ahsn-gold: #f2b705; /* gold-500 */
+  --ahsn-cream: #fdfbf7; /* cream-50 */
+  --ahsn-cream-line: #ead9ba; /* cream-300 */
+  --ahsn-on-maroon: #fdfbf7;
+  --ahsn-card: #ffffff;
+  --ahsn-accent-text: var(--ahsn-maroon);
+}
+
+html[data-theme='dark'] {
+  --ahsn-maroon-soft: color-mix(in srgb, #b02024 18%, transparent);
+  --ahsn-cream: var(--theme-elevation-50);
+  --ahsn-cream-line: var(--theme-elevation-150);
+  --ahsn-card: var(--theme-elevation-50);
+  --ahsn-accent-text: #eea5a5; /* maroon-300: readable on dark */
+}
+
+/* ---------------------------------------------------------------- buttons and focus */
+
+.btn--style-primary:not(.btn--disabled) {
+  --bg-color: var(--ahsn-maroon);
+  --hover-bg: var(--ahsn-maroon-hover);
+  --color: var(--ahsn-on-maroon);
+  --hover-color: var(--ahsn-on-maroon);
+}
+
+:focus-visible {
+  outline-color: var(--ahsn-maroon);
+}
+
+/* ---------------------------------------------------------------- sidebar */
+
+.nav__link-indicator,
+.nav-group__indicator {
+  background: var(--ahsn-gold);
+  width: 3px;
+}
+
+.nav__link:has(.nav__link-indicator) {
+  color: var(--ahsn-accent-text);
+}
+
+.nav-group__toggle {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- dashboard */
+
+.collections__label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--ahsn-cream-line);
+}
+
+.collections__card-list .card {
+  background: var(--ahsn-card);
+  border: 1px solid var(--ahsn-cream-line);
+  border-left: 4px solid var(--ahsn-maroon);
+  min-height: 0;
+  padding-block: 18px;
+}
+
+.collections__card-list .card--has-onclick:hover {
+  background: var(--ahsn-maroon-soft);
+  border-color: var(--ahsn-maroon);
+  box-shadow: 0 6px 16px -8px rgb(92 16 19 / 0.25);
+}
+
+.collections__card-list .card__title {
+  font-size: 1rem;
+}
+
+/* The welcome panel at the top of the dashboard (components/admin/Welcome.tsx). */
+.ahsn-welcome {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 36px;
+  padding: 24px;
+  border-radius: var(--style-radius-l);
+  color: var(--ahsn-on-maroon);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(242 183 5 / 0.18), transparent 45%),
+    linear-gradient(135deg, var(--ahsn-maroon) 0%, var(--ahsn-maroon-strong) 100%);
+
+  @media (min-width: 1024px) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 32px 36px;
+  }
+}
+
+.ahsn-welcome__role {
+  margin: 0;
+  color: var(--ahsn-gold);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ahsn-welcome__title {
+  margin: 6px 0 0;
+  color: inherit;
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.15;
+}
+
+.ahsn-welcome__summary {
+  margin: 8px 0 0;
+  max-width: 52ch;
+  opacity: 0.9;
+}
+
+.ahsn-welcome__shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  @media (min-width: 1024px) {
+    max-width: 440px;
+    justify-content: flex-end;
+  }
+}
+
+.ahsn-welcome__shortcut {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgb(253 251 247 / 0.35);
+  background: rgb(253 251 247 / 0.1);
+  color: var(--ahsn-on-maroon);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--ahsn-cream);
+    color: var(--ahsn-maroon-strong);
+  }
+
+  &:first-child {
+    background: var(--ahsn-gold);
+    border-color: var(--ahsn-gold);
+    color: #2a0a0b; /* maroon-950 on gold: 9:1 */
+  }
+}
+
+/* ---------------------------------------------------------------- sign-in screens */
+
+.template-minimal {
+  background:
+    radial-gradient(circle at 0% 0%, var(--ahsn-maroon-soft), transparent 50%),
+    var(--ahsn-cream);
+}
+
+.template-minimal__wrap {
+  padding: 32px 28px;
+  border-radius: var(--style-radius-l);
+  border: 1px solid var(--ahsn-cream-line);
+  border-top: 4px solid var(--ahsn-maroon);
+  background: var(--ahsn-card);
+  box-shadow: 0 18px 40px -24px rgb(92 16 19 / 0.35);
+}
+
+.ahsn-login-note {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ahsn-cream-line);
+  color: var(--theme-elevation-600);
+  font-size: 13px;
+
+  p {
+    margin: 0 0 6px;
+  }
+
+  a {
+    color: var(--ahsn-accent-text);
+    font-weight: 600;
+  }
+}
+
+/* ---------------------------------------------------------------- staff invitation panel */
+
+.ahsn-invite {
+  padding: 14px 16px;
+  border-radius: var(--style-radius-m);
+  border: 1px solid var(--ahsn-cream-line);
+  background: var(--ahsn-cream);
+}
+
+.ahsn-invite--pending {
+  border-left: 4px solid var(--ahsn-gold);
+}
+
+.ahsn-invite--done {
+  border-left: 4px solid var(--theme-success-500);
+}
+
+.ahsn-invite__title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.ahsn-invite__text {
+  margin: 4px 0 10px;
+  color: var(--theme-elevation-650);
+  font-size: 13px;
+}
+
+/* ---------------------------------------------------------------- account forms */
+
+/* No password is typed for a new staff member or student (components/admin/AccountFormHelper.tsx). */
+.ahsn-account-form .collection-edit:not(.collection-edit--is-editing) .auth-fields__changing-password {
+  display: none;
+}
+
+/* A student's username is their admission number, kept in step automatically. */
+.ahsn-account-form .collection-edit--students .auth-fields .field-type:has(#field-username) {
+  display: none;
+}
+
+.ahsn-account-form .collection-edit--students:not(.collection-edit--is-editing) .auth-fields {
+  display: none;
+}

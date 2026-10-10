@@ -65,6 +65,8 @@ export default buildConfig({
         Logo: '/components/admin/Logo#Logo',
         Icon: '/components/admin/Logo#Icon',
       },
+      beforeDashboard: ['/components/admin/Welcome#Welcome'],
+      afterLogin: ['/components/admin/LoginNote#LoginNote'],
     },
   },
 

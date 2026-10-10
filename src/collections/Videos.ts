@@ -5,7 +5,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { publishedOrStaff, roles } from '../access/roles'
+import { hiddenUnless, publishedOrStaff, roles } from '../access/roles'
 import { slugField } from '../fields/slug'
 
 /** Accepts the usual YouTube address shapes and returns the 11-character id. */
@@ -31,6 +31,7 @@ export const Videos: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'publishedAt', '_status'],
     group: 'Content',
+    hidden: hiddenUnless('editor'),
   },
   access: {
     read: publishedOrStaff,

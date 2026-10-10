@@ -9,6 +9,7 @@ import React from 'react'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { Container } from '../ui'
+import { cn } from '../../lib/cn'
 import { MediaImage, PlaceholderNote, isMedia } from '../ui/MediaImage'
 import type { Media } from '../../payload-types'
 
@@ -29,7 +30,7 @@ export function PageHeader({ title, lead, image, trail = [] }: PageHeaderProps) 
   const hasImage = isMedia(image)
 
   return (
-    <section className="relative isolate bg-maroon-800">
+    <section className={cn('relative isolate bg-maroon-800', !hasImage && 'pattern-plus')}>
       {hasImage ? (
         <>
           <div className="absolute inset-0 -z-10">

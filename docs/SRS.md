@@ -52,7 +52,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 | FR-02 | Images and files are uploaded through the CMS; every image has alt text and a blur placeholder, and publishing rebuilds the affected pages within seconds. | Built |
 | FR-03 | Videos are embedded from YouTube behind a click-to-load facade, so no visitor pays for video they did not ask for. | Built |
 | FR-04 | News posts carry a category, a publish date and an author, and can be scheduled. | Built |
-| FR-05 | Staff accounts have roles, and every access rule starts from "no" and grants deliberately. | Built |
+| FR-05 | Staff accounts have roles, and every access rule starts from "no" and grants deliberately. Only the super admin adds staff, never with a password: each new person is emailed an invitation (valid three days, can be resent) to choose their own. The admin menu and dashboard show each role only the sections it can work in. | Built |
 
 ### e-Library / resources
 
@@ -67,7 +67,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-10 | Students sign in with their admission number; students are a separate collection from staff, so a student session can never satisfy a staff check. | Built |
+| FR-10 | Students sign in with their admission number (in whatever format the school issues); students are a separate collection from staff, so a student session can never satisfy a staff check. The registrar creates student records without passwords; on first-time sign-in a 6-digit code (15 minutes, five tries) is emailed to the student's and guardians' addresses on file, and the student chooses a password. Students cannot edit their own record. | Built |
 | FR-11 | Staff accounts lock for 15 minutes after five failed attempts. | Built |
 | FR-12 | The registrar imports report cards in bulk from a spreadsheet, with a dry-run summary before anything is written. | Planned |
 

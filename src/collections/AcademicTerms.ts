@@ -6,7 +6,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, hasRole, roles, type StaffUser } from '../access/roles'
+import { anyone, hasRole, hiddenUnless, roles, type StaffUser } from '../access/roles'
 import { recordAudit } from '../lib/audit'
 
 export const AcademicTerms: CollectionConfig = {
@@ -16,6 +16,7 @@ export const AcademicTerms: CollectionConfig = {
     useAsTitle: 'label',
     defaultColumns: ['label', 'year', 'term', 'resultsReleased', 'current'],
     group: 'Academics',
+    hidden: hiddenUnless('registrar'),
     description: 'School terms, reporting dates and the results release switch.',
   },
   access: {

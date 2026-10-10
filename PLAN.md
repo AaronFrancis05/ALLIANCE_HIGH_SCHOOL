@@ -79,7 +79,11 @@ them before you open a branch.
       5-minute signed URL (FR-08)
 
 ### P4: portal remainder
+- [x] **P4-T5** Staff invitations (super admin only, no typed passwords), role-scoped admin menu and
+      dashboard, branded admin, first-time student sign-in with an emailed code (FR-05, FR-10)
 - [ ] **P4-T?** *(proposed)* Report-card bulk import from a spreadsheet, with a dry-run summary (FR-12)
+- [ ] **P4-T?** *(proposed)* Student bulk import (CSV with admission numbers and emails), dry run first;
+      fills the missing `scripts/import-students.ts`
 
 ### P5: admissions
 - [x] **P5-T1** Submit the application end to end, with the same schema in the browser and on the server (FR-16)

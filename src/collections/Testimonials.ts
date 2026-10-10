@@ -3,12 +3,12 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles } from '../access/roles'
 
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
   labels: { singular: 'Testimonial', plural: 'Testimonials' },
-  admin: { useAsTitle: 'name', defaultColumns: ['name', 'role', 'featured'], group: 'Content' },
+  admin: { useAsTitle: 'name', defaultColumns: ['name', 'role', 'featured'], group: 'Content', hidden: hiddenUnless('editor') },
   access: {
     read: anyone,
     create: roles('superAdmin', 'editor'),

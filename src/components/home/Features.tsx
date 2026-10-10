@@ -29,7 +29,7 @@ export function Features({ features }: { features: Feature[] }) {
   if (!features.length) return null
 
   return (
-    <Section tone="sunken">
+    <Section tone="sunken" pattern>
       <Container>
         <SectionHeading
           eyebrow="Why choose us"

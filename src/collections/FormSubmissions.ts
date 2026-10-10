@@ -6,7 +6,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { denyAll, roles } from '../access/roles'
+import { denyAll, hiddenUnless, roles } from '../access/roles'
 
 export const FormSubmissions: CollectionConfig = {
   slug: 'formSubmissions',
@@ -15,6 +15,7 @@ export const FormSubmissions: CollectionConfig = {
     useAsTitle: 'subject',
     defaultColumns: ['form', 'name', 'subject', 'handled', 'createdAt'],
     group: 'Administration',
+    hidden: hiddenUnless('editor', 'admissions'),
     description: 'Messages sent through the website.',
   },
   access: {
