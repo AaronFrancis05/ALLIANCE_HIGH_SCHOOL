@@ -14,6 +14,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import sharp from 'sharp'
+import { attachDatabasePool } from '@vercel/functions'
 
 import { Users } from './collections/Users'
 import { Students } from './collections/Students'
@@ -120,12 +121,22 @@ export default buildConfig({
     },
   }),
 
+  // A suspended Vercel instance never runs the idle timeout above, so its connections
+  // stayed open and counted against the pooler's 15. This closes them before suspension.
+  onInit: (payload) => {
+    attachDatabasePool((payload.db as unknown as { pool: Parameters<typeof attachDatabasePool>[0] }).pool)
+  },
+
   sharp,
 
-  email: env.isProduction || process.env.SMTP_HOST
+  // Without a mail server Payload logs outgoing mail to the console instead.
+  email: env.email.configured
     ? nodemailerAdapter({
         defaultFromAddress: env.email.fromAddress,
         defaultFromName: env.email.fromName,
+        // Verifying opens an SMTP connection on every cold start; a bad setting still
+        // fails, with the real error, when a message is sent.
+        skipVerify: Boolean(process.env.VERCEL),
         transportOptions: {
           host: env.email.host,
           port: env.email.port,
