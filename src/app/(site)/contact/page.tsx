@@ -2,17 +2,19 @@
  * Contact (FR-21, FR-24).
  *
  * Every detail comes from the site settings global. The enquiry form (P2-T9) sends a
- * message to the office and saves it under Enquiries in the admin panel.
+ * message to the office and saves it under Enquiries in the admin panel. The map always
+ * shows: see src/lib/map.ts for how it finds the school.
  */
 
 import React from 'react'
 import type { Metadata } from 'next'
-import { Mail, MapPin, Phone, Clock } from 'lucide-react'
-import { Container, Card, Section, SectionHeading } from '../../../components/ui'
+import { Mail, MapPin, Navigation, Phone, Clock } from 'lucide-react'
+import { ButtonLink, Container, Card, Section, SectionHeading } from '../../../components/ui'
 import { PageHeader } from '../../../components/layout/PageHeader'
 import { BreadcrumbJsonLd } from '../../../components/seo/JsonLd'
 import { EnquiryForm } from '../../../components/contact/EnquiryForm'
 import { getMediaBySlug, getSiteSettings } from '../../../lib/payload'
+import { mapDirectionsUrl, mapEmbedUrl } from '../../../lib/map'
 
 export const revalidate = 3600
 
@@ -34,7 +36,18 @@ export default async function ContactPage() {
   const address = settings?.address
   const hours = settings?.officeHours ?? []
 
-  const addressLines = [address?.line1, address?.district, address?.country].filter(Boolean)
+  const enteredLines = [address?.line1, address?.district, address?.country].filter(Boolean)
+  // The town and district are already public (page description, structured data); they
+  // stand in until the office fills in the address under School details.
+  const addressLines = enteredLines.length ? enteredLines : ['Nansana', 'Wakiso District', 'Uganda']
+
+  const schoolName = settings?.schoolName ?? 'Alliance High School Nansana'
+  const location = {
+    schoolName,
+    mapEmbedUrl: address?.mapEmbedUrl,
+    latitude: address?.latitude,
+    longitude: address?.longitude,
+  }
 
   return (
     <>
@@ -102,6 +115,12 @@ export default async function ContactPage() {
                 ))}
                 {address?.poBox ? <span className="mt-2 block">{address.poBox}</span> : null}
               </address>
+              <a
+                href="#map"
+                className="mt-3 inline-flex min-h-11 items-center font-medium text-maroon-700 hover:underline"
+              >
+                See it on the map
+              </a>
             </Card>
 
             {hours.length ? (
@@ -123,6 +142,27 @@ export default async function ContactPage() {
         </Container>
       </Section>
 
+      <Section tone="sunken" id="map">
+        <Container>
+          <SectionHeading eyebrow="Getting here" title="Find the school" />
+          <div className="aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] border border-cream-300 sm:aspect-[16/9]">
+            <iframe
+              src={mapEmbedUrl(location)}
+              title={`Google map showing where ${schoolName} is`}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="h-full w-full border-0"
+            />
+          </div>
+          <div className="mt-6 text-center">
+            <ButtonLink href={mapDirectionsUrl(location)} target="_blank" rel="noopener noreferrer">
+              <Navigation className="h-5 w-5" aria-hidden />
+              Get directions
+            </ButtonLink>
+          </div>
+        </Container>
+      </Section>
+
       <Section tone="plain" id="enquiry">
         <Container className="max-w-3xl">
           <SectionHeading
@@ -134,22 +174,6 @@ export default async function ContactPage() {
         </Container>
       </Section>
 
-      {address?.mapEmbedUrl ? (
-        <Section tone="sunken">
-          <Container>
-            <SectionHeading eyebrow="Getting here" title="Find the school" />
-            <div className="aspect-[16/9] overflow-hidden rounded-[var(--radius-card)] border border-cream-300">
-              <iframe
-                src={address.mapEmbedUrl}
-                title="Map showing Alliance High School Nansana"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="h-full w-full border-0"
-              />
-            </div>
-          </Container>
-        </Section>
-      ) : null}
     </>
   )
 }

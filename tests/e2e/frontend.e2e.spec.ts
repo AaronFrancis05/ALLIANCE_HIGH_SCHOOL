@@ -32,6 +32,31 @@ test.describe('Public site', () => {
     expect(jsonLd).toContain('Alliance High School Nansana')
   })
 
+  test('home page carries what Google needs for the name, crest and thumbnail', async ({ page }) => {
+    await page.goto('/')
+
+    // The name alone, as Google shows established schools.
+    await expect(page).toHaveTitle('Alliance High School Nansana')
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /^https?:\/\/[^/]+\/?$/)
+
+    // Site name above the address in a result.
+    const blocks = await page.locator('script[type="application/ld+json"]').allTextContents()
+    const types = blocks.map((block) => (JSON.parse(block) as { '@type': string })['@type'])
+    expect(types).toEqual(expect.arrayContaining(['WebSite', 'HighSchool']))
+
+    // Google ignores favicons that are not a multiple of 48 px.
+    await expect(page.locator('link[rel="icon"][sizes="192x192"]')).toHaveCount(1)
+    await expect(page.locator('meta[property="og:image"]').first()).toHaveAttribute('content', /crest-512\.png$/)
+  })
+
+  test('inner pages name their own canonical, never the home page', async ({ page }) => {
+    await page.goto('/admissions/fees')
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/admissions\/fees$/)
+
+    await page.goto('/no-such-page')
+    await expect(page.locator('link[rel="canonical"]')).toHaveCount(0)
+  })
+
   test('has no horizontal scroll on a 360 px phone', async ({ page }) => {
     await page.setViewportSize(PHONE)
     await page.goto('/')

@@ -108,7 +108,14 @@ export default buildConfig({
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
 
   db: postgresAdapter({
-    pool: { connectionString: process.env.DATABASE_URL || '' },
+    pool: {
+      connectionString: process.env.DATABASE_URL || '',
+      // Every serverless instance opens its own pool, and the hosted pooler allows 15
+      // clients in all. At the node-postgres default of 10 per instance, two busy
+      // instances used them up and every page failed with EMAXCONNSESSION.
+      max: env.database.poolMax,
+      idleTimeoutMillis: 10_000,
+    },
   }),
 
   sharp,

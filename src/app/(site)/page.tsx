@@ -18,9 +18,35 @@ import { Testimonials } from '../../components/home/Testimonials'
 import { PostCard, formatDate } from '../../components/content/PostCard'
 import { MediaImage, PlaceholderNote } from '../../components/ui/MediaImage'
 import { getHomePage, getPayloadClient, getSiteSettings } from '../../lib/payload'
+import { WebSiteJsonLd } from '../../components/seo/JsonLd'
 import type { Media } from '../../payload-types'
+import type { Metadata } from 'next'
 
 export const revalidate = 3600
+
+/**
+ * The home page result: the school's name alone as the title (as Google shows established
+ * schools), and a snippet that says what the school is and how to join it.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings()
+  const name = settings?.schoolName ?? 'Alliance High School Nansana'
+  const description = `${name} is a secondary school in Nansana, Wakiso, offering O-Level and A-Level. Apply online for Senior One, Senior Five or a transfer.`
+
+  return {
+    title: { absolute: name },
+    description,
+    alternates: { canonical: '/' },
+    openGraph: {
+      type: 'website',
+      siteName: name,
+      locale: 'en_UG',
+      title: name,
+      description,
+      images: [{ url: '/brand/crest-512.png', width: 512, height: 512, alt: `${name} crest` }],
+    },
+  }
+}
 
 export default async function HomePageRoute() {
   const payload = await getPayloadClient()
@@ -231,6 +257,8 @@ export default async function HomePageRoute() {
           </div>
         </Container>
       </Section>
+
+      <WebSiteJsonLd settings={settings} />
     </>
   )
 }

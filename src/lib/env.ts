@@ -29,6 +29,10 @@ export const env = {
 
   siteUrl: optional('NEXT_PUBLIC_SITE_URL', 'http://localhost:3000').replace(/\/$/, ''),
   databaseUrl: () => required('DATABASE_URL'),
+  database: {
+    /** Connections each server instance may hold. Kept small in production (see payload.config.ts). */
+    poolMax: Number(optional('DATABASE_POOL_MAX', process.env.NODE_ENV === 'production' ? '3' : '10')),
+  },
   payloadSecret: () => required('PAYLOAD_SECRET'),
 
   s3: {

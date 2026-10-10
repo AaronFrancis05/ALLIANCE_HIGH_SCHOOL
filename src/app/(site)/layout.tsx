@@ -120,13 +120,20 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: 'en_UG',
       title: name,
       description: description.slice(0, 155),
+      // The crest is the thumbnail Google and chat apps show beside the link.
+      images: [{ url: '/brand/crest-512.png', width: 512, height: 512, alt: `${name} crest` }],
     },
-    twitter: { card: 'summary_large_image' },
+    twitter: { card: 'summary' },
     icons: {
-      icon: [{ url: '/favicon-32.png', sizes: '32x32' }],
+      // Google only shows a favicon in results when it is a multiple of 48 px.
+      icon: [
+        { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+        { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      ],
       apple: [{ url: '/apple-touch-icon.png' }],
     },
-    alternates: { canonical: '/' },
+    // No canonical here: every page sets its own, and a site-wide '/' would tell Google
+    // that any page without one is a copy of the home page.
   }
 }
 

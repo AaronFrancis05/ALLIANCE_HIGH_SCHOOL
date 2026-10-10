@@ -94,9 +94,13 @@ them before you open a branch.
 - [ ] Performance budget check: LCP < 2.5 s, first load < 1 MB (NFR-01)
 - [ ] Staff 2FA behind `STAFF_2FA_REQUIRED` (A07)
 - [ ] `pnpm audit` in CI (A06). No CI exists yet
+- [x] Search appearance: site name, favicon, home title and snippet, share image, canonical fix (FR-24, docs/SEO.md)
+- [x] Branded 404 for unknown URLs; contact-page map always shown (FR-21); production DB pool capped
+- [ ] Switch Vercel `DATABASE_URL` to the Supabase transaction pooler (port 6543)
 
 ### P7: launch
 - [ ] Collect everything in docs/CONTENT_TODO.md from the school
+- [ ] Claim the Google Business Profile and submit the sitemap in Search Console (docs/SEO.md §2)
 - [ ] Replace the 12 AI placeholder images (docs/IMAGE_GUIDE.md)
 - [ ] Choose hosting (managed or VPS) and write `docs/DEPLOYMENT-VPS.md`
 - [ ] Automated backups plus a restore that has actually been tested (NFR-07)

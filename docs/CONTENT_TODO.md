@@ -55,6 +55,7 @@ publish, including a parent's consent where a student is named.
 |---|---|
 | A larger copy of the school crest | The genuine artwork is now in use (`assets/brand/originallogo.jpg`), but it is only 204×192 px, so the crest is soft at large sizes and unreadable as a 32 px favicon. A vector (SVG, AI, EPS or PDF) or a PNG of 1000 px or more would fix both. Drop it in `assets/brand/` and run `pnpm crest` |
 | A simplified mark for the favicon | Any detailed crest turns to mush at 32×32. A single element — the elephant head alone, or the letter A — would be legible in a browser tab. Needed only if the school wants a sharp tab icon |
+| Map coordinates of the main gate (latitude, longitude) | The map pin Google shows in the school's panel. Enter them in *School details → Contact* (see docs/SEO.md) |
 | UNEB results, last three years | The academics results page |
 | Leadership: the Deputy Head Teacher's name; photographs of everyone (names supplied 2026-09-23) | About → leadership |
 | Staff directory: teaching and support staff names (heads of subject supplied 2026-09-23); photographs | About → staff |
@@ -63,7 +64,7 @@ publish, including a parent's consent where a student is named.
 | Term dates for the coming year | Events, admissions |
 | Clubs and societies: the real list | Student life |
 | Sports: teams, achievements | Student life |
-| Google Maps link or coordinates for the campus | Contact page, structured data |
+| Google Maps link or coordinates for the campus | Contact page, structured data. Until then the contact map searches Google for the school's name, which is only as accurate as Google's own listing |
 | Social media accounts the school actually uses | Footer |
 | Bank or mobile money details for fees | Fees page (only if the school wants them published) |
 
