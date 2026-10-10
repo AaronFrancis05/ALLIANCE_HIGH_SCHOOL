@@ -19,12 +19,15 @@ export function Container({ className, children }: { className?: string; childre
 export function Section({
   className,
   tone = 'plain',
+  pattern = false,
   children,
   id,
 }: {
   className?: string
   /** Background treatment. Alternate `plain` and `sunken` down a page. */
   tone?: 'plain' | 'sunken' | 'brand' | 'dark'
+  /** A faint grid behind the content. Use on one or two sections a page, not all of them. */
+  pattern?: boolean
   children: React.ReactNode
   id?: string
 }) {
@@ -35,8 +38,11 @@ export function Section({
     dark: 'bg-ink-950 text-cream-100',
   } as const
 
+  const isDark = tone === 'brand' || tone === 'dark'
+  const patternClass = pattern ? (isDark ? 'pattern-plus' : 'pattern-grid') : null
+
   return (
-    <section id={id} className={cn('py-14 sm:py-20', tones[tone], className)}>
+    <section id={id} className={cn('py-14 sm:py-20', tones[tone], patternClass, className)}>
       {children}
     </section>
   )

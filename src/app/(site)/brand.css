@@ -75,6 +75,12 @@
   --brand-strong: var(--color-maroon-900);
   --accent: var(--color-gold-500);
   --focus-ring: var(--color-maroon-600);
+
+  /* Grid backgrounds (see .pattern-grid and .pattern-plus). */
+  --grid-line: color-mix(in srgb, var(--color-maroon-900) 7%, transparent);
+  --grid-line-dark: color-mix(in srgb, var(--color-cream-50) 5%, transparent);
+  /* A 12 px crosshair in cream-50 (#fdfbf7). A data URI cannot read a variable, hence the hex. */
+  --grid-plus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M6.5 1v11M1 6.5h11' stroke='%23fdfbf7' stroke-opacity='0.22' stroke-width='1'/%3E%3C/svg%3E");
 }
 
 @layer base {
@@ -149,6 +155,45 @@
     .container-site {
       padding-inline: 1.5rem;
     }
+  }
+
+  /*
+   * Grid backgrounds. Drawn on a pseudo-element behind the content and faded towards the
+   * edges, so they read as texture rather than as a pattern. Pure CSS: nothing to download.
+   * `.pattern-grid` is fine lines for light sections; `.pattern-plus` is crosshairs for dark ones.
+   */
+  .pattern-grid,
+  .pattern-plus {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .pattern-grid::before,
+  .pattern-plus::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 40%, #000 30%, transparent 100%);
+    mask-image: radial-gradient(ellipse 75% 70% at 50% 40%, #000 30%, transparent 100%);
+  }
+
+  .pattern-grid::before {
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .pattern-plus::before {
+    background-image:
+      var(--grid-plus),
+      linear-gradient(to right, var(--grid-line-dark) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line-dark) 1px, transparent 1px);
+    background-size: 48px 48px;
+    /* Centre each crosshair on a line crossing. */
+    background-position: -6px -6px, 0 0, 0 0;
   }
 
   /* Skip link, visible only when focused. */

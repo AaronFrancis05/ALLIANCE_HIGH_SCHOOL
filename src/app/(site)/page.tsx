@@ -231,7 +231,7 @@ export default async function HomePageRoute() {
       <Testimonials testimonials={testimonials.docs} />
 
       {/* Closing call to action */}
-      <Section tone="brand" className="py-16">
+      <Section tone="brand" pattern className="py-16">
         <Container className="text-center">
           <h2 className="text-3xl text-white sm:text-4xl">
             {home?.callToAction?.heading ?? 'Join our school community'}

@@ -87,7 +87,7 @@ export function Stats({ stats }: { stats: Stat[] }) {
   if (!stats.length) return null
 
   return (
-    <section className="bg-maroon-800 py-12" ref={ref}>
+    <section className="pattern-plus bg-maroon-800 py-12" ref={ref}>
       <div className="container-site grid grid-cols-2 gap-8 lg:grid-cols-4">
         {stats.map((stat) => (
           <StatItem key={stat.label} stat={stat} visible={visible} />
