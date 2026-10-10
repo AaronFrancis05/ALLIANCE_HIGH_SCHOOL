@@ -84,7 +84,7 @@ entry short: what changed, what was verified, what is left.
 ## Log
 
 ### 2026-10-10 (production logs: EMAXCONNSESSION again, Nodemailer ECONNREFUSED)
-- Production (`ac0b41e`, already has the pool cap of 3) still hit the Supabase **session pooler's** 15-client cap on /admin and /admin/login. Read-only check of the production DB: only ~7 backends, none from the app, so the limit is the pooler, not Postgres. Suspended Vercel instances keep their connections because the idle timeout cannot fire while frozen.
+- Production (`ac0b41e`, already has the pool cap of 3) still hit the Supabase **session pooler's** 15-client cap on /admin and /admin/login. The error itself names the pooler's `pool_size: 15`, so the limit is the pooler, not Postgres. (The Supabase account connected to Claude, project `llxxcnrdrkshqddxkyxr`, is **not** the app's database: it has no Payload tables. The production DB lives in another account.) Suspended Vercel instances keep their connections because the idle timeout cannot fire while frozen.
 - Fix: `onInit` in `src/payload.config.ts` calls `attachDatabasePool` from `@vercel/functions` (new dependency, Vercel's own helper for this), which releases idle connections before suspension. No-op off Vercel.
 - Nodemailer tried `127.0.0.1:587` on every `/api/users/me`: Vercel's `SMTP_HOST` is a loopback value. `env.email.configured` now rejects a loopback host on Vercel (Payload then logs mail to the console) and `skipVerify` is on for Vercel. Local Mailpit unchanged.
 - Verified: lint, typecheck, unit 196/196. e2e not run: Docker is down and the tests write data, so they were not pointed at the production DB.
