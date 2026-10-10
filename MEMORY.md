@@ -12,7 +12,7 @@ entry short: what changed, what was verified, what is left.
 ## Current status (as of 2026-10-10)
 
 **Where we are:** P0–P4 done; P2 now done (P2-T11 leadership/staff, P2-T12 careers); P3 done; P5 done (P5-T1 to P5-T5). P6 hardening and P7 launch remain.
-**Latest:** P4-T5 staff invitations, role-scoped admin, branded admin and first-time student sign-in (branch `feat/P4-T5-invites-roles-first-signin`, not committed).
+**Latest:** production log fixes on `fix/P6-prod-db-pool-email` (not committed): DB connections released before Vercel suspends an instance, no SMTP verify on cold start. **Owner action on Vercel**: `DATABASE_URL` to the transaction pooler (port 6543) and a real `SMTP_HOST`.
 **Next up:** student bulk import (CSV, dry run; fills the `import:students` loose end), P6 site-wide search and performance budget, or P4-T bulk report-card import (FR-12). Contact details in docs/CONTENT_TODO.md deliberately left until launch (school owner's call, 2026-09-23).
 
 ### Health checks
@@ -82,6 +82,13 @@ entry short: what changed, what was verified, what is left.
 ---
 
 ## Log
+
+### 2026-10-10 (production logs: EMAXCONNSESSION again, Nodemailer ECONNREFUSED)
+- Production (`ac0b41e`, already has the pool cap of 3) still hit the Supabase **session pooler's** 15-client cap on /admin and /admin/login. Read-only check of the production DB: only ~7 backends, none from the app, so the limit is the pooler, not Postgres. Suspended Vercel instances keep their connections because the idle timeout cannot fire while frozen.
+- Fix: `onInit` in `src/payload.config.ts` calls `attachDatabasePool` from `@vercel/functions` (new dependency, Vercel's own helper for this), which releases idle connections before suspension. No-op off Vercel.
+- Nodemailer tried `127.0.0.1:587` on every `/api/users/me`: Vercel's `SMTP_HOST` is a loopback value. `env.email.configured` now rejects a loopback host on Vercel (Payload then logs mail to the console) and `skipVerify` is on for Vercel. Local Mailpit unchanged.
+- Verified: lint, typecheck, unit 196/196. e2e not run: Docker is down and the tests write data, so they were not pointed at the production DB.
+- **Still to do on Vercel**: `DATABASE_URL` to the transaction pooler (port 6543); set a real `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS`, or staff invitation emails will not be delivered.
 
 ### 2026-10-10 (P4-T5: invitations, role-scoped admin, first-time sign-in)
 - **Staff invitations** (FR-05): `src/lib/staff-invite.ts`. A new staff account gets an unusable random password and an invitation email linking to `/admin/reset/<token>`; `invitedAt` and `firstSignedInAt` track it, and the sidebar panel `InvitationStatus` offers "Send invitation again" (`POST /api/users/:id/invite`, super admin only via `canInviteStaff`). A virtual `password` field with access rules means a password typed for someone else is dropped, and the super admin cannot change another person's password; staff change only their own.

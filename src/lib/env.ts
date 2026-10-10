@@ -50,6 +50,13 @@ export const env = {
   },
 
   email: {
+    /**
+     * A mail server is set. A loopback host is Mailpit on a developer machine; on Vercel
+     * nothing listens there, so it refused every connection and filled the logs.
+     */
+    configured:
+      Boolean(optional('SMTP_HOST').trim()) &&
+      !(flag('VERCEL') && /^(localhost|127\.0\.0\.1|::1)$/i.test(optional('SMTP_HOST').trim())),
     host: optional('SMTP_HOST', 'localhost'),
     port: Number(optional('SMTP_PORT', '1025')),
     user: optional('SMTP_USER'),
