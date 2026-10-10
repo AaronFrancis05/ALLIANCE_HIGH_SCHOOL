@@ -95,6 +95,8 @@ them before you open a branch.
 - [ ] Staff 2FA behind `STAFF_2FA_REQUIRED` (A07)
 - [ ] `pnpm audit` in CI (A06). No CI exists yet
 - [x] Search appearance: site name, favicon, home title and snippet, share image, canonical fix (FR-24, docs/SEO.md)
+- [x] Branded 404 for unknown URLs; contact-page map always shown (FR-21); production DB pool capped
+- [ ] Switch Vercel `DATABASE_URL` to the Supabase transaction pooler (port 6543)
 
 ### P7: launch
 - [ ] Collect everything in docs/CONTENT_TODO.md from the school

@@ -64,7 +64,7 @@ publish, including a parent's consent where a student is named.
 | Term dates for the coming year | Events, admissions |
 | Clubs and societies: the real list | Student life |
 | Sports: teams, achievements | Student life |
-| Google Maps link or coordinates for the campus | Contact page, structured data |
+| Google Maps link or coordinates for the campus | Contact page, structured data. Until then the contact map searches Google for the school's name, which is only as accurate as Google's own listing |
 | Social media accounts the school actually uses | Footer |
 | Bank or mobile money details for fees | Fees page (only if the school wants them published) |
 

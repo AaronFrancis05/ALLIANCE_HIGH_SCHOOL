@@ -80,6 +80,12 @@ entry short: what changed, what was verified, what is left.
 
 ## Log
 
+### 2026-10-10 (branded 404 for unknown URLs, map on the contact page, production DB pool)
+- **404**: unknown URLs showed Next's bare page because the app has three root layouts. Added `src/app/global-not-found.tsx` (flag `experimental.globalNotFound`), with the crest header, no CMS read. Both 404s share `src/components/layout/NotFoundContent.tsx`; e-Library added to its suggestions.
+- **Map**: the contact page's map only rendered when `mapEmbedUrl` was set, and production had none. `src/lib/map.ts` now always gives one: coordinates if entered, else a pasted Google Maps link (https www.google.com/maps only), else a search for the school's name. Map sits right under the contact cards with a "Get directions" button; the empty "Where we are" card falls back to Nansana, Wakiso District, Uganda. Unit tests: `tests/unit/map.spec.ts`.
+- **Production 500s** (e.g. /resources, digest 885424223): Vercel logs showed `EMAXCONNSESSION`, the Supabase session pooler's 15-client cap, on /, /events, /admissions, /contact too. Pool now capped at `DATABASE_POOL_MAX` (default 3 in production) with a 10 s idle timeout. **Still to do on Vercel**: switch `DATABASE_URL` to the transaction pooler (port 6543), the real fix for serverless.
+- Verified: typecheck, lint, unit 162/162. Not deployed.
+
 ### 2026-10-10 (search appearance, like an established school's Google result)
 - **Goal**: the result St Mary's College Kisubi and Greenhill Academy get: name and crest above the link, a short description, sitelinks, a knowledge panel. Their data was not used, only the structure.
 - **Code**: `WebSiteJsonLd` on the home page (site name above the address); home title is the school name alone, with an admissions-focused description and its own canonical; 192 px favicon declared (Google needs multiples of 48 px); crest as default `og:image`; `HighSchool` data now lists a real campus photo first and a `hasMap` link once coordinates are set.
@@ -87,7 +93,7 @@ entry short: what changed, what was verified, what is left.
 - **docs/SEO.md** (was referenced but missing): what the code supplies, and what the school must do itself: Google Business Profile (the right-hand panel: hours, Directions, photos), Search Console with the sitemap, and Wikidata for "Founded" and "Colours". CONTENT_TODO gains the gate's map coordinates.
 - Verified: lint, typecheck, unit 156/156; `frontend.e2e.spec.ts` 7/7 (two new: home name/site-name/favicon/og:image; inner canonical and none on the 404), including the 360 px check, against local Docker services.
 - **Note for testing**: `.env` now points at a remote Supabase pooler (`connection_limit=1`), where a page takes 2 to 10 minutes to render. Run tests against the local stack instead: `set -a; . ./.env.example; set +a; pnpm dev --port 3002`, then `PLAYWRIGHT_BASE_URL=http://localhost:3002 pnpm e2e`.
-- Not in scope, noticed: an unknown URL renders Next's default 404 page, not `src/app/(site)/not-found.tsx`.
+- Not in scope, noticed: an unknown URL renders Next's default 404 page, not `src/app/(site)/not-found.tsx`. (Fixed the same day.)
 
 ### 2026-10-08 (nav section links, failing Vercel builds)
 - **Nav**: items with a drop-down were a `<button>`, so About, Academics, Admissions, Student life and News never routed, and hover lived on the button alone, so moving into the panel closed it. `src/components/layout/Header.tsx`: the label is now a link, a chevron button (`aria-label="<Item> pages"`) toggles the panel, and mouse-only pointer hover covers the whole item. Verified on a local production build (hover into panel, label and child links route, touch tap on chevron, 360 px drawer with no overflow) and live.
