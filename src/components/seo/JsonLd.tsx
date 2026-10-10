@@ -10,6 +10,9 @@ import React from 'react'
 import { env } from '../../lib/env'
 import type { SiteSetting } from '../../payload-types'
 
+/** A genuine school photograph (not an AI placeholder), served from public/. */
+export const CAMPUS_PHOTO = '/photos/students-on-the-main-driveway-alliance-high-nansana.webp'
+
 function JsonLd({ data }: { data: Record<string, unknown> }) {
   return (
     <script
@@ -32,7 +35,8 @@ export function OrganisationJsonLd({ settings }: { settings: SiteSetting | null 
     alternateName: settings?.shortName ?? undefined,
     url: env.siteUrl,
     logo: `${env.siteUrl}/brand/crest.png`,
-    image: `${env.siteUrl}/brand/crest.png`,
+    // A real photograph first: Google prefers a picture of the place for the panel.
+    image: [`${env.siteUrl}${CAMPUS_PHOTO}`, `${env.siteUrl}/brand/crest.png`],
     slogan: settings?.motto ?? undefined,
     description: settings?.mission ?? undefined,
     address: {
@@ -54,6 +58,7 @@ export function OrganisationJsonLd({ settings }: { settings: SiteSetting | null 
       latitude: address.latitude,
       longitude: address.longitude,
     }
+    data.hasMap = `https://www.google.com/maps?q=${address.latitude},${address.longitude}`
   }
 
   // Only claim a founding date once the school has confirmed one.
@@ -61,6 +66,27 @@ export function OrganisationJsonLd({ settings }: { settings: SiteSetting | null 
   if (founded && /^\d{4}$/.test(founded)) data.foundingDate = founded
 
   return <JsonLd data={data} />
+}
+
+/**
+ * The site name Google prints above the address in a result ("Alliance High School Nansana"
+ * instead of the bare domain). Google reads it from the home page only.
+ */
+export function WebSiteJsonLd({ settings }: { settings: SiteSetting | null }) {
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        '@id': `${env.siteUrl}/#website`,
+        name: settings?.schoolName ?? 'Alliance High School Nansana',
+        alternateName: settings?.shortName ?? undefined,
+        url: `${env.siteUrl.replace(/\/$/, '')}/`,
+        inLanguage: 'en-UG',
+        publisher: { '@id': `${env.siteUrl}/#school` },
+      }}
+    />
+  )
 }
 
 export function BreadcrumbJsonLd({ trail }: { trail: { name: string; href: string }[] }) {
