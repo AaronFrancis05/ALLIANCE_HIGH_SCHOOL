@@ -9,6 +9,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   canFileInDepartment,
+  canFileResource,
   canOpenResource,
   canStudentOpenResource,
   readResources,
@@ -192,5 +193,59 @@ describe('titleFromFilename', () => {
   it('gives nothing for an empty name, so the resource must be titled by hand', () => {
     expect(titleFromFilename('')).toBe('')
     expect(titleFromFilename('.pdf')).toBe('')
+  })
+})
+
+const teacher = (subjects: (number | { id: number })[], overrides: Partial<StaffUser> = {}): StaffUser => ({
+  ...staff('teacher', 3),
+  subjects,
+  ...overrides,
+})
+
+describe('teachers and holiday work', () => {
+  it('lets a teacher edit only the holiday work of the subjects they teach', () => {
+    expect(writeResources(req(teacher([7, { id: 8 }])))).toEqual({
+      and: [{ type: { equals: 'holidayWork' } }, { subject: { in: ['7', '8'] } }],
+    })
+  })
+
+  it('gives a teacher with no subjects nothing to edit, and an inactive teacher nothing at all', () => {
+    expect(writeResources(req(teacher([])))).toBe(false)
+    expect(writeResources(req(teacher([7], { active: false })))).toBe(false)
+  })
+
+  it('lets a teacher file holiday work for their own subject', () => {
+    expect(canFileResource(teacher([7]), { type: 'holidayWork', subject: 7, department: 99 })).toBe(true)
+    expect(canFileResource(teacher([7]), { type: 'holidayWork', subject: { id: 7 }, department: undefined })).toBe(true)
+  })
+
+  it('refuses a teacher holiday work for a subject they do not teach', () => {
+    expect(canFileResource(teacher([7]), { type: 'holidayWork', subject: 8, department: 3 })).toBe(false)
+    expect(canFileResource(teacher([7]), { type: 'holidayWork', subject: undefined, department: 3 })).toBe(false)
+  })
+
+  it('refuses a teacher any other kind of resource, even for their own subject', () => {
+    for (const type of ['notes', 'pastPaper', 'textbook', 'scheme', 'video', 'other', undefined]) {
+      expect(canFileResource(teacher([7]), { type, subject: 7, department: 3 }), String(type)).toBe(false)
+    }
+  })
+
+  it('keeps the head of department rule for holiday work', () => {
+    expect(canFileResource(staff('hod', 3), { type: 'holidayWork', subject: 7, department: 3 })).toBe(true)
+    expect(canFileResource(staff('hod', 3), { type: 'holidayWork', subject: 7, department: 4 })).toBe(false)
+  })
+
+  it('lets editors, registrars and the super admin file holiday work anywhere', () => {
+    for (const role of ['editor', 'registrar', 'superAdmin'] as const) {
+      expect(canFileResource(staff(role), { type: 'holidayWork', subject: 1, department: 1 }), role).toBe(true)
+    }
+  })
+
+  it('refuses students, the bursar, admissions and visitors', () => {
+    const resource = { type: 'holidayWork', subject: 7, department: 3 }
+    expect(canFileResource(student(), resource)).toBe(false)
+    expect(canFileResource(staff('bursar'), resource)).toBe(false)
+    expect(canFileResource(staff('admissions'), resource)).toBe(false)
+    expect(canFileResource(null, resource)).toBe(false)
   })
 })

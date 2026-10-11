@@ -141,9 +141,24 @@ export const Users: CollectionConfig = {
       name: 'department',
       type: 'relationship',
       relationTo: 'departments',
+      // The department decides which shelf a head of department manages, so nobody may
+      // change their own: anyone may edit their own profile, but not this.
+      access: { create: fieldSuperAdminOnly, update: fieldSuperAdminOnly },
       admin: {
         description: 'Required for Heads of Department: they may only manage their own department.',
         condition: (data) => data?.role === 'hod' || data?.role === 'teacher',
+      },
+    },
+    {
+      name: 'subjects',
+      type: 'relationship',
+      relationTo: 'subjects',
+      hasMany: true,
+      // Decides which subjects' holiday work a teacher may upload, so only the super admin sets it.
+      access: { create: fieldSuperAdminOnly, update: fieldSuperAdminOnly },
+      admin: {
+        description: 'The subjects this teacher teaches. They may upload holiday work for these subjects only.',
+        condition: (data) => data?.role === 'teacher',
       },
     },
     {

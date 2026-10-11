@@ -14,7 +14,7 @@
 
 import { randomUUID } from 'node:crypto'
 import sharp from 'sharp'
-import { uploadProblem, type IncomingFile } from './upload-safety'
+import { normaliseMimeType, uploadProblem, type IncomingFile } from './upload-safety'
 
 /** Long edge, in pixels, that a document photo is scaled down to. Still legible when printed. */
 export const DOCUMENT_IMAGE_MAX_EDGE = 2000
@@ -57,7 +57,7 @@ export type PreparedDocument = { file: IncomingFile } | { problem: string }
 export async function prepareApplicantDocument(upload: File): Promise<PreparedDocument> {
   const original: IncomingFile = {
     name: upload.name,
-    mimetype: upload.type,
+    mimetype: normaliseMimeType(upload.type),
     size: upload.size,
     data: Buffer.from(await upload.arrayBuffer()),
   }

@@ -83,6 +83,20 @@ entry short: what changed, what was verified, what is left.
 
 ## Log
 
+### 2026-10-11 (P3-T4 holiday work and upload hardening)
+- **Holiday work** (FR-06a): a new resource type (`holidayWork`). Teachers get a `subjects` field (only the super admin sets it) and may create or edit holiday work only for those subjects (`writeResources`, `canFileResource` in `src/access/resources.ts`); the admin form offers them only that type and their subjects, and files it under the subject's department. HODs and editors keep their rules.
+- **File rules**: holiday work takes PDF or .docx only; ZIP only when the subject has "Accepts ZIP folders" ticked (the migration ticks code `ICT`). ZIPs are refused everywhere else in the library. Re-filing an existing resource cannot smuggle a stored file past these rules.
+- **Upload hardening for every collection**: file names go through a Zod schema (no paths, control characters or missing extension); the extension must match the declared type, which must match the bytes; Windows' `application/x-zip-compressed` is treated as ZIP. `src/lib/zip-inspect.ts` reads the central directory of every ZIP and .docx: unsafe paths, executables/scripts, macro files, nested archives, encryption, more than 1000 entries, more than 200 MB unpacked or a ratio above 200:1 are refused; a .docx with `vbaProject.bin` or no `word/document.xml` is refused.
+- **URL params**: the three file routes and the calendar route validate `[id]` / `[slug]` with Zod (`src/lib/validation.ts`) before any query or audit entry.
+- **Security fix**: a staff member could change their own `department` from their profile (no field access), so a HOD could move themselves into another department's shelf. Now super-admin only. Needs human review (AGENTS.md section 5).
+- `/portal/library` shows a "Holiday work" section by subject above the shelf; the shelf leaves holiday work out unless filtered by that type. Cards show the format (PDF / Word / ZIP folder).
+- Migration `20261011_174938_holiday_work` (enum value, `subjects.accepts_archives`, `users_rels`). **Not applied anywhere yet.**
+- Verified: typecheck, lint, unit 257/257 (34 new). **Not run**: e2e and the 360 px check, because `.env` points at the production Supabase database and Docker is not available, and the e2e web server would write to that database.
+
+### 2026-10-11 (admissions apply-online buttons)
+- `/admissions` showed "Apply online" only in the closing banner. Added it under the three steps and first in the Requirements button row, both linking to `/admissions/apply` and shown only while `applicationsOpen` is on (FR-16).
+- Validation: `pnpm lint` and `pnpm typecheck` pass. Not checked at 360 px in a browser.
+
 ### 2026-10-11 (review fixes)
 
 - Verified all seven supplied findings against current code and fixed them. Added service-worker and audit regression tests.

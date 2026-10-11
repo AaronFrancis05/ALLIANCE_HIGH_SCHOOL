@@ -61,6 +61,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 | FR-06 | Students find resources by subject, class, type (notes, past paper, textbook, scheme) and year. | Built |
 | FR-07 | A head of department manages their own department's resources and no other. | Built |
 | FR-08 | A restricted file is served only through a route that re-checks the session and returns a signed URL valid for five minutes; the storage key never reaches the browser. | Built |
+| FR-06a | Holiday work is a resource type with its own section in the student's e-Library, grouped by subject. A teacher uploads it only for the subjects the super admin has assigned them; a head of department within their department; editors, registrars and the super admin anywhere. It takes PDF and Word (.docx) files only, plus ZIP folders for subjects marked as accepting them (ICT practicals). ZIP and Word files are inspected: no unsafe paths, programs, scripts, macros, nested archives, password protection or zip bombs. | Built; e2e not yet run |
 | FR-09 | A resource records its subject, class list, visibility, file size and page count, so a student knows what they are downloading before they spend data. | Built |
 
 ### Accounts
@@ -116,7 +117,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 |---|---|---|
 | A01 Broken access control | A student reads another student's results | Every rule lives in `src/access/`, is unit-tested including negative cases, and is re-checked server-side on every request |
 | A02 Cryptographic failures | Report cards readable from a public bucket | Private files live in a separate, non-public bucket; five-minute signed URLs only |
-| A03 Injection | Hostile input in forms | Zod on the server for every input; Payload's query layer is parameterised |
+| A03 Injection | Hostile input in forms, URLs and uploads | Zod on the server for every input, including URL ids and slugs (`src/lib/validation.ts`) and uploaded file names; Payload's query layer is parameterised; uploads must agree in name, type and bytes, and ZIP containers are inspected (`src/lib/zip-inspect.ts`) |
 | A04 Insecure design | Results released by accident | Release is a deliberate act with three independent conditions, all audited |
 | A05 Security misconfiguration | Debug surface in production | Security headers set in `proxy.ts`; GraphQL playground disabled outside development |
 | A06 Vulnerable components | Stale dependencies | Pinned versions; `pnpm audit` in CI |

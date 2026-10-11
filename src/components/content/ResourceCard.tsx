@@ -9,7 +9,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { BookOpen, Download, FileText, GraduationCap, Layers, Video } from 'lucide-react'
+import { BookOpen, Download, FileText, GraduationCap, Layers, Sun, Video } from 'lucide-react'
 import { Badge, Card } from '../ui'
 import { CLASS_LABELS, type SchoolClass } from '../../access/resources'
 import { resourceTypeLabel } from '../../lib/resource-filters'
@@ -20,6 +20,7 @@ const TYPE_ICONS: Record<string, typeof BookOpen> = {
   pastPaper: GraduationCap,
   textbook: BookOpen,
   scheme: Layers,
+  holidayWork: Sun,
   video: Video,
   other: FileText,
 }
@@ -33,14 +34,27 @@ export function formatSize(bytes?: number | null): string | null {
   return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`
 }
 
+const FORMAT_LABELS: Record<string, string> = {
+  'application/pdf': 'PDF',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word',
+  'application/zip': 'ZIP folder',
+}
+
+/** What program a student needs to open the file, for the formats holiday work uses. */
+export function formatLabel(mimeType?: string | null): string | null {
+  return mimeType ? (FORMAT_LABELS[mimeType] ?? null) : null
+}
+
 export function resourceDownloadHref(id: Resource['id']): string {
   return `/api/files/resource/${id}`
 }
 
-export function ResourceCard({ resource }: { resource: Resource }) {
+export function ResourceCard({ resource, titleAs = 'h2' }: { resource: Resource; titleAs?: 'h2' | 'h3' }) {
   const Icon = TYPE_ICONS[resource.type] ?? FileText
+  const Title = titleAs
   const subject = resource.subject as Subject | undefined
   const size = formatSize(resource.filesize)
+  const format = formatLabel(resource.mimeType)
 
   return (
     <Card as="li" className="flex flex-col p-6">
@@ -49,7 +63,7 @@ export function ResourceCard({ resource }: { resource: Resource }) {
         <Badge tone="muted">{resourceTypeLabel(resource.type)}</Badge>
       </div>
 
-      <h2 className="mt-4 font-display text-lg">{resource.title}</h2>
+      <Title className="mt-4 font-display text-lg">{resource.title}</Title>
       {resource.description ? (
         <p className="mt-2 line-clamp-3 text-sm text-[var(--text-body)]">{resource.description}</p>
       ) : null}
@@ -73,6 +87,12 @@ export function ResourceCard({ resource }: { resource: Resource }) {
           <div className="flex gap-1">
             <dt className="font-medium">Year:</dt>
             <dd>{resource.year}</dd>
+          </div>
+        ) : null}
+        {format ? (
+          <div className="flex gap-1">
+            <dt className="font-medium">Format:</dt>
+            <dd>{format}</dd>
           </div>
         ) : null}
         {size ? (

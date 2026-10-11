@@ -48,5 +48,15 @@ export const Subjects: CollectionConfig = {
       options: SCHOOL_CLASSES.map((value) => ({ label: CLASS_LABELS[value], value })),
       admin: { description: 'Classes that take this subject.' },
     },
+    {
+      name: 'acceptsArchives',
+      label: 'Accepts ZIP folders',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Tick for subjects whose holiday work is handed out as a ZIP folder of practical files, such as ICT. Every folder is still checked for programs, scripts and macros.',
+      },
+    },
   ],
 }
