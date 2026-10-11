@@ -65,7 +65,7 @@ export default async function AboutPage() {
                   The school takes both boarders and day students. What we ask of every learner is the
                   same: come to work, be known by name, and leave better than you arrived. Our motto,{' '}
                   <em>{settings?.motto ?? 'Adfecto Excellencia'}</em>
-                  {settings?.mottoMeaning ? ` — ${settings.mottoMeaning.toLowerCase()}` : null}, is
+                  {settings?.mottoMeaning ? ` (${settings.mottoMeaning.toLowerCase()})` : null}, is
                   meant literally.
                 </p>
                 {isContentPlaceholder(founded) ? (
@@ -125,7 +125,7 @@ export default async function AboutPage() {
                       <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-500" />
                       <span>
                         <span className="font-medium text-[var(--text-strong)]">{entry.value}</span>
-                        {entry.description ? ` — ${entry.description}` : null}
+                        {entry.description ? `: ${entry.description}` : null}
                       </span>
                     </li>
                   ))}

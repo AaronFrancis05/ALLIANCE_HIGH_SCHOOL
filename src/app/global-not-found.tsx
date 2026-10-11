@@ -21,7 +21,7 @@ import { NotFoundContent } from '../components/layout/NotFoundContent'
 const SCHOOL_NAME = 'Alliance High School Nansana'
 
 export const metadata: Metadata = {
-  title: `Page not found — ${SCHOOL_NAME}`,
+  title: `Page not found | ${SCHOOL_NAME}`,
   robots: { index: false, follow: true },
 }
 

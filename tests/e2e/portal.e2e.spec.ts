@@ -3,7 +3,7 @@
  *
  * AGENTS.md rule 3: any feature behind a login ships with tests that prove a user cannot
  * reach what they should not. The unit tests cover every branch of the decision; these
- * prove the wiring — that the decision is actually applied by the running server, to the
+ * prove the wiring, that the decision is actually applied by the running server, to the
  * page and to the file route alike.
  *
  * They rely on the seeded students: AHSN/25/001 is cleared for a released term,

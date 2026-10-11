@@ -37,12 +37,15 @@ export default async function PortalHomePage() {
 
   return (
     <Container className="max-w-4xl">
-      <h1 className="text-3xl">
-        Hello, {student.firstName ?? student.admissionNo}
-      </h1>
+      <h1 className="text-3xl">Hello, {student.firstName ?? student.admissionNo}</h1>
       <p className="mt-2 text-[var(--text-muted)]">
-        {student.class ? CLASS_LABELS[student.class as SchoolClass] : null}
-        {student.stream ? ` · ${student.stream}` : null} · {student.admissionNo}
+        {[
+          student.class ? CLASS_LABELS[student.class as SchoolClass] : null,
+          student.stream,
+          student.admissionNo,
+        ]
+          .filter(Boolean)
+          .join(', ')}
       </p>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2">

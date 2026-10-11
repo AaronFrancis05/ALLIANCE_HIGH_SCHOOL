@@ -1,5 +1,5 @@
 /**
- * e-Library resources: notes, past papers, textbooks, schemes and videos (FR-06 … FR-09).
+ * e-Library resources: notes, past papers, textbooks, schemes and videos (FR-06 to FR-09).
  *
  * Files go to the private bucket and are never linked directly. The browser only ever
  * receives `/api/files/resource/<id>`, which re-checks access and issues a 5-minute

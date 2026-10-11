@@ -76,7 +76,7 @@ export default async function ContactPage() {
                       </a>
                       <span className="block text-sm text-[var(--text-muted)]">
                         {entry.label}
-                        {entry.whatsapp ? ' · WhatsApp' : null}
+                        {entry.whatsapp ? ', WhatsApp' : null}
                       </span>
                     </li>
                   ))}
