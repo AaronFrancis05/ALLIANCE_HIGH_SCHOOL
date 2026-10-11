@@ -14,6 +14,8 @@ import {
   ROLE_LABELS,
   STAFF_ROLES,
   canInviteStaff,
+  deleteOtherStaff,
+  fieldSuperAdminOnOthers,
   fieldSuperAdminOnly,
   hasRole,
   hiddenUnless,
@@ -85,7 +87,8 @@ export const Users: CollectionConfig = {
   access: {
     // Only the super admin manages staff accounts; everyone else may read the directory.
     create: superAdminOnly,
-    delete: superAdminOnly,
+    // Never their own account, so the school is never left without a super admin.
+    delete: deleteOtherStaff,
     update: ({ req, id }) => {
       if (hasRole(req.user as StaffUser, 'superAdmin')) return true
       // Anyone may edit their own profile, but not their own role (see field access below).
@@ -126,11 +129,13 @@ export const Users: CollectionConfig = {
       defaultValue: 'teacher',
       options: STAFF_ROLES.map((role) => ({ label: ROLE_LABELS[role], value: role })),
       access: {
-        // Nobody can promote themselves.
+        // Nobody changes their own role, not even the super admin; another super admin can.
         create: fieldSuperAdminOnly,
-        update: fieldSuperAdminOnly,
+        update: fieldSuperAdminOnOthers,
       },
-      admin: { description: 'Decides what this person can see and change.' },
+      admin: {
+        description: 'Decides what this person can see and change. Nobody can change their own role.',
+      },
     },
     {
       name: 'department',
@@ -145,10 +150,10 @@ export const Users: CollectionConfig = {
       name: 'active',
       type: 'checkbox',
       defaultValue: true,
-      access: { update: fieldSuperAdminOnly },
+      access: { update: fieldSuperAdminOnOthers },
       admin: {
         position: 'sidebar',
-        description: 'Unchecked accounts keep their history but cannot sign in.',
+        description: 'Unchecked accounts keep their history but cannot sign in. Nobody can deactivate their own account.',
       },
     },
     {

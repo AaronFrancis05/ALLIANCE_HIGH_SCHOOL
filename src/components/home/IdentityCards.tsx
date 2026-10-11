@@ -23,7 +23,7 @@ export function IdentityCards({ vision, mission, coreValues, theme }: IdentityCa
     coreValues?.length && {
       icon: HeartHandshake,
       title: 'Core values',
-      body: coreValues.map((entry) => entry.value).join(' · '),
+      body: coreValues.map((entry) => entry.value).join(', '),
     },
     theme?.theme && {
       icon: Sparkles,

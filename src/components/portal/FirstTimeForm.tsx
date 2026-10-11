@@ -16,6 +16,7 @@ import {
   type FirstTimeState,
 } from '../../app/(portal)/portal/first-time/actions'
 import { MIN_PASSWORD_LENGTH } from '../../lib/student-password'
+import { PasswordInput } from './PasswordInput'
 
 const INPUT =
   'mt-1.5 min-h-12 w-full rounded-lg border border-cream-300 bg-white px-3 text-base text-ink-900 focus:border-maroon-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-maroon-600'
@@ -42,7 +43,7 @@ function ResendButton() {
       disabled={pending}
       className="min-h-11 rounded-md px-1 text-sm font-semibold text-maroon-700 underline-offset-4 hover:underline disabled:opacity-70"
     >
-      {pending ? 'Sending…' : 'Send a new code'}
+      {pending ? 'Sending' : 'Send a new code'}
     </button>
   )
 }
@@ -107,7 +108,7 @@ export function FirstTimeForm() {
           />
           <p className="mt-1.5 text-sm text-[var(--text-muted)]">Exactly as it is on your school ID card.</p>
         </div>
-        <SubmitButton idle="Email me a code" busy="Sending…" />
+        <SubmitButton idle="Email me a code" busy="Sending" />
       </form>
     )
   }
@@ -150,10 +151,9 @@ export function FirstTimeForm() {
           <label htmlFor="password" className={LABEL}>
             Choose a password
           </label>
-          <input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             autoComplete="new-password"
             minLength={MIN_PASSWORD_LENGTH}
             required
@@ -169,17 +169,16 @@ export function FirstTimeForm() {
           <label htmlFor="confirm" className={LABEL}>
             Type the password again
           </label>
-          <input
+          <PasswordInput
             id="confirm"
             name="confirm"
-            type="password"
             autoComplete="new-password"
             required
             className={INPUT}
           />
         </div>
 
-        <SubmitButton idle="Set password and sign in" busy="Setting up…" />
+        <SubmitButton idle="Set password and sign in" busy="Setting up" />
       </form>
 
       <form action={requestCode} className="flex flex-wrap items-center justify-between gap-2 text-sm">

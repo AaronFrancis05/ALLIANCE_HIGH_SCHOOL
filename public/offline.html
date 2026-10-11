@@ -1,0 +1,94 @@
+<!doctype html>
+<!--
+  Shown by public/sw.js when a page is requested with no internet connection at all, in place
+  of the browser's own "No internet" screen. It is cached on the visitor's device, so it must
+  stand alone: inline styles, system fonts, and only the crest as an extra file.
+  The colours copy the tokens in src/app/(site)/brand.css; keep them in step.
+-->
+<html lang="en-UG">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>You are offline | Alliance High School Nansana</title>
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <style>
+      :root {
+        --maroon-50: #fdf3f3;
+        --maroon-700: #8b1a1a;
+        --maroon-800: #741417;
+        --maroon-900: #5c1013;
+        --cream-50: #fdfbf7;
+        --ink-500: #6b6f76;
+        --ink-800: #333333;
+        --ink-950: #141414;
+        --focus-ring: #b02024;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--cream-50);
+        color: var(--ink-800);
+        font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+      }
+      header { background: var(--maroon-800); color: #fff; border-bottom: 1px solid var(--maroon-900); }
+      .bar { max-width: 72rem; margin: 0 auto; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; }
+      .bar img { width: 44px; height: 44px; object-fit: contain; }
+      .name { font-family: Georgia, 'Times New Roman', serif; font-weight: 600; }
+      main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1rem; }
+      .box { max-width: 32rem; text-align: center; }
+      .icon {
+        width: 64px; height: 64px; margin: 0 auto; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--maroon-50); color: var(--maroon-700);
+      }
+      h1 { font-family: Georgia, 'Times New Roman', serif; color: var(--ink-950); font-size: 1.875rem; line-height: 1.2; margin: 1.5rem 0 0; }
+      p { margin: 1rem 0 0; }
+      .muted { color: var(--ink-500); font-size: 0.875rem; }
+      .button {
+        display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
+        margin-top: 2rem; padding: 0.625rem 1.25rem; border: 0; border-radius: 0.5rem;
+        background: var(--maroon-700); color: #fff; font: inherit; font-size: 0.875rem; font-weight: 500;
+        text-decoration: none; cursor: pointer;
+      }
+      .button:hover { background: var(--maroon-800); }
+      .button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="bar">
+        <img src="/brand/crest.png?v=2" alt="" width="44" height="44" />
+        <span class="name">Alliance High School Nansana</span>
+      </div>
+    </header>
+
+    <main>
+      <div class="box" role="alert">
+        <div class="icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h.01" /><path d="M8.5 16.43a5 5 0 0 1 7 0" /><path d="M5 12.86a10 10 0 0 1 5.17-2.69" />
+            <path d="M19 12.86a10 10 0 0 0-2.01-1.48" /><path d="M2 8.82a15 15 0 0 1 4.18-2.65" />
+            <path d="M22 8.82a15 15 0 0 0-11.29-3.76" /><path d="m2 2 20 20" />
+          </svg>
+        </div>
+        <h1>You are offline</h1>
+        <p>
+          This page needs an internet connection, and your phone or computer does not have one at
+          the moment. Check your mobile data or Wi-Fi.
+        </p>
+        <p class="muted">The page will reload by itself as soon as the connection is back.</p>
+        <a class="button" href="" id="retry">Try again</a>
+      </div>
+    </main>
+
+    <script>
+      // The link above already reloads without script; this only makes it automatic.
+      window.addEventListener('online', function () { window.location.reload() })
+    </script>
+  </body>
+</html>

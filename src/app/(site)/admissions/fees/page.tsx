@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 
 /** Placeholder amounts are shown in a muted style so nobody mistakes one for a figure. */
 function Amount({ value }: { value?: string | null }) {
-  if (!value) return <span className="text-[var(--text-muted)]">—</span>
+  if (!value) return <span className="text-[var(--text-muted)]">Not set</span>
   if (isContentPlaceholder(value)) {
     return <span className="text-sm text-[var(--text-muted)] italic">to be confirmed</span>
   }
@@ -64,7 +64,7 @@ export default async function FeesPage() {
               <Info className="mt-0.5 h-5 w-5 shrink-0 text-gold-700" aria-hidden />
               <p className="text-sm text-ink-800">
                 The fees for the coming term have not been published yet. Please call the bursar&rsquo;s
-                office for the current figures — we would rather show nothing than a figure that is out
+                office for the current figures. We would rather show nothing than a figure that is out
                 of date.
               </p>
             </div>

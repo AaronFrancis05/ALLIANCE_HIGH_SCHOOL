@@ -26,12 +26,12 @@ export const metadata: Metadata = {
 const LEVELS = [
   {
     id: 'o-level',
-    title: 'O-Level — Senior One to Senior Four',
+    title: 'O-Level: Senior One to Senior Four',
     body: 'The competence-based lower secondary curriculum, ending in the Uganda Certificate of Education. Learners take a broad set of subjects and are assessed continuously as well as at the end.',
   },
   {
     id: 'a-level',
-    title: 'A-Level — Senior Five and Senior Six',
+    title: 'A-Level: Senior Five and Senior Six',
     body: 'Two years of specialist study ending in the Uganda Advanced Certificate of Education. Students choose a combination built around the subjects they are strongest in.',
   },
 ]

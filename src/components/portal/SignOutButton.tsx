@@ -19,7 +19,7 @@ function Button() {
       className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium whitespace-nowrap text-cream-200 hover:bg-maroon-700 hover:text-white disabled:opacity-60"
     >
       <LogOut className="h-4 w-4" aria-hidden />
-      {pending ? 'Signing out…' : 'Sign out'}
+      {pending ? 'Signing out' : 'Sign out'}
     </button>
   )
 }
