@@ -9,10 +9,10 @@ entry short: what changed, what was verified, what is left.
 
 ---
 
-## Current status (as of 2026-10-10)
+## Current status (as of 2026-10-11)
 
 **Where we are:** P0–P4 done; P2 now done (P2-T11 leadership/staff, P2-T12 careers); P3 done; P5 done (P5-T1 to P5-T5). P6 hardening and P7 launch remain.
-**Latest:** 2026-10-11 branded error pages (site, portal, global) and an offline fallback page (service worker), uncommitted. Earlier the same day: student sign-in hang fixed (pool starvation) and show-password button, uncommitted on `fix/P6-prod-db-pool-email`. Before that: production log fixes on `fix/P6-prod-db-pool-email` (not committed): DB connections released before Vercel suspends an instance, no SMTP verify on cold start. **Owner action on Vercel**: `DATABASE_URL` to the transaction pooler (port 6543) and a real `SMTP_HOST`.
+**Latest:** Review fixes: offline fallback always returns a response, precache matching is same-origin, transactional audit failures propagate, password padding is merged, stale seed command removed, and comments clarified. 2026-10-11 branded error pages (site, portal, global) and an offline fallback page (service worker), uncommitted. Earlier the same day: student sign-in hang fixed (pool starvation) and show-password button, uncommitted on `fix/P6-prod-db-pool-email`. Before that: production log fixes on `fix/P6-prod-db-pool-email` (not committed): DB connections released before Vercel suspends an instance, no SMTP verify on cold start. **Owner action on Vercel**: `DATABASE_URL` to the transaction pooler (port 6543) and a real `SMTP_HOST`.
 **Next up:** student bulk import (CSV, dry run; fills the `import:students` loose end), P6 site-wide search and performance budget, or P4-T bulk report-card import (FR-12). Contact details in docs/CONTENT_TODO.md deliberately left until launch (school owner's call, 2026-09-23).
 
 ### Health checks
@@ -82,6 +82,11 @@ entry short: what changed, what was verified, what is left.
 ---
 
 ## Log
+
+### 2026-10-11 (review fixes)
+
+- Verified all seven supplied findings against current code and fixed them. Added service-worker and audit regression tests.
+- Validation: `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass (222 tests, including 19 new regression cases). Seed-command removal and padding-merge smoke checks pass. E2E and 360 px application checks blocked by absent local configuration and seeded fixtures; the seed implementation remains intentionally untracked.
 
 ### 2026-10-11 (branded error and offline pages)
 - **Why**: production `/portal/sign-in` showed Next's unbranded "This page couldn't load". The app had a branded 404 but no error boundary.

@@ -7,6 +7,7 @@
 
 import React, { useState, type InputHTMLAttributes } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
+import { twMerge } from 'tailwind-merge'
 
 type PasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & { id: string }
 
@@ -15,7 +16,7 @@ export function PasswordInput({ id, className, ...inputProps }: PasswordInputPro
 
   return (
     <div className="relative">
-      <input {...inputProps} id={id} type={visible ? 'text' : 'password'} className={`${className ?? ''} pr-12`} />
+      <input {...inputProps} id={id} type={visible ? 'text' : 'password'} className={twMerge(className, 'pr-12')} />
       <button
         type="button"
         onClick={() => setVisible((shown) => !shown)}

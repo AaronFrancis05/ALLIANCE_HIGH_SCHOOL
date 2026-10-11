@@ -36,12 +36,27 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
 
   if (request.mode === 'navigate') {
-    event.respondWith(fetch(request).catch(() => caches.match(OFFLINE_URL)))
+    event.respondWith(
+      fetch(request).catch(
+        async () =>
+          (await caches.match(OFFLINE_URL)) ?? new Response('Service unavailable', { status: 503 }),
+      ),
+    )
     return
   }
 
   // The offline page's own crest and icon, which cannot be fetched while offline.
-  if (request.method === 'GET' && PRECACHE.some((path) => request.url.endsWith(path))) {
-    event.respondWith(fetch(request).catch(() => caches.match(request)))
+  const url = new URL(request.url)
+  if (
+    request.method === 'GET' &&
+    url.origin === self.location.origin &&
+    PRECACHE.includes(url.pathname + url.search)
+  ) {
+    event.respondWith(
+      fetch(request).catch(
+        async () =>
+          (await caches.match(request)) ?? new Response('Service unavailable', { status: 503 }),
+      ),
+    )
   }
 })

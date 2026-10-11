@@ -4,8 +4,8 @@
  * Records who did what, when and from where, for logins, permission changes, fee
  * clearance changes and every report-card access attempt.
  *
- * Writing an audit entry must never break the action being audited, so failures here are
- * logged and swallowed.
+ * Failures in a separate audit transaction are logged and swallowed. Failures inside the
+ * caller's transaction are rethrown so the caller can roll back the operation.
  */
 
 import type { PayloadRequest } from 'payload'
@@ -87,6 +87,7 @@ export async function recordAudit(
       ...(options.inTransaction ? { req } : {}),
     })
   } catch (error) {
+    if (options.inTransaction) throw error
     logger.error('Could not write audit entry', { action: entry.action, error })
   }
 }

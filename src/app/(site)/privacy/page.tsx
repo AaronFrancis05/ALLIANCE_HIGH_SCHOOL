@@ -3,7 +3,7 @@
  *
  * The site holds personal data about children, so this page states plainly what is held,
  * why, who can see it and how long it is kept. It mirrors the data rules in docs/SRS.md
- * section 6, if one changes, change both.
+ * section 6. If one changes, change both.
  */
 
 import React from 'react'
