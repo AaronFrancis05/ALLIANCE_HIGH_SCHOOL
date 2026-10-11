@@ -16,7 +16,6 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "images": "tsx scripts/optimize-images.ts",
     "images:guide": "tsx scripts/generate-image-guide.ts",
-    "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/seed.ts",
     "import:students": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/import-students.ts",
     "retention": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/retention.ts",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",

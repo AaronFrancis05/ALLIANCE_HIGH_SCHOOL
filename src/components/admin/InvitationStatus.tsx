@@ -81,7 +81,7 @@ export function InvitationStatus() {
       </p>
       {canInviteStaff(user) ? (
         <Button buttonStyle="secondary" size="small" disabled={sending} onClick={resend}>
-          {sending ? 'Sending…' : legacy ? 'Send invitation' : 'Send invitation again'}
+          {sending ? 'Sending' : legacy ? 'Send invitation' : 'Send invitation again'}
         </Button>
       ) : null}
     </div>

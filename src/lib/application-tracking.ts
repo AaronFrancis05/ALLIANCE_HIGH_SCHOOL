@@ -27,7 +27,7 @@ function digitsOnly(value: string): string {
   return value.replace(/\D/g, '')
 }
 
-/** True when two ways of writing a number name the same phone: 0772…, +256 772…, 256772…. */
+/** True when two ways of writing a number name the same phone, including prefixes 0772, +256 772 or 256772. */
 export function samePhone(a: string, b: string): boolean {
   const left = normaliseUgandanPhone(a)
   const right = normaliseUgandanPhone(b)

@@ -2,7 +2,7 @@
  * Photo gallery index (FR-01).
  *
  * Albums are covered images that link through to the full set. Every tile has fixed
- * dimensions and a blur placeholder, so the grid never collapses while loading — the
+ * dimensions and a blur placeholder, so the grid never collapses while loading, the
  * flaw on the reference site this replaces.
  */
 

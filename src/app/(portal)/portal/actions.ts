@@ -105,12 +105,8 @@ export async function signInAction(_previous: SignInState, formData: FormData): 
       }
     }
 
+    // The Students afterLogin hook has already written the student.login audit entry.
     await setStudentSessionCookie(payload, result.token, result.exp)
-
-    await recordAudit(
-      { ...auditReq, user: result.user } as unknown as Parameters<typeof recordAudit>[0],
-      { action: 'student.login', targetType: 'students', targetId: String(result.user.id) },
-    )
   } catch (error) {
     // Payload throws for both a wrong password and a locked account.
     logger.warn('Student sign-in refused', { reason: error instanceof Error ? error.name : 'unknown' })

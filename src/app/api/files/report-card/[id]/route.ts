@@ -4,8 +4,8 @@
  * This route is the only way a report card file can be reached. It:
  *   1. verifies the session with Payload (never trusts anything the browser sent),
  *   2. loads the card, its term and the bursar's clearance **with overrideAccess: false**,
- *   3. asks `evaluateReportCardAccess` — the same pure function the portal page uses and
- *      the unit tests cover — whether this person may have this file,
+ *   3. asks `evaluateReportCardAccess`, the same pure function the portal page uses and
+ *      the unit tests cover, whether this person may have this file,
  *   4. writes the outcome to the audit log either way,
  *   5. only then mints a signed URL that expires in five minutes and redirects to it.
  *

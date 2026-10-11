@@ -3,7 +3,7 @@
  *
  * Lists the fixed pages plus every published post, event and album, so a new article is
  * discoverable without waiting for Google to crawl its way to it. The student portal and
- * the admin panel are deliberately absent — they are noindex.
+ * the admin panel are deliberately absent. They are noindex.
  */
 
 import type { MetadataRoute } from 'next'

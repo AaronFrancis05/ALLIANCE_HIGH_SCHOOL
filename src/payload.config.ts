@@ -118,6 +118,9 @@ export default buildConfig({
       // instances used them up and every page failed with EMAXCONNSESSION.
       max: env.database.poolMax,
       idleTimeoutMillis: 10_000,
+      // node-postgres waits for a free connection forever by default, so a starved pool
+      // hung student sign-in until Vercel killed it at 300 s. Fail with an error instead.
+      connectionTimeoutMillis: 10_000,
     },
   }),
 

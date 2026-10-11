@@ -20,7 +20,7 @@ export const revalidate = 3600
 export const metadata: Metadata = {
   title: 'Student life',
   description:
-    'Clubs, societies, sport and boarding at Alliance High School Nansana — what students do beyond the classroom.',
+    'Clubs, societies, sport and boarding at Alliance High School Nansana: what students do beyond the classroom.',
   alternates: { canonical: '/student-life' },
 }
 

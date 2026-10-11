@@ -9,6 +9,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   canInviteStaff,
+  deleteOtherStaff,
+  fieldSuperAdminOnOthers,
   hiddenUnless,
   ownPasswordOnly,
   passwordNeverOnCreate,
@@ -77,6 +79,50 @@ describe('staff invitations', () => {
 
   it('a deactivated super admin is refused', () => {
     expect(canInviteStaff(staff({ role: 'superAdmin', active: false }))).toBe(false)
+  })
+})
+
+describe('roles and the active flag', () => {
+  it('the super admin may change another staff member’s role, including another super admin', () => {
+    expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role: 'superAdmin' }), 4))).toBe(true)
+    expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role: 'superAdmin' }), '4'))).toBe(true)
+  })
+
+  it('the super admin cannot change their own role or deactivate themselves', () => {
+    expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role: 'superAdmin' }), 1))).toBe(false)
+    expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role: 'superAdmin' }), '1'))).toBe(false)
+  })
+
+  it('no other role may change anyone’s role, their own included', () => {
+    for (const role of ['editor', 'hod', 'registrar', 'bursar', 'admissions', 'teacher'] as const) {
+      expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role }), 1))).toBe(false)
+      expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role }), 4))).toBe(false)
+    }
+  })
+
+  it('a deactivated super admin, a student and an anonymous visitor are refused', () => {
+    expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role: 'superAdmin', active: false }), 4))).toBe(false)
+    expect(fieldSuperAdminOnOthers(args(student({ id: 1 }), 4))).toBe(false)
+    expect(fieldSuperAdminOnOthers(args(null, 4))).toBe(false)
+  })
+
+  it('refuses when there is no document id to compare with', () => {
+    expect(fieldSuperAdminOnOthers(args(staff({ role: 'superAdmin' })))).toBe(false)
+  })
+})
+
+describe('deleting staff accounts', () => {
+  it('the super admin may delete any account but their own', () => {
+    expect(deleteOtherStaff(args(staff({ id: 1, role: 'superAdmin' })))).toEqual({ id: { not_equals: 1 } })
+  })
+
+  it('every other role, a deactivated super admin, a student and nobody are refused', () => {
+    for (const role of ['editor', 'hod', 'registrar', 'bursar', 'admissions', 'teacher'] as const) {
+      expect(deleteOtherStaff(args(staff({ role })))).toBe(false)
+    }
+    expect(deleteOtherStaff(args(staff({ role: 'superAdmin', active: false })))).toBe(false)
+    expect(deleteOtherStaff(args(student()))).toBe(false)
+    expect(deleteOtherStaff(args(null))).toBe(false)
   })
 })
 

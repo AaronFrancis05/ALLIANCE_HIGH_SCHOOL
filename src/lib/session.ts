@@ -5,7 +5,7 @@
  * Payload's `auth` so the session is verified by Payload, never trusted from the browser.
  *
  * Students and staff are separate collections, so `currentStudent()` can never return a
- * staff account and vice versa — a structural guarantee rather than a condition someone
+ * staff account and vice versa, a structural guarantee rather than a condition someone
  * has to remember to write.
  */
 

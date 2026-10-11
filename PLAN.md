@@ -58,6 +58,7 @@ Task IDs follow `P<phase>-T<number>`. IDs marked *(proposed)* have not been agre
 them before you open a branch.
 
 ### Step 0: housekeeping (before any new feature)
+- [x] Resolve reviewed offline fallbacks, precache matching, password padding, audit error propagation, stale seed command and comments (2026-10-11).
 - [x] Commit the current work. Everything since `064eda3 feat: initial commit` is uncommitted
       (71 changed or untracked paths). Split the commits by phase so the history can be read.
 - [ ] Run `pnpm e2e` with the Docker services up and record the result in MEMORY.md.
@@ -100,6 +101,7 @@ them before you open a branch.
 - [ ] `pnpm audit` in CI (A06). No CI exists yet
 - [x] Search appearance: site name, favicon, home title and snippet, share image, canonical fix (FR-24, docs/SEO.md)
 - [x] Branded 404 for unknown URLs; contact-page map always shown (FR-21); production DB pool capped
+- [x] Branded error pages (site, portal, global) and an offline fallback page via a minimal service worker
 - [ ] Switch Vercel `DATABASE_URL` to the Supabase transaction pooler (port 6543)
 
 ### P7: launch

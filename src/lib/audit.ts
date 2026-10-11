@@ -4,8 +4,8 @@
  * Records who did what, when and from where, for logins, permission changes, fee
  * clearance changes and every report-card access attempt.
  *
- * Writing an audit entry must never break the action being audited, so failures here are
- * logged and swallowed.
+ * Failures in a separate audit transaction are logged and swallowed. Failures inside the
+ * caller's transaction are rethrown so the caller can roll back the operation.
  */
 
 import type { PayloadRequest } from 'payload'
@@ -53,7 +53,20 @@ function clientIp(req: PayloadRequest): string {
   return req.headers?.get?.('x-real-ip') ?? 'unknown'
 }
 
-export async function recordAudit(req: PayloadRequest, entry: AuditEntry): Promise<void> {
+export interface AuditOptions {
+  /**
+   * Write the entry inside the caller's database transaction instead of a new one. Use it
+   * from hooks that run while a lock already holds a connection (sign-in), so the entry does
+   * not need a connection of its own. The entry is then rolled back with the operation.
+   */
+  inTransaction?: boolean
+}
+
+export async function recordAudit(
+  req: PayloadRequest,
+  entry: AuditEntry,
+  options: AuditOptions = {},
+): Promise<void> {
   try {
     const actor = req.user
     await req.payload.create({
@@ -71,8 +84,10 @@ export async function recordAudit(req: PayloadRequest, entry: AuditEntry): Promi
       },
       // The log is written on behalf of the system, not the signed-in user.
       overrideAccess: true,
+      ...(options.inTransaction ? { req } : {}),
     })
   } catch (error) {
+    if (options.inTransaction) throw error
     logger.error('Could not write audit entry', { action: entry.action, error })
   }
 }

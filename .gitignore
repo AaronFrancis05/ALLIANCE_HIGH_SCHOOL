@@ -62,3 +62,7 @@ node_modules/
 
 # Local dev server log
 /dev.log
+
+# Seed code creates accounts with a known password; kept local only, never published
+/scripts/seed.ts
+/src/app/api/admin/seed/

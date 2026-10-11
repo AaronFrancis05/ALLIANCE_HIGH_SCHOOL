@@ -74,7 +74,7 @@ function SubmitButton() {
       disabled={pending}
       className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-maroon-700 px-6 text-sm font-semibold text-white transition-colors hover:bg-maroon-800 disabled:opacity-70 sm:w-auto"
     >
-      {pending ? 'Sending…' : 'Send message'}
+      {pending ? 'Sending' : 'Send message'}
     </button>
   )
 }

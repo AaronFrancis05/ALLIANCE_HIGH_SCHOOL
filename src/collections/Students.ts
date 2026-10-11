@@ -221,11 +221,14 @@ export const Students: CollectionConfig = {
     ],
     afterLogin: [
       async ({ req, user }) => {
-        await recordAudit(req, {
-          action: 'student.login',
-          targetType: 'students',
-          targetId: String(user.id),
-        })
+        // Inside the login's own transaction: portal sign-in already holds one connection
+        // for the per-account lock and one for this transaction, and production's pool is
+        // small. A third connection here could wait forever for a free one.
+        await recordAudit(
+          req,
+          { action: 'student.login', targetType: 'students', targetId: String(user.id) },
+          { inTransaction: true },
+        )
       },
     ],
   },

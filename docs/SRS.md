@@ -95,7 +95,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 | FR-20 | Events have dates and a location, and can be added to a phone calendar (.ics). | Built |
 | FR-21 | Contact, alumni and careers enquiries are captured, rate-limited and spam-protected. | Built |
 | FR-22 | Site-wide search across pages, news and resources. | Planned |
-| FR-23 | Sensitive actions — sign-in, report card access, clearance changes, releases — are written to an append-only audit log. | Built |
+| FR-23 | Sensitive actions — sign-in, report card access, clearance changes, releases — are written to an append-only audit log. | Built; transactional insert failures propagate to the caller |
 | FR-24 | Every page carries a title, description, canonical URL, Open Graph tags and structured data; the school appears as an organisation Google can understand. | Built |
 
 ## 4. Non-functional requirements
@@ -107,7 +107,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 | NFR-03 | The site works at 360 px wide with no horizontal scrolling. | Mobile-first CSS; proved by an e2e test |
 | NFR-04 | Contrast at least 4.5:1, visible focus rings, touch targets at least 44×44 px, keyboard reachable. | Brand tokens, e2e checks |
 | NFR-05 | Personal data never appears in a URL, a log line or an error message. | Logger redaction; generic error messages |
-| NFR-06 | The whole system runs locally with `docker compose up -d`, `pnpm install`, `pnpm seed`, `pnpm dev`. | Compose file with Postgres, MinIO and Mailpit |
+| NFR-06 | The whole system runs locally with `docker compose up -d`, `pnpm install`, `pnpm seed`, `pnpm dev`. | Compose file with Postgres, MinIO and Mailpit; seed implementation intentionally untracked, stale command removed |
 | NFR-07 | Backups of the database and private files are automated, and restoring is a documented, tested procedure. | Planned — see DEPLOYMENT-VPS.md |
 
 ## 5. Security requirements (OWASP Top 10)

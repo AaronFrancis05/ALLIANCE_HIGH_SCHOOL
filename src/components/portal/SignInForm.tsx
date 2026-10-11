@@ -11,6 +11,7 @@ import React, { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { AlertCircle } from 'lucide-react'
 import { signInAction, type SignInState } from '../../app/(portal)/portal/actions'
+import { PasswordInput } from './PasswordInput'
 
 function SubmitButton() {
   const { pending } = useFormStatus()
@@ -21,7 +22,7 @@ function SubmitButton() {
       disabled={pending}
       className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-maroon-700 px-6 text-sm font-semibold text-white transition-colors hover:bg-maroon-800 disabled:opacity-70"
     >
-      {pending ? 'Signing in…' : 'Sign in'}
+      {pending ? 'Signing in' : 'Sign in'}
     </button>
   )
 }
@@ -62,10 +63,9 @@ export function SignInForm() {
         <label htmlFor="password" className="block text-sm font-medium text-[var(--text-strong)]">
           Password
         </label>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           required
           autoComplete="current-password"
           className="mt-1.5 min-h-12 w-full rounded-lg border border-cream-300 bg-white px-3 text-base text-ink-900 focus:border-maroon-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-maroon-600"
