@@ -560,7 +560,7 @@ export interface User {
    */
   name: string;
   /**
-   * Decides what this person can see and change.
+   * Decides what this person can see and change. Nobody can change their own role.
    */
   role: 'superAdmin' | 'editor' | 'hod' | 'registrar' | 'bursar' | 'admissions' | 'teacher';
   /**
@@ -568,7 +568,7 @@ export interface User {
    */
   department?: (number | null) | Department;
   /**
-   * Unchecked accounts keep their history but cannot sign in.
+   * Unchecked accounts keep their history but cannot sign in. Nobody can deactivate their own account.
    */
   active?: boolean | null;
   invitedAt?: string | null;

@@ -80,6 +80,13 @@ export function roles(...allowed: StaffRole[]): Access {
 
 export const superAdminOnly: Access = ({ req }) => hasRole(req.user as AnyUser, 'superAdmin')
 
+/** Staff accounts the super admin may delete: anyone's but their own. */
+export const deleteOtherStaff: Access = ({ req }) => {
+  const user = req.user as AnyUser
+  if (!hasRole(user, 'superAdmin')) return false
+  return { id: { not_equals: user!.id } }
+}
+
 /** Published content is public; drafts stay with the staff who can edit them. */
 export const publishedOrStaff: Access = ({ req }) => {
   if (isStaff(req.user as AnyUser)) return true
@@ -95,6 +102,15 @@ export function fieldRoles(...allowed: StaffRole[]): FieldAccess {
 }
 
 export const fieldSuperAdminOnly: FieldAccess = ({ req }) => hasRole(req.user as AnyUser, 'superAdmin')
+
+/**
+ * A staff account's role and active flag. Only the super admin changes them, and only on
+ * someone else's account: nobody promotes themselves, and a super admin cannot demote or
+ * deactivate themselves and leave the school with no one to manage staff. Another super
+ * admin can.
+ */
+export const fieldSuperAdminOnOthers: FieldAccess = ({ req, id }) =>
+  hasRole(req.user as AnyUser, 'superAdmin') && id !== undefined && String(req.user!.id) !== String(id)
 
 /**
  * Passwords are never typed in for someone else. New staff set theirs from an invitation
