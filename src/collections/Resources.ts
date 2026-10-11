@@ -17,6 +17,7 @@ import {
   HOLIDAY_WORK,
   SCHOOL_CLASSES,
   canFileResource,
+  filesOnlyHolidayWork,
   readResources,
   writeResources,
 } from '../access/resources'
@@ -26,11 +27,6 @@ import { titleFromFilename } from '../lib/resource-title'
 import { hideStorageKey } from '../access/private-files'
 import { RESOURCE_TYPES } from '../lib/resource-filters'
 import type { Subject } from '../payload-types'
-
-/** A teacher and nothing more: the super admin passes every `hasRole` check. */
-function isTeacherOnly(user: unknown): boolean {
-  return (user as StaffUser | null)?.role === 'teacher' && hasRole(user as StaffUser, 'teacher')
-}
 
 async function loadSubject(req: PayloadRequest, subject: unknown): Promise<Subject | null> {
   const id = typeof subject === 'object' && subject !== null ? (subject as { id: unknown }).id : subject
@@ -64,14 +60,14 @@ export const Resources: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'type', 'subject', 'classes', 'visibility', 'downloads'],
     group: 'e-Library',
-    hidden: hiddenUnless('editor', 'registrar', 'hod', 'teacher'),
+    hidden: hiddenUnless('editor', 'secretary', 'hod', 'teacher'),
     description: 'Notes, past papers, textbooks and schemes of work for students.',
   },
   access: {
     read: readResources,
     create: writeResources,
     update: writeResources,
-    delete: ({ req }) => hasRole(req.user as StaffUser, 'superAdmin', 'registrar'),
+    delete: ({ req }) => hasRole(req.user as StaffUser, 'secretary'),
   },
   upload: {
     // Stored in the private bucket; see payload.config.ts.
@@ -102,11 +98,11 @@ export const Resources: CollectionConfig = {
       name: 'type',
       type: 'select',
       required: true,
-      defaultValue: ({ user }) => (isTeacherOnly(user) ? HOLIDAY_WORK : 'notes'),
+      defaultValue: ({ user }) => (filesOnlyHolidayWork(user) ? HOLIDAY_WORK : 'notes'),
       options: [...RESOURCE_TYPES],
       // Teachers are offered holiday work only; the hook enforces it on the server.
       filterOptions: ({ options, req }) =>
-        isTeacherOnly(req.user) ? options.filter((option) => optionValue(option) === HOLIDAY_WORK) : options,
+        filesOnlyHolidayWork(req.user) ? options.filter((option) => optionValue(option) === HOLIDAY_WORK) : options,
       index: true,
       admin: {
         description:
@@ -132,7 +128,7 @@ export const Resources: CollectionConfig = {
       required: true,
       index: true,
       // A teacher is offered only the subjects they teach; the hook enforces it on the server.
-      filterOptions: ({ req }) => (isTeacherOnly(req.user) ? { id: { in: subjectIds(req.user as StaffUser) } } : true),
+      filterOptions: ({ req }) => (filesOnlyHolidayWork(req.user) ? { id: { in: subjectIds(req.user as StaffUser) } } : true),
     },
     {
       name: 'classes',
@@ -216,7 +212,7 @@ export const Resources: CollectionConfig = {
 
         // A teacher's holiday work is filed under its subject's department.
         let department = data?.department ?? originalDoc?.department
-        if (isTeacherOnly(req.user) && subject) department = subject.department
+        if (filesOnlyHolidayWork(req.user) && subject) department = subject.department
 
         // FR-07: a head of department files only under their own department, and a teacher
         // only holiday work for their own subjects, on create and on every update that
@@ -224,7 +220,7 @@ export const Resources: CollectionConfig = {
         if (req.user?.collection === 'users') {
           const touches = operation === 'create' || changesFiling || data?.department !== undefined
           if (touches && !canFileResource(req.user, { department, subject: subjectRef, type })) {
-            throw new APIError(isTeacherOnly(req.user) ? REFUSED.teacher : REFUSED.other, 403, undefined, true)
+            throw new APIError(filesOnlyHolidayWork(req.user) ? REFUSED.teacher : REFUSED.other, 403, undefined, true)
           }
         }
 

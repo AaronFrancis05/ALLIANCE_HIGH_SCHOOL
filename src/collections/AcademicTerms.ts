@@ -6,7 +6,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, hasRole, hiddenUnless, roles, type StaffUser } from '../access/roles'
+import { anyone, hasRole, hiddenUnless, roles, superAdminOnly, type StaffUser } from '../access/roles'
 import { recordAudit } from '../lib/audit'
 
 export const AcademicTerms: CollectionConfig = {
@@ -16,14 +16,14 @@ export const AcademicTerms: CollectionConfig = {
     useAsTitle: 'label',
     defaultColumns: ['label', 'year', 'term', 'resultsReleased', 'current'],
     group: 'Academics',
-    hidden: hiddenUnless('registrar'),
+    hidden: hiddenUnless('secretary'),
     description: 'School terms, reporting dates and the results release switch.',
   },
   access: {
     read: anyone, // term dates are public information
-    create: roles('superAdmin', 'registrar'),
-    update: roles('superAdmin', 'registrar'),
-    delete: roles('superAdmin'),
+    create: roles('secretary'),
+    update: roles('secretary'),
+    delete: superAdminOnly,
   },
   fields: [
     {
@@ -58,7 +58,7 @@ export const AcademicTerms: CollectionConfig = {
       name: 'resultsReleased',
       type: 'checkbox',
       defaultValue: false,
-      access: { update: ({ req }) => hasRole(req.user as StaffUser, 'registrar') },
+      access: { update: ({ req }) => hasRole(req.user as StaffUser, 'secretary') },
       admin: {
         position: 'sidebar',
         description:

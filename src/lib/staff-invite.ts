@@ -1,18 +1,19 @@
 /**
  * Staff invitations (FR-05, A07).
  *
- * The super admin adds a staff member with a name, email address and role, but never a
+ * The super admin adds a staff member with a name, email address and roles, but never a
  * password. The new account gets a long random password nobody knows, and the staff member
  * is emailed a link to choose their own. The link is Payload's password-reset token, issued
  * with a longer life (three days) because people do not always read work email at once.
- * It opens the admin's own "set a new password" screen, which signs them straight in.
+ * Staff open the staff portal's "choose your password" page; a super admin opens the
+ * admin's own reset screen, because that is the only door they sign in at.
  *
  * Sending again issues a fresh token, which replaces the previous one.
  */
 
 import crypto from 'node:crypto'
 import type { Payload, PayloadRequest } from 'payload'
-import { ROLE_LABELS, type StaffRole } from '../access/roles'
+import { ROLE_LABELS, type AccountType, type StaffRole } from '../access/roles'
 import { env } from './env'
 
 /** How long an invitation link works. */
@@ -28,8 +29,33 @@ export function unusablePassword(): string {
   return crypto.randomBytes(32).toString('base64url')
 }
 
-export function inviteLink(token: string, siteUrl = env.siteUrl): string {
-  return `${siteUrl}/admin/reset/${encodeURIComponent(token)}`
+/** Where an account signs in: the super admin at /admin, everyone else at /staff. */
+export function signInPath(accountType: AccountType | null | undefined): string {
+  return accountType === 'superAdmin' ? '/admin' : '/staff'
+}
+
+export function inviteLink(token: string, accountType: AccountType | null | undefined, siteUrl = env.siteUrl): string {
+  return `${siteUrl}${signInPath(accountType)}/reset/${encodeURIComponent(token)}`
+}
+
+/** "as Super Admin (ICT)", "as staff" or "as staff (Bursar, Teacher)". */
+function accessPhrase(accountType: AccountType | null | undefined, roles: readonly StaffRole[]): string {
+  if (accountType === 'superAdmin') return 'as Super Admin (ICT)'
+  if (!roles.length) return 'as staff'
+  return `as staff (${roles.map((role) => ROLE_LABELS[role]).join(', ')})`
+}
+
+/** The "forgot your password" email, linking to the account's own door. */
+export const resetEmail = {
+  subject: `Choose a new password for the ${SCHOOL} website`,
+  html(token: string, accountType: AccountType | null | undefined, siteUrl = env.siteUrl): string {
+    const link = inviteLink(token, accountType, siteUrl)
+    return [
+      '<p>Someone asked to reset the password for this staff account.</p>',
+      `<p><a href="${link}">Choose a new password</a> (the link works for one hour).</p>`,
+      '<p>If it was not you, ignore this email: your password stays as it is.</p>',
+    ].join('\n')
+  },
 }
 
 export interface InviteMessage {
@@ -37,13 +63,25 @@ export interface InviteMessage {
   text: string
 }
 
-export function inviteMessage(input: { name: string; role: StaffRole; link: string }): InviteMessage {
+export interface InviteAccount {
+  email: string
+  name: string
+  accountType?: AccountType | null
+  roles?: StaffRole[] | null
+}
+
+export function inviteMessage(input: {
+  name: string
+  accountType?: AccountType | null
+  roles?: readonly StaffRole[] | null
+  link: string
+}): InviteMessage {
   return {
     subject: `You have been invited to the ${SCHOOL} website`,
     text: [
       `Hello ${input.name},`,
       '',
-      `You have been given a staff account on the ${SCHOOL} website, as ${ROLE_LABELS[input.role]}.`,
+      `You have been given an account on the ${SCHOOL} website, ${accessPhrase(input.accountType, input.roles ?? [])}.`,
       '',
       'Choose your password here to finish setting it up:',
       input.link,
@@ -51,7 +89,7 @@ export function inviteMessage(input: { name: string; role: StaffRole; link: stri
       'The link works once and expires in three days. If it has expired, ask the ICT office to',
       'send a new one. Nobody from the school will ever ask you for your password.',
       '',
-      `After that, sign in at ${env.siteUrl}/admin with this email address.`,
+      `After that, sign in at ${env.siteUrl}${signInPath(input.accountType)} with this email address.`,
     ].join('\n'),
   }
 }
@@ -62,7 +100,7 @@ export function inviteMessage(input: { name: string; role: StaffRole; link: stri
  */
 export async function sendStaffInvite(
   payload: Payload,
-  account: { email: string; name: string; role: StaffRole },
+  account: InviteAccount,
   req?: PayloadRequest,
 ): Promise<void> {
   const token = await payload.forgotPassword({
@@ -75,7 +113,12 @@ export async function sendStaffInvite(
 
   if (!token) throw new Error('No invitation token was issued')
 
-  const message = inviteMessage({ name: account.name, role: account.role, link: inviteLink(token) })
+  const message = inviteMessage({
+    name: account.name,
+    accountType: account.accountType,
+    roles: account.roles,
+    link: inviteLink(token, account.accountType),
+  })
   // Sent directly rather than through the notifier, which swallows failures: the super
   // admin needs to know when an invitation did not go.
   await payload.sendEmail({ to: account.email, subject: message.subject, text: message.text })

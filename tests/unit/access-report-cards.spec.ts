@@ -15,7 +15,8 @@ import {
   writeReportCards,
   type GateInput,
 } from '../../src/access/report-cards'
-import type { StaffUser, StudentUser } from '../../src/access/roles'
+import type { StudentUser } from '../../src/access/roles'
+import { staffUser as staff, type StaffAs } from '../helpers/staff'
 
 const OWNER = 42
 
@@ -31,7 +32,11 @@ function gate(overrides: Partial<GateInput> = {}) {
   return evaluateReportCardAccess(input)
 }
 
-const staff = (role: StaffUser['role']): StaffUser => ({ id: 1, collection: 'users', role, active: true })
+/** The gate's view of a staff requester: their account type and roles. */
+const asStaff = (as: StaffAs) => {
+  const { accountType, roles } = staff(as)
+  return { requester: { id: 7, collection: 'users' as const }, requesterAccount: { accountType, roles } }
+}
 const student = (id: string | number = OWNER): StudentUser => ({ id, collection: 'students', status: 'active' })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,7 +61,7 @@ describe('evaluateReportCardAccess', () => {
 
   it('does not reveal whether the other report card exists', () => {
     const otherStudent = gate({ requester: { id: 999, collection: 'students' } })
-    const otherStaff = gate({ requester: { id: 7, collection: 'users' }, requesterRole: 'teacher' })
+    const otherStaff = gate(asStaff('teacher'))
     // Identical wording, so ids cannot be probed by comparing messages.
     expect(otherStudent).toMatchObject({ allowed: false })
     expect(otherStaff).toMatchObject({ allowed: false })
@@ -89,31 +94,42 @@ describe('evaluateReportCardAccess', () => {
     expect(result).toMatchObject({ reason: 'not-released' })
   })
 
-  it('lets the registrar fetch any card for support', () => {
-    expect(gate({ requester: { id: 7, collection: 'users' }, requesterRole: 'registrar' })).toEqual({
-      allowed: true,
-    })
+  it('lets the secretary fetch any card for support', () => {
+    expect(gate(asStaff('secretary'))).toEqual({ allowed: true })
+  })
+
+  it('lets the super admin fetch any card', () => {
+    expect(gate(asStaff('superAdmin'))).toEqual({ allowed: true })
   })
 
   it('refuses the bursar, who has no business reading results', () => {
-    const result = gate({ requester: { id: 7, collection: 'users' }, requesterRole: 'bursar' })
+    const result = gate(asStaff('bursar'))
     expect(result).toMatchObject({ allowed: false, reason: 'not-owner' })
   })
 
+  it('still refuses the bursar now that the bursar also runs admissions', () => {
+    expect(gate(asStaff(['bursar', 'teacher']))).toMatchObject({ allowed: false, reason: 'not-owner' })
+  })
+
+  it('refuses staff with no role', () => {
+    expect(gate(asStaff(null))).toMatchObject({ allowed: false, reason: 'not-owner' })
+  })
+
   it('refuses a teacher', () => {
-    const result = gate({ requester: { id: 7, collection: 'users' }, requesterRole: 'teacher' })
+    const result = gate(asStaff('teacher'))
     expect(result).toMatchObject({ allowed: false, reason: 'not-owner' })
   })
 })
 
 describe('readReportCards', () => {
-  it('gives the registrar the whole collection', () => {
-    expect(readReportCards(req(staff('registrar')))).toBe(true)
+  it('gives the secretary the whole collection', () => {
+    expect(readReportCards(req(staff('secretary')))).toBe(true)
   })
 
   it('refuses the bursar and the teacher', () => {
     expect(readReportCards(req(staff('bursar')))).toBe(false)
     expect(readReportCards(req(staff('teacher')))).toBe(false)
+    expect(readReportCards(req(staff(['bursar', 'editor'])))).toBe(false)
   })
 
   it('limits a student to their own rows', () => {
@@ -126,8 +142,8 @@ describe('readReportCards', () => {
 })
 
 describe('writeReportCards', () => {
-  it('is the registrar only', () => {
-    expect(writeReportCards(req(staff('registrar')))).toBe(true)
+  it('is the secretary only', () => {
+    expect(writeReportCards(req(staff('secretary')))).toBe(true)
     expect(writeReportCards(req(staff('superAdmin')))).toBe(true)
     expect(writeReportCards(req(staff('bursar')))).toBe(false)
     expect(writeReportCards(req(student()))).toBe(false)
@@ -138,13 +154,15 @@ describe('writeReportCards', () => {
 describe('clearances', () => {
   it('are written by the bursar only', () => {
     expect(writeClearances(req(staff('bursar')))).toBe(true)
-    expect(writeClearances(req(staff('registrar')))).toBe(false)
+    expect(writeClearances(req(staff('secretary')))).toBe(false)
     expect(writeClearances(req(student()))).toBe(false)
   })
 
   it('are readable by a student for their own record, so the portal can explain a block', () => {
     expect(readClearances(req(student(5)))).toEqual({ student: { equals: 5 } })
     expect(readClearances(req(staff('bursar')))).toBe(true)
+    expect(readClearances(req(staff('secretary')))).toBe(true)
+    expect(readClearances(req(staff('editor')))).toBe(false)
     expect(readClearances(req(null))).toBe(false)
   })
 })

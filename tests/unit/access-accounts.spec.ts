@@ -18,14 +18,9 @@ import {
   type StudentUser,
 } from '../../src/access/roles'
 import { canKeepStudentRecords, manageStudents, readStudents } from '../../src/access/students'
+import { staffUser, type StaffAs } from '../helpers/staff'
 
-const staff = (overrides: Partial<StaffUser> = {}): StaffUser => ({
-  id: 1,
-  collection: 'users',
-  role: 'teacher',
-  active: true,
-  ...overrides,
-})
+const staff = (as: StaffAs = 'teacher', overrides: Partial<StaffUser> = {}): StaffUser => staffUser(as, overrides)
 
 const student = (overrides: Partial<StudentUser> = {}): StudentUser => ({
   id: 9,
@@ -39,103 +34,103 @@ const args = (user: unknown, id?: string | number): any => ({ req: { user }, id 
 
 describe('passwords are never typed for someone else', () => {
   it('nobody can send a password when an account is created, not even the super admin', () => {
-    expect(passwordNeverOnCreate(args(staff({ role: 'superAdmin' })))).toBe(false)
-    expect(passwordNeverOnCreate(args(staff({ role: 'registrar' })))).toBe(false)
+    expect(passwordNeverOnCreate(args(staff('superAdmin')))).toBe(false)
+    expect(passwordNeverOnCreate(args(staff('secretary')))).toBe(false)
     expect(passwordNeverOnCreate(args(null))).toBe(false)
   })
 
   it('a staff member may change their own password', () => {
-    expect(ownPasswordOnly(args(staff({ id: 4 }), 4))).toBe(true)
-    expect(ownPasswordOnly(args(staff({ id: 4 }), '4'))).toBe(true)
+    expect(ownPasswordOnly(args(staff('teacher', { id: 4 }), 4))).toBe(true)
+    expect(ownPasswordOnly(args(staff('teacher', { id: 4 }), '4'))).toBe(true)
   })
 
   it('the super admin cannot change another person’s password', () => {
-    expect(ownPasswordOnly(args(staff({ id: 1, role: 'superAdmin' }), 4))).toBe(false)
+    expect(ownPasswordOnly(args(staff('superAdmin', { id: 1 }), 4))).toBe(false)
   })
 
   it('a student, an anonymous visitor or a deactivated account cannot change a staff password', () => {
     expect(ownPasswordOnly(args(student({ id: 4 }), 4))).toBe(false)
     expect(ownPasswordOnly(args(null, 4))).toBe(false)
-    expect(ownPasswordOnly(args(staff({ id: 4, active: false }), 4))).toBe(false)
+    expect(ownPasswordOnly(args(staff('teacher', { id: 4, active: false }), 4))).toBe(false)
   })
 
   it('refuses when there is no document id to compare with', () => {
-    expect(ownPasswordOnly(args(staff({ id: 4 })))).toBe(false)
+    expect(ownPasswordOnly(args(staff('teacher', { id: 4 })))).toBe(false)
   })
 })
 
 describe('staff invitations', () => {
   it('only the super admin may invite', () => {
-    expect(canInviteStaff(staff({ role: 'superAdmin' }))).toBe(true)
+    expect(canInviteStaff(staff('superAdmin'))).toBe(true)
   })
 
   it('every other role, a student and an anonymous visitor are refused', () => {
-    for (const role of ['editor', 'hod', 'registrar', 'bursar', 'admissions', 'teacher'] as const) {
-      expect(canInviteStaff(staff({ role }))).toBe(false)
+    for (const role of ['editor', 'hod', 'secretary', 'bursar', 'teacher', null] as const) {
+      expect(canInviteStaff(staff(role))).toBe(false)
     }
     expect(canInviteStaff(student())).toBe(false)
     expect(canInviteStaff(null)).toBe(false)
   })
 
   it('a deactivated super admin is refused', () => {
-    expect(canInviteStaff(staff({ role: 'superAdmin', active: false }))).toBe(false)
+    expect(canInviteStaff(staff('superAdmin', { active: false }))).toBe(false)
   })
 })
 
 describe('roles and the active flag', () => {
   it('the super admin may change another staff member’s role, including another super admin', () => {
-    expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role: 'superAdmin' }), 4))).toBe(true)
-    expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role: 'superAdmin' }), '4'))).toBe(true)
+    expect(fieldSuperAdminOnOthers(args(staff('superAdmin', { id: 1 }), 4))).toBe(true)
+    expect(fieldSuperAdminOnOthers(args(staff('superAdmin', { id: 1 }), '4'))).toBe(true)
   })
 
   it('the super admin cannot change their own role or deactivate themselves', () => {
-    expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role: 'superAdmin' }), 1))).toBe(false)
-    expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role: 'superAdmin' }), '1'))).toBe(false)
+    expect(fieldSuperAdminOnOthers(args(staff('superAdmin', { id: 1 }), 1))).toBe(false)
+    expect(fieldSuperAdminOnOthers(args(staff('superAdmin', { id: 1 }), '1'))).toBe(false)
   })
 
   it('no other role may change anyone’s role, their own included', () => {
-    for (const role of ['editor', 'hod', 'registrar', 'bursar', 'admissions', 'teacher'] as const) {
-      expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role }), 1))).toBe(false)
-      expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role }), 4))).toBe(false)
+    for (const role of ['editor', 'hod', 'secretary', 'bursar', 'teacher', null] as const) {
+      expect(fieldSuperAdminOnOthers(args(staff(role, { id: 1 }), 1))).toBe(false)
+      expect(fieldSuperAdminOnOthers(args(staff(role, { id: 1 }), 4))).toBe(false)
     }
   })
 
   it('a deactivated super admin, a student and an anonymous visitor are refused', () => {
-    expect(fieldSuperAdminOnOthers(args(staff({ id: 1, role: 'superAdmin', active: false }), 4))).toBe(false)
+    expect(fieldSuperAdminOnOthers(args(staff('superAdmin', { id: 1, active: false }), 4))).toBe(false)
     expect(fieldSuperAdminOnOthers(args(student({ id: 1 }), 4))).toBe(false)
     expect(fieldSuperAdminOnOthers(args(null, 4))).toBe(false)
   })
 
   it('refuses when there is no document id to compare with', () => {
-    expect(fieldSuperAdminOnOthers(args(staff({ role: 'superAdmin' })))).toBe(false)
+    expect(fieldSuperAdminOnOthers(args(staff('superAdmin')))).toBe(false)
   })
 })
 
 describe('deleting staff accounts', () => {
   it('the super admin may delete any account but their own', () => {
-    expect(deleteOtherStaff(args(staff({ id: 1, role: 'superAdmin' })))).toEqual({ id: { not_equals: 1 } })
+    expect(deleteOtherStaff(args(staff('superAdmin', { id: 1 })))).toEqual({ id: { not_equals: 1 } })
   })
 
   it('every other role, a deactivated super admin, a student and nobody are refused', () => {
-    for (const role of ['editor', 'hod', 'registrar', 'bursar', 'admissions', 'teacher'] as const) {
-      expect(deleteOtherStaff(args(staff({ role })))).toBe(false)
+    for (const role of ['editor', 'hod', 'secretary', 'bursar', 'teacher', null] as const) {
+      expect(deleteOtherStaff(args(staff(role)))).toBe(false)
     }
-    expect(deleteOtherStaff(args(staff({ role: 'superAdmin', active: false })))).toBe(false)
+    expect(deleteOtherStaff(args(staff('superAdmin', { active: false })))).toBe(false)
     expect(deleteOtherStaff(args(student()))).toBe(false)
     expect(deleteOtherStaff(args(null))).toBe(false)
   })
 })
 
 describe('student records', () => {
-  it('the registrar and the super admin keep them', () => {
-    expect(canKeepStudentRecords(staff({ role: 'registrar' }))).toBe(true)
-    expect(canKeepStudentRecords(staff({ role: 'superAdmin' }))).toBe(true)
-    expect(manageStudents(args(staff({ role: 'registrar' })))).toBe(true)
+  it('the secretary and the super admin keep them', () => {
+    expect(canKeepStudentRecords(staff('secretary'))).toBe(true)
+    expect(canKeepStudentRecords(staff('superAdmin'))).toBe(true)
+    expect(manageStudents(args(staff('secretary')))).toBe(true)
   })
 
   it('other staff cannot create or change them', () => {
-    for (const role of ['editor', 'hod', 'bursar', 'admissions', 'teacher'] as const) {
-      expect(manageStudents(args(staff({ role })))).toBe(false)
+    for (const role of ['editor', 'hod', 'bursar', 'teacher', null] as const) {
+      expect(manageStudents(args(staff(role)))).toBe(false)
     }
   })
 
@@ -152,29 +147,36 @@ describe('student records', () => {
     expect(manageStudents(args(null))).toBe(false)
   })
 
-  it('the content editor cannot read student records', () => {
-    expect(readStudents(args(staff({ role: 'editor' })))).toBe(false)
+  it('the content manager and staff with no role cannot read student records', () => {
+    expect(readStudents(args(staff('editor')))).toBe(false)
+    expect(readStudents(args(staff(null)))).toBe(false)
+  })
+
+  it('the secretary, bursar, head of department and teachers read them', () => {
+    for (const role of ['secretary', 'bursar', 'hod', 'teacher'] as const) {
+      expect(readStudents(args(staff(role))), role).toBe(true)
+    }
   })
 })
 
 describe('admin menu shows each role only its own sections', () => {
-  const studentsSection = hiddenUnless('registrar')
+  const studentsSection = hiddenUnless('secretary')
 
   it('shows a section to the roles that work in it', () => {
-    expect(studentsSection({ user: staff({ role: 'registrar' }) })).toBe(false)
+    expect(studentsSection({ user: staff('secretary') })).toBe(false)
   })
 
   it('shows every section to the super admin', () => {
-    expect(studentsSection({ user: staff({ role: 'superAdmin' }) })).toBe(false)
+    expect(studentsSection({ user: staff('superAdmin') })).toBe(false)
   })
 
   it('hides it from every other role', () => {
-    expect(studentsSection({ user: staff({ role: 'editor' }) })).toBe(true)
-    expect(studentsSection({ user: staff({ role: 'bursar' }) })).toBe(true)
+    expect(studentsSection({ user: staff('editor') })).toBe(true)
+    expect(studentsSection({ user: staff('bursar') })).toBe(true)
   })
 
   it('hides it from a deactivated account, a student and nobody at all', () => {
-    expect(studentsSection({ user: staff({ role: 'registrar', active: false }) })).toBe(true)
+    expect(studentsSection({ user: staff('secretary', { active: false }) })).toBe(true)
     expect(studentsSection({ user: student() })).toBe(true)
     expect(studentsSection({ user: null })).toBe(true)
   })

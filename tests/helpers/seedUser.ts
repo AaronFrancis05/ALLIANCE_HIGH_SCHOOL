@@ -5,7 +5,7 @@ export const testUser = {
   name: 'Test Administrator',
   email: 'dev@payloadcms.com',
   password: 'test',
-  role: 'superAdmin' as const,
+  accountType: 'superAdmin' as const,
   active: true,
 }
 

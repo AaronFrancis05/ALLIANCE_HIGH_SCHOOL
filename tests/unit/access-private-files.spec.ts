@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { mustHideStorageKey, withoutStorageKey } from '../../src/access/private-files'
 
 const student = { id: 9, collection: 'students', status: 'active' }
-const editor = { id: 1, collection: 'users', role: 'editor', active: true }
+const editor = { id: 1, collection: 'users', accountType: 'staff', roles: ['editor'], active: true }
 
 describe('mustHideStorageKey', () => {
   it('hides the key from a student reading over REST or GraphQL', () => {

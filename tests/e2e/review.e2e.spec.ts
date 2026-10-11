@@ -1,13 +1,13 @@
 /**
- * The admissions officer's review workflow (FR-19): stages follow the allowed steps, other
+ * The bursar's admissions review workflow (FR-19): stages follow the allowed steps, other
  * staff cannot change them, and the family is emailed at every step. Mail is read back from
  * Mailpit, which catches everything the app sends locally.
  */
 
 import { test, expect, type APIRequestContext } from '@playwright/test'
 import { createTestApplication, deleteTestApplication } from '../helpers/application'
+import { staffContext } from '../helpers/staff-portal'
 
-const STAFF_PASSWORD = 'AllianceDev1!'
 const MAILPIT = process.env.MAILPIT_URL ?? 'http://localhost:8025'
 
 test.setTimeout(180_000)
@@ -15,11 +15,6 @@ test.describe.configure({ mode: 'serial' })
 
 let application: { id: number; trackingCode: string }
 const guardianEmail = `review-${Date.now()}@example.test`
-
-async function signInStaff(request: APIRequestContext, email: string) {
-  const response = await request.post('/api/users/login', { data: { email, password: STAFF_PASSWORD } })
-  expect(response.ok()).toBe(true)
-}
 
 /** Subjects of the mail Mailpit holds for one address, oldest first. */
 async function mailFor(request: APIRequestContext, address: string): Promise<{ subject: string; text: string }[]> {
@@ -48,9 +43,9 @@ test.describe('Admissions review', () => {
       .toContain(`Application received: ${application.trackingCode}`)
   })
 
-  test('the officer moves it on step by step, and each step reaches the family', async ({ playwright, baseURL }) => {
-    const officer = await playwright.request.newContext({ baseURL })
-    await signInStaff(officer, 'admissions@alliancehigh.sc.ug')
+  test('the bursar moves it on step by step, and each step reaches the family', async ({ browser, playwright, baseURL }) => {
+    const bursar = await staffContext(browser, baseURL, 'bursar@alliancehigh.sc.ug')
+    const officer = bursar.request
     const url = `/api/applications/${application.id}`
 
     // A decision cannot be made before the application has been reviewed.
@@ -68,7 +63,7 @@ test.describe('Admissions review', () => {
     expect(saved.status).toBe('admitted')
     expect(saved.history.map((entry: { status: string }) => entry.status)).toEqual(['submitted', 'review', 'admitted'])
     expect(saved.statusChangedAt).toBeTruthy()
-    await officer.dispose()
+    await bursar.close()
 
     const request = await playwright.request.newContext()
     await expect
@@ -83,12 +78,13 @@ test.describe('Admissions review', () => {
     await request.dispose()
   })
 
-  test('other staff cannot read or move an application', async ({ playwright, baseURL }) => {
-    const editor = await playwright.request.newContext({ baseURL })
-    await signInStaff(editor, 'editor@alliancehigh.sc.ug')
-    const url = `/api/applications/${application.id}`
-    expect((await editor.get(url)).status()).toBe(403)
-    expect((await editor.patch(url, { data: { status: 'rejected' } })).status()).toBe(403)
-    await editor.dispose()
+  test('other staff cannot read or move an application', async ({ browser, baseURL }) => {
+    for (const email of ['editor@alliancehigh.sc.ug', 'secretary@alliancehigh.sc.ug']) {
+      const context = await staffContext(browser, baseURL, email)
+      const url = `/api/applications/${application.id}`
+      expect((await context.request.get(url)).status(), email).toBe(403)
+      expect((await context.request.patch(url, { data: { status: 'rejected' } })).status(), email).toBe(403)
+      await context.close()
+    }
   })
 })

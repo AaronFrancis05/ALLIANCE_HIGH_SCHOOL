@@ -14,18 +14,14 @@ import {
   canStudentOpenResource,
   readResources,
   visibleResourcesWhere,
+  filesOnlyHolidayWork,
   writeResources,
 } from '../../src/access/resources'
 import type { StaffUser } from '../../src/access/roles'
+import { staffUser, type StaffAs } from '../helpers/staff'
 import { titleFromFilename } from '../../src/lib/resource-title'
 
-const staff = (role: StaffUser['role'], department?: number): StaffUser => ({
-  id: 1,
-  collection: 'users',
-  role,
-  active: true,
-  department,
-})
+const staff = (as: StaffAs, department?: number): StaffUser => staffUser(as, { department })
 
 const student = (overrides: Record<string, unknown> = {}) => ({
   id: 9,
@@ -81,7 +77,7 @@ describe('readResources', () => {
 describe('writeResources', () => {
   it('allows editors and registrars anywhere', () => {
     expect(writeResources(req(staff('editor')))).toBe(true)
-    expect(writeResources(req(staff('registrar')))).toBe(true)
+    expect(writeResources(req(staff('secretary')))).toBe(true)
     expect(writeResources(req(staff('superAdmin')))).toBe(true)
   })
 
@@ -177,7 +173,7 @@ describe('canFileInDepartment', () => {
 
   it('lets editors and registrars file anywhere, and nobody else at all', () => {
     expect(canFileInDepartment(staff('editor'), 4)).toBe(true)
-    expect(canFileInDepartment(staff('registrar'), 4)).toBe(true)
+    expect(canFileInDepartment(staff('secretary'), 4)).toBe(true)
     expect(canFileInDepartment(staff('teacher', 3), 3)).toBe(false)
     expect(canFileInDepartment(student(), 3)).toBe(false)
     expect(canFileInDepartment(null, 3)).toBe(false)
@@ -235,17 +231,43 @@ describe('teachers and holiday work', () => {
     expect(canFileResource(staff('hod', 3), { type: 'holidayWork', subject: 7, department: 4 })).toBe(false)
   })
 
-  it('lets editors, registrars and the super admin file holiday work anywhere', () => {
-    for (const role of ['editor', 'registrar', 'superAdmin'] as const) {
+  it('lets content managers, the secretary and the super admin file holiday work anywhere', () => {
+    for (const role of ['editor', 'secretary', 'superAdmin'] as const) {
       expect(canFileResource(staff(role), { type: 'holidayWork', subject: 1, department: 1 }), role).toBe(true)
     }
   })
 
-  it('refuses students, the bursar, admissions and visitors', () => {
+  it('refuses students, the bursar, staff with no role and visitors', () => {
     const resource = { type: 'holidayWork', subject: 7, department: 3 }
     expect(canFileResource(student(), resource)).toBe(false)
     expect(canFileResource(staff('bursar'), resource)).toBe(false)
-    expect(canFileResource(staff('admissions'), resource)).toBe(false)
+    expect(canFileResource(staff(null), resource)).toBe(false)
     expect(canFileResource(null, resource)).toBe(false)
+  })
+})
+
+describe('a head of department who also teaches', () => {
+  const both = (subjects: number[]): StaffUser => ({ ...staff(['hod', 'teacher'], 3), subjects })
+
+  it('may edit their own department and their own holiday work elsewhere', () => {
+    expect(writeResources(req(both([7])))).toEqual({
+      or: [
+        { department: { equals: 3 } },
+        { and: [{ type: { equals: 'holidayWork' } }, { subject: { in: ['7'] } }] },
+      ],
+    })
+  })
+
+  it('may file holiday work for their subject under another department, but nothing else there', () => {
+    expect(canFileResource(both([7]), { type: 'holidayWork', subject: 7, department: 4 })).toBe(true)
+    expect(canFileResource(both([7]), { type: 'notes', subject: 7, department: 4 })).toBe(false)
+    expect(canFileResource(both([7]), { type: 'notes', subject: 9, department: 3 })).toBe(true)
+  })
+
+  it('is not limited to the teacher-only upload form', () => {
+    expect(filesOnlyHolidayWork(both([7]))).toBe(false)
+    expect(filesOnlyHolidayWork(teacher([7]))).toBe(true)
+    expect(filesOnlyHolidayWork(staff(['teacher', 'editor']))).toBe(false)
+    expect(filesOnlyHolidayWork(staff('superAdmin'))).toBe(false)
   })
 })

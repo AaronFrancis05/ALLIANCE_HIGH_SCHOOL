@@ -3,7 +3,7 @@
  *
  * Reading:  public items are open to everyone; anything else needs a signed-in student
  *           whose class is listed on the resource.
- * Writing:  editors and registrars anywhere; a head of department only inside their
+ * Writing:  content managers and the secretary anywhere; a head of department only inside their
  *           own department; a teacher only holiday work for a subject they teach;
  *           nobody else.
  */
@@ -64,29 +64,41 @@ export function visibleResourcesWhere(user: unknown): Where {
 
 export const readResources: Access = ({ req }) => visibleResourcesWhere(req.user)
 
+/** Roles that may manage any resource anywhere (the super admin passes too). */
+const LIBRARY_KEEPERS = ['editor', 'secretary'] as const
+
 /**
- * Editors and registrars may manage any resource; a HOD only their own department's; a
- * teacher only the holiday work of the subjects they teach.
+ * True for a teacher whose only way into the library is holiday work for their own
+ * subjects: no role that files elsewhere, and not the super admin. The admin form offers
+ * such a person holiday work and their subjects only.
+ */
+export function filesOnlyHolidayWork(user: unknown): boolean {
+  const staff = user as StaffUser | null
+  return hasRole(staff, 'teacher') && !hasRole(staff, ...LIBRARY_KEEPERS, 'hod')
+}
+
+/**
+ * Content managers and the secretary may manage any resource; a HOD only their own
+ * department's; a teacher only the holiday work of the subjects they teach. Someone who
+ * holds both of the last two gets both.
  */
 export const writeResources: Access = ({ req }) => {
   const user = req.user as StaffUser | null
 
-  if (hasRole(user, 'superAdmin', 'editor', 'registrar')) return true
+  if (hasRole(user, ...LIBRARY_KEEPERS)) return true
 
-  if (hasRole(user, 'hod')) {
-    const department = departmentId(user)
-    if (!department) return false
-    return { department: { equals: department } }
+  const allowed: Where[] = []
+
+  const department = hasRole(user, 'hod') ? departmentId(user) : null
+  if (department) allowed.push({ department: { equals: department } })
+
+  const subjects = hasRole(user, 'teacher') ? subjectIds(user) : []
+  if (subjects.length) {
+    allowed.push({ and: [{ type: { equals: HOLIDAY_WORK } }, { subject: { in: subjects } }] })
   }
 
-  if (hasRole(user, 'teacher')) {
-    const subjects = subjectIds(user)
-    if (!subjects.length) return false
-    const ownHolidayWork: Where = { and: [{ type: { equals: HOLIDAY_WORK } }, { subject: { in: subjects } }] }
-    return ownHolidayWork
-  }
-
-  return false
+  if (!allowed.length) return false
+  return allowed.length === 1 ? allowed[0] : { or: allowed }
 }
 
 function idOf(value: unknown): string | null {
@@ -102,7 +114,7 @@ function idOf(value: unknown): string | null {
  */
 export function canFileInDepartment(user: unknown, department: unknown): boolean {
   const staff = user as StaffUser | null
-  if (hasRole(staff, 'superAdmin', 'editor', 'registrar')) return true
+  if (hasRole(staff, ...LIBRARY_KEEPERS)) return true
   if (!hasRole(staff, 'hod')) return false
   const own = departmentId(staff)
   const target = idOf(department)
@@ -120,8 +132,8 @@ export function canFileResource(
   resource: { department: unknown; subject: unknown; type: unknown },
 ): boolean {
   const staff = user as StaffUser | null
-  if (hasRole(staff, 'superAdmin', 'editor', 'registrar')) return true
-  if (hasRole(staff, 'hod')) return canFileInDepartment(staff, resource.department)
+  if (hasRole(staff, ...LIBRARY_KEEPERS)) return true
+  if (hasRole(staff, 'hod') && canFileInDepartment(staff, resource.department)) return true
   if (hasRole(staff, 'teacher')) {
     const subject = idOf(resource.subject)
     return resource.type === HOLIDAY_WORK && subject !== null && subjectIds(staff).includes(subject)

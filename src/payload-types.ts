@@ -547,7 +547,7 @@ export interface Category {
   createdAt: string;
 }
 /**
- * Add a staff member with their email address and role. They are emailed an invitation to choose their own password.
+ * Add a staff member with their email address and any roles. They are emailed an invitation to choose their own password and sign in at /staff.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -560,9 +560,13 @@ export interface User {
    */
   name: string;
   /**
-   * Decides what this person can see and change. Nobody can change their own role.
+   * The super admin reaches everything and signs in at /admin. Staff sign in at /staff.
    */
-  role: 'superAdmin' | 'editor' | 'hod' | 'registrar' | 'bursar' | 'admissions' | 'teacher';
+  accountType: 'staff' | 'superAdmin';
+  /**
+   * What this person works on, on top of staff access. Choose as many as apply. Without a role they can still use the staff portal.
+   */
+  roles?: ('editor' | 'secretary' | 'bursar' | 'hod' | 'teacher')[] | null;
   /**
    * Required for Heads of Department: they may only manage their own department.
    */
@@ -2134,7 +2138,8 @@ export interface ApplicationDocumentsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   password?: T;
   name?: T;
-  role?: T;
+  accountType?: T;
+  roles?: T;
   department?: T;
   subjects?: T;
   active?: T;

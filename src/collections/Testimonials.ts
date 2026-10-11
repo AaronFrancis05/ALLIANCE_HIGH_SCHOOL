@@ -11,9 +11,9 @@ export const Testimonials: CollectionConfig = {
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'role', 'featured'], group: 'Content', hidden: hiddenUnless('editor') },
   access: {
     read: anyone,
-    create: roles('superAdmin', 'editor'),
-    update: roles('superAdmin', 'editor'),
-    delete: roles('superAdmin', 'editor'),
+    create: roles('editor'),
+    update: roles('editor'),
+    delete: roles('editor'),
   },
   fields: [
     { name: 'name', type: 'text', required: true },

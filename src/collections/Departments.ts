@@ -4,7 +4,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, hiddenUnless, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles, superAdminOnly } from '../access/roles'
 
 export const Departments: CollectionConfig = {
   slug: 'departments',
@@ -13,13 +13,13 @@ export const Departments: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'code', 'head'],
     group: 'Academics',
-    hidden: hiddenUnless('editor', 'registrar'),
+    hidden: hiddenUnless('editor', 'secretary'),
   },
   access: {
     read: anyone,
-    create: roles('superAdmin', 'editor', 'registrar'),
-    update: roles('superAdmin', 'editor', 'registrar'),
-    delete: roles('superAdmin'),
+    create: roles('editor', 'secretary'),
+    update: roles('editor', 'secretary'),
+    delete: superAdminOnly,
   },
   fields: [
     { name: 'name', type: 'text', required: true, unique: true },
@@ -34,7 +34,7 @@ export const Departments: CollectionConfig = {
       name: 'head',
       type: 'relationship',
       relationTo: 'users',
-      filterOptions: { role: { in: ['hod', 'teacher'] } },
+      filterOptions: { roles: { in: ['hod', 'teacher'] } },
       admin: { description: 'Head of Department.' },
     },
     { name: 'description', type: 'textarea' },

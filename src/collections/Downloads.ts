@@ -14,13 +14,13 @@ export const Downloads: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'updatedAt'],
     group: 'Content',
-    hidden: hiddenUnless('editor', 'registrar', 'bursar', 'admissions'),
+    hidden: hiddenUnless('editor', 'secretary', 'bursar'),
   },
   access: {
     read: anyone,
-    create: roles('superAdmin', 'editor', 'registrar', 'bursar', 'admissions'),
-    update: roles('superAdmin', 'editor', 'registrar', 'bursar', 'admissions'),
-    delete: roles('superAdmin', 'editor'),
+    create: roles('editor', 'secretary', 'bursar'),
+    update: roles('editor', 'secretary', 'bursar'),
+    delete: roles('editor'),
   },
   upload: {
     mimeTypes: ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
