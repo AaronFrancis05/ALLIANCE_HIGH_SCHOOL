@@ -35,6 +35,7 @@ export interface StaffUser {
   collection: 'users'
   role?: StaffRole
   department?: string | number | { id: string | number } | null
+  subjects?: (string | number | { id: string | number })[] | null
   active?: boolean
 }
 
@@ -64,6 +65,12 @@ export function hasRole(user: AnyUser, ...roles: StaffRole[]): boolean {
 export function departmentId(user: AnyUser): string | number | null {
   if (!isStaff(user) || !user.department) return null
   return typeof user.department === 'object' ? user.department.id : user.department
+}
+
+/** Ids of the subjects a staff member teaches, as strings so ids of either type compare. */
+export function subjectIds(user: AnyUser): string[] {
+  if (!isStaff(user) || !Array.isArray(user.subjects)) return []
+  return user.subjects.map((subject) => String(typeof subject === 'object' ? subject.id : subject))
 }
 
 // ---------------------------------------------------------------- collection access

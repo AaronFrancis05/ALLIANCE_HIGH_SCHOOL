@@ -9,9 +9,12 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { getPayloadClient } from '../../../../../lib/payload'
 import { buildEventIcs } from '../../../../../lib/ics'
 import { env } from '../../../../../lib/env'
+import { parseSlug } from '../../../../../lib/validation'
 
 export async function GET(_request: NextRequest, context: { params: Promise<{ slug: string }> }) {
-  const { slug } = await context.params
+  const slug = parseSlug((await context.params).slug)
+  if (!slug) return NextResponse.json({ error: 'No such event.' }, { status: 404 })
+
   const payload = await getPayloadClient()
 
   // Read as the public: the collection's own rule leaves only published events visible.

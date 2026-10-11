@@ -13,6 +13,13 @@ add a row instead.
 
 ---
 
+## 0. Needed to switch features on
+
+| What | Why | Where |
+|---|---|---|
+| Which subjects each teacher teaches | Teachers can upload holiday work only for the subjects on their account | Admin → Staff accounts → Subjects (super admin) |
+| Which subjects hand out ZIP folders besides ICT | Only ticked subjects accept ZIP holiday work | Admin → Subjects → Accepts ZIP folders |
+
 ## 1. Must be confirmed before launch
 
 These are already on the site as if they were facts. They were taken from the material

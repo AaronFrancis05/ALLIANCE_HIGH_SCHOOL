@@ -76,6 +76,7 @@ them before you open a branch.
 ### P3: e-Library
 - [x] **P3-T1** Browse and filter by subject, class, type and year (FR-06)
 - [x] **P3-T2** Bulk resource upload for heads of department (FR-06, FR-07)
+- [x] **P3-T4** Holiday work: teacher uploads for their own subjects, PDF/Word only, ZIP folders for ICT practicals, own section in the student e-Library; Zod and container checks on uploads and URL params (FR-06a, A03). Still to do: an e2e run against a local database
 - [x] **P3-T3** Gated download route for restricted resources: re-check the session, return a
       5-minute signed URL (FR-08)
 

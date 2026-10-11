@@ -4,13 +4,17 @@
  * Reading:  public items are open to everyone; anything else needs a signed-in student
  *           whose class is listed on the resource.
  * Writing:  editors and registrars anywhere; a head of department only inside their
- *           own department; nobody else.
+ *           own department; a teacher only holiday work for a subject they teach;
+ *           nobody else.
  */
 
 import type { Access, Where } from 'payload'
-import { departmentId, hasRole, isStaff, isStudent, type StaffUser, type StudentUser } from './roles'
+import { departmentId, hasRole, isStaff, isStudent, subjectIds, type StaffUser, type StudentUser } from './roles'
 
 export type SchoolClass = 'S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6'
+
+/** The resource type teachers may upload: work set for the holidays. */
+export const HOLIDAY_WORK = 'holidayWork'
 
 export const SCHOOL_CLASSES: SchoolClass[] = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
 
@@ -60,7 +64,10 @@ export function visibleResourcesWhere(user: unknown): Where {
 
 export const readResources: Access = ({ req }) => visibleResourcesWhere(req.user)
 
-/** Editors and registrars may manage any resource; a HOD only their own department's. */
+/**
+ * Editors and registrars may manage any resource; a HOD only their own department's; a
+ * teacher only the holiday work of the subjects they teach.
+ */
 export const writeResources: Access = ({ req }) => {
   const user = req.user as StaffUser | null
 
@@ -72,7 +79,19 @@ export const writeResources: Access = ({ req }) => {
     return { department: { equals: department } }
   }
 
+  if (hasRole(user, 'teacher')) {
+    const subjects = subjectIds(user)
+    if (!subjects.length) return false
+    const ownHolidayWork: Where = { and: [{ type: { equals: HOLIDAY_WORK } }, { subject: { in: subjects } }] }
+    return ownHolidayWork
+  }
+
   return false
+}
+
+function idOf(value: unknown): string | null {
+  const id = typeof value === 'object' && value !== null ? (value as { id: unknown }).id : value
+  return id === null || id === undefined || id === '' ? null : String(id)
 }
 
 /**
@@ -86,8 +105,28 @@ export function canFileInDepartment(user: unknown, department: unknown): boolean
   if (hasRole(staff, 'superAdmin', 'editor', 'registrar')) return true
   if (!hasRole(staff, 'hod')) return false
   const own = departmentId(staff)
-  const target = typeof department === 'object' && department !== null ? (department as { id: unknown }).id : department
-  return own !== null && target !== null && target !== undefined && String(target) === String(own)
+  const target = idOf(department)
+  return own !== null && target !== null && target === String(own)
+}
+
+/**
+ * May this person save a resource of this type and subject in this department? Checked on
+ * every create and on every update that touches one of the three, for the same reason as
+ * `canFileInDepartment`: a teacher could otherwise create a resource for a subject they do
+ * not teach, or turn their holiday work into another kind of resource.
+ */
+export function canFileResource(
+  user: unknown,
+  resource: { department: unknown; subject: unknown; type: unknown },
+): boolean {
+  const staff = user as StaffUser | null
+  if (hasRole(staff, 'superAdmin', 'editor', 'registrar')) return true
+  if (hasRole(staff, 'hod')) return canFileInDepartment(staff, resource.department)
+  if (hasRole(staff, 'teacher')) {
+    const subject = idOf(resource.subject)
+    return resource.type === HOLIDAY_WORK && subject !== null && subjectIds(staff).includes(subject)
+  }
+  return false
 }
 
 /**

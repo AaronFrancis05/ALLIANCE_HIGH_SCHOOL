@@ -18,6 +18,7 @@ export const RESOURCE_TYPES = [
   { label: 'Past paper', value: 'pastPaper' },
   { label: 'Textbook', value: 'textbook' },
   { label: 'Scheme of work', value: 'scheme' },
+  { label: 'Holiday work', value: 'holidayWork' },
   { label: 'Video lesson', value: 'video' },
   { label: 'Other', value: 'other' },
 ] as const

@@ -568,6 +568,10 @@ export interface User {
    */
   department?: (number | null) | Department;
   /**
+   * The subjects this teacher teaches. They may upload holiday work for these subjects only.
+   */
+  subjects?: (number | Subject)[] | null;
+  /**
    * Unchecked accounts keep their history but cannot sign in. Nobody can deactivate their own account.
    */
   active?: boolean | null;
@@ -619,6 +623,27 @@ export interface Department {
    * One action shot that represents the department.
    */
   image?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subjects".
+ */
+export interface Subject {
+  id: number;
+  name: string;
+  code: string;
+  department: number | Department;
+  level: 'o' | 'a' | 'both';
+  /**
+   * Classes that take this subject.
+   */
+  classes?: ('S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6')[] | null;
+  /**
+   * Tick for subjects whose holiday work is handed out as a ZIP folder of practical files, such as ICT. Every folder is still checked for programs, scripts and macros.
+   */
+  acceptsArchives?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -865,23 +890,6 @@ export interface Vacancy {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "subjects".
- */
-export interface Subject {
-  id: number;
-  name: string;
-  code: string;
-  department: number | Department;
-  level: 'o' | 'a' | 'both';
-  /**
-   * Classes that take this subject.
-   */
-  classes?: ('S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6')[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Notes, past papers, textbooks and schemes of work for students.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -897,9 +905,12 @@ export interface Resource {
    * One or two lines so students know what is inside.
    */
   description?: string | null;
-  type: 'notes' | 'pastPaper' | 'textbook' | 'scheme' | 'video' | 'other';
   /**
-   * Heads of Department may only add resources to their own department.
+   * Holiday work takes PDF or Word (.docx) files only, and ZIP folders for subjects that accept them (ICT practicals).
+   */
+  type: 'notes' | 'pastPaper' | 'textbook' | 'scheme' | 'holidayWork' | 'video' | 'other';
+  /**
+   * Heads of Department may only add resources to their own department. For a teacher this is filled from the subject.
    */
   department: number | Department;
   subject: number | Subject;
@@ -1928,6 +1939,7 @@ export interface SubjectsSelect<T extends boolean = true> {
   department?: T;
   level?: T;
   classes?: T;
+  acceptsArchives?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2124,6 +2136,7 @@ export interface UsersSelect<T extends boolean = true> {
   name?: T;
   role?: T;
   department?: T;
+  subjects?: T;
   active?: T;
   invitedAt?: T;
   firstSignedInAt?: T;
