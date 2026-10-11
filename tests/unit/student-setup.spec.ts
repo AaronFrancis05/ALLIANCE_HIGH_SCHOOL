@@ -107,14 +107,28 @@ describe('student passwords', () => {
 
 describe('staff invitations', () => {
   it('link to the admin’s set-password screen with the token', () => {
-    expect(inviteLink('abc123', 'https://school.test')).toBe('https://school.test/admin/reset/abc123')
+    expect(inviteLink('abc123', 'staff', 'https://school.test')).toBe('https://school.test/staff/reset/abc123')
+    expect(inviteLink('abc123', 'superAdmin', 'https://school.test')).toBe('https://school.test/admin/reset/abc123')
   })
 
-  it('name the role and the link, and never a password', () => {
-    const message = inviteMessage({ name: 'Grace', role: 'bursar', link: 'https://school.test/admin/reset/abc' })
-    expect(message.text).toContain('Bursar')
-    expect(message.text).toContain('https://school.test/admin/reset/abc')
+  it('name the roles and the link, and never a password', () => {
+    const message = inviteMessage({
+      name: 'Grace',
+      accountType: 'staff',
+      roles: ['bursar', 'teacher'],
+      link: 'https://school.test/staff/reset/abc',
+    })
+    expect(message.text).toContain('as staff (Bursar, Teacher)')
+    expect(message.text).toContain('https://school.test/staff/reset/abc')
+    expect(message.text).toMatch(/sign in at .*\/staff /)
     expect(message.text).not.toMatch(/password is/i)
+  })
+
+  it('tell staff with no role that they have a staff account, and the super admin to use /admin', () => {
+    expect(inviteMessage({ name: 'Ann', accountType: 'staff', roles: [], link: 'x' }).text).toContain('as staff.')
+    const admin = inviteMessage({ name: 'Ann', accountType: 'superAdmin', link: 'x' }).text
+    expect(admin).toContain('as Super Admin (ICT)')
+    expect(admin).toMatch(/sign in at .*\/admin /)
   })
 
   it('give new accounts a long password nobody chose', () => {

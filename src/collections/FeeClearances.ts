@@ -7,7 +7,7 @@
 
 import type { CollectionConfig } from 'payload'
 import { readClearances, writeClearances } from '../access/report-cards'
-import { hasRole, hiddenUnless, type StaffUser } from '../access/roles'
+import { hiddenUnless, isSuperAdmin, type StaffUser } from '../access/roles'
 import { recordAudit } from '../lib/audit'
 
 export const FeeClearances: CollectionConfig = {
@@ -17,14 +17,14 @@ export const FeeClearances: CollectionConfig = {
     useAsTitle: 'label',
     defaultColumns: ['label', 'student', 'term', 'status', 'updatedAt'],
     group: 'Results',
-    hidden: hiddenUnless('bursar', 'registrar'),
+    hidden: hiddenUnless('bursar', 'secretary'),
     description: 'Which students are cleared to download their report card each term.',
   },
   access: {
     read: readClearances,
     create: writeClearances,
     update: writeClearances,
-    delete: ({ req }) => hasRole(req.user as StaffUser, 'superAdmin'),
+    delete: ({ req }) => isSuperAdmin(req.user as StaffUser),
   },
   fields: [
     {

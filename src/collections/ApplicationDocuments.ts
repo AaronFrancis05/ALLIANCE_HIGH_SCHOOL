@@ -7,7 +7,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { denyAll, hiddenUnless, roles } from '../access/roles'
+import { denyAll, hiddenUnless, superAdminOnly } from '../access/roles'
 import { readAdmissions } from '../access/admissions'
 import { assertAllowedUpload } from '../lib/upload-safety'
 import { hideStorageKey } from '../access/private-files'
@@ -18,14 +18,14 @@ export const ApplicationDocuments: CollectionConfig = {
   admin: {
     useAsTitle: 'filename',
     group: 'Admissions',
-    hidden: hiddenUnless('admissions'),
+    hidden: hiddenUnless('bursar'),
   },
   access: {
     // Created by the application route on the applicant's behalf.
     create: denyAll,
     read: readAdmissions,
     update: denyAll,
-    delete: roles('superAdmin'),
+    delete: superAdminOnly,
   },
   upload: {
     mimeTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],

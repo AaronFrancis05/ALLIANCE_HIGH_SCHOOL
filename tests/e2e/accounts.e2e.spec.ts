@@ -7,29 +7,39 @@
  * code never reveals whether an admission number exists.
  */
 
-import { test, expect, type APIRequestContext, type Page, type PlaywrightWorkerArgs } from '@playwright/test'
+import { test, expect, type Page, type PlaywrightWorkerArgs } from '@playwright/test'
 import { login } from '../helpers/login'
+import { STAFF_PASSWORD, signInAtStaffPortal, staffContext } from '../helpers/staff-portal'
 import { mailFor } from '../helpers/mailpit'
 import { createUnsetStudent, deleteStaffByEmail, deleteStudent } from '../helpers/accounts'
 import { STUDENTS } from '../helpers/student'
 
-const STAFF_PASSWORD = 'AllianceDev1!'
 const SUPER_ADMIN = 'admin@alliancehigh.sc.ug'
 const EDITOR = 'editor@alliancehigh.sc.ug'
-const REGISTRAR = 'registrar@alliancehigh.sc.ug'
+const SECRETARY = 'secretary@alliancehigh.sc.ug'
+const NO_ROLE = 'staff@alliancehigh.sc.ug'
 
 test.setTimeout(180_000)
 test.describe.configure({ mode: 'serial' })
 
-async function signInStaff(request: APIRequestContext, email: string) {
-  const response = await request.post('/api/users/login', { data: { email, password: STAFF_PASSWORD }, timeout: 120_000 })
+/** The super admin signs in through the API like the admin form does; the door allows it. */
+async function asSuperAdmin(playwright: PlaywrightWorkerArgs['playwright'], baseURL: string | undefined) {
+  const context = await playwright.request.newContext({ baseURL })
+  const response = await context.post('/api/users/login', {
+    data: { email: SUPER_ADMIN, password: STAFF_PASSWORD },
+    timeout: 120_000,
+  })
   expect(response.ok()).toBe(true)
+  return context
 }
 
-async function asStaff(playwright: PlaywrightWorkerArgs['playwright'], baseURL: string | undefined, email: string) {
-  const context = await playwright.request.newContext({ baseURL })
-  await signInStaff(context, email)
-  return context
+/** A staff portal sign-in that is expected to be refused, with the message shown. */
+async function expectStaffSignInRefused(page: Page, email: string, password: string) {
+  await page.goto('/staff/sign-in', { timeout: 180_000 })
+  await page.getByLabel('Email address').fill(email)
+  await page.getByLabel('Password', { exact: true }).fill(password)
+  await page.getByRole('button', { name: 'Sign in' }).click()
+  await expect(page.locator('form [role="alert"]')).toContainText('do not match')
 }
 
 const SENT_NOTICE = /a 6-digit code is on its way/i
@@ -59,32 +69,32 @@ test.describe('Staff invitations', () => {
     baseURL,
     page,
   }) => {
-    const admin = await asStaff(playwright, baseURL, SUPER_ADMIN)
+    const admin = await asSuperAdmin(playwright, baseURL)
     // A password typed for someone else is ignored.
     const created = await admin.post('/api/users', {
-      data: { name: 'Invited Teacher', email: invitee, role: 'teacher', password: 'Typed12345' },
+      data: { name: 'Invited Teacher', email: invitee, roles: ['teacher'], password: 'Typed12345' },
       timeout: 120_000,
     })
     expect(created.status()).toBe(201)
 
-    const typed = await page.request.post('/api/users/login', { data: { email: invitee, password: 'Typed12345' } })
-    expect(typed.ok()).toBe(false)
+    await expectStaffSignInRefused(page, invitee, 'Typed12345')
 
     // The invitation arrives with a link to choose a password.
     await expect.poll(async () => (await mailFor(page.request, invitee)).length).toBeGreaterThan(0)
     const [invitation] = await mailFor(page.request, invitee)
     expect(invitation.subject).toContain('invited')
-    const link = invitation.text.match(/https?:\/\/\S+\/admin\/reset\/\S+/)?.[0]
+    // Staff choose their password in the staff portal, not the admin.
+    const link = invitation.text.match(/https?:\/\/\S+\/staff\/reset\/\S+/)?.[0]
     expect(link).toBeTruthy()
 
     await page.goto(new URL(link!).pathname, { timeout: 180_000 })
-    await page.getByLabel('New Password').fill('Chosen12345!')
-    await page.getByLabel('Confirm Password').fill('Chosen12345!')
-    await page.getByRole('button', { name: 'Reset Password' }).click()
-    await page.waitForURL(/\/admin$/, { timeout: 180_000 })
+    await page.getByLabel('New password').fill('Chosen12345!')
+    await page.getByLabel('The same password again').fill('Chosen12345!')
+    await page.getByRole('button', { name: 'Save my password' }).click()
+    await page.waitForURL(/\/staff\/sign-in\?password=set$/, { timeout: 180_000 })
 
-    const chosen = await page.request.post('/api/users/login', { data: { email: invitee, password: 'Chosen12345!' } })
-    expect(chosen.ok()).toBe(true)
+    await signInAtStaffPortal(page, invitee, 'Chosen12345!')
+    await expect(page.getByText('Teacher').first()).toBeVisible()
     await admin.dispose()
   })
 
@@ -104,47 +114,86 @@ test.describe('Staff invitations', () => {
     }
   })
 
-  test('nobody but the super admin can add staff or send invitations', async ({ playwright, baseURL }) => {
-    const editor = await asStaff(playwright, baseURL, EDITOR)
+  test('nobody but the super admin can add staff or send invitations', async ({ browser, baseURL }) => {
+    const context = await staffContext(browser, baseURL, EDITOR)
+    const editor = context.request
     const create = await editor.post('/api/users', {
-      data: { name: 'Sneaky', email: `sneaky-${Date.now()}@example.test`, role: 'superAdmin' },
+      data: { name: 'Sneaky', email: `sneaky-${Date.now()}@example.test`, accountType: 'superAdmin' },
     })
     expect(create.status()).toBe(403)
 
     const me = (await (await editor.get('/api/users/me')).json()) as { user: { id: number } }
     const invite = await editor.post(`/api/users/${me.user.id}/invite`)
     expect(invite.status()).toBe(403)
-    await editor.dispose()
+
+    // Nor can they give themselves another role or make themselves the super admin.
+    await editor.patch(`/api/users/${me.user.id}`, { data: { roles: ['editor', 'secretary'], accountType: 'superAdmin' } })
+    const after = (await (await editor.get('/api/users/me')).json()) as { user: { roles: string[]; accountType: string } }
+    expect(after.user.roles).toEqual(['editor'])
+    expect(after.user.accountType).toBe('staff')
+    await context.close()
   })
 
   test('the super admin cannot set another person’s password', async ({ playwright, baseURL, page }) => {
-    const admin = await asStaff(playwright, baseURL, SUPER_ADMIN)
+    const admin = await asSuperAdmin(playwright, baseURL)
     const { docs } = (await (await admin.get(`/api/users?where[email][equals]=${encodeURIComponent(EDITOR)}`)).json()) as {
       docs: { id: number }[]
     }
     await admin.patch(`/api/users/${docs[0].id}`, { data: { password: 'Hijacked123' } })
-    const hijack = await page.request.post('/api/users/login', { data: { email: EDITOR, password: 'Hijacked123' } })
-    expect(hijack.ok()).toBe(false)
+    await expectStaffSignInRefused(page, EDITOR, 'Hijacked123')
     await admin.dispose()
   })
 })
 
+test.describe('Two doors: the super admin at /admin, staff at /staff', () => {
+  test('a staff member is turned away from the admin sign-in and pointed to the staff portal', async ({ page }) => {
+    await page.goto('/admin/login', { timeout: 180_000 })
+    await page.locator('#field-email').fill(EDITOR)
+    await page.locator('#field-password').fill(STAFF_PASSWORD)
+    await page.click('button[type="submit"]')
+    await expect(page.getByText('Staff sign in at the staff portal')).toBeVisible({ timeout: 60_000 })
+    await expect(page).toHaveURL(/\/admin\/login/)
+  })
+
+  test('the super admin is turned away from the staff portal and pointed to /admin', async ({ page }) => {
+    await page.goto('/staff/sign-in', { timeout: 180_000 })
+    await page.getByLabel('Email address').fill(SUPER_ADMIN)
+    await page.getByLabel('Password', { exact: true }).fill(STAFF_PASSWORD)
+    await page.getByRole('button', { name: 'Sign in' }).click()
+    await expect(page.locator('form [role="alert"]')).toContainText('signs in at /admin')
+  })
+
+  test('staff with no role get the portal but no work area', async ({ page }) => {
+    await signInAtStaffPortal(page, NO_ROLE)
+    await expect(page.getByText('does not have a role yet')).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Work area' })).toHaveCount(0)
+    await page.goto('/staff/directory')
+    await expect(page.getByRole('heading', { name: 'Staff directory' })).toBeVisible()
+
+    await page.goto('/admin', { timeout: 180_000 })
+    await expect(page.locator('span[title="Dashboard"]')).toHaveCount(0)
+  })
+})
+
 test.describe('Admin shows each role only its own work', () => {
-  test('the content editor sees content, not students or staff accounts', async ({ page }) => {
-    await login({ page, user: { email: EDITOR, password: STAFF_PASSWORD } })
+  test('the content manager sees content, not students or staff accounts', async ({ page }) => {
+    await signInAtStaffPortal(page, EDITOR)
+    await page.getByRole('link', { name: 'Work area' }).click()
+    await page.waitForURL(/\/admin$/, { timeout: 180_000 })
     const nav = page.locator('nav')
     await expect(nav.getByRole('link', { name: 'News' }).first()).toBeVisible()
     await expect(nav.getByRole('link', { name: 'Students' })).toHaveCount(0)
     await expect(nav.getByRole('link', { name: 'Staff accounts' })).toHaveCount(0)
-    await expect(page.locator('.ahsn-welcome')).toContainText('Content Editor')
+    await expect(page.locator('.ahsn-welcome')).toContainText('Content Manager')
 
     // Hidden is not just hidden: the section cannot be opened by URL either.
     const response = await page.goto('/admin/collections/students')
     expect(response?.status()).toBe(404)
   })
 
-  test('the registrar sees students, not news or staff accounts', async ({ page }) => {
-    await login({ page, user: { email: REGISTRAR, password: STAFF_PASSWORD } })
+  test('the secretary sees students, not news or staff accounts', async ({ page }) => {
+    await signInAtStaffPortal(page, SECRETARY)
+    await page.goto('/admin', { timeout: 180_000 })
     const nav = page.locator('nav')
     await expect(nav.getByRole('link', { name: 'Students' }).first()).toBeVisible()
     await expect(nav.getByRole('link', { name: 'News' })).toHaveCount(0)
@@ -167,10 +216,10 @@ test.describe('First-time student sign-in', () => {
     await deleteStudent(studentId)
   })
 
-  test('the registrar adds a student in the admin without typing a password', async ({ page }) => {
+  test('the secretary adds a student in the admin without typing a password', async ({ page }) => {
     const viaForm = `FORM/${stamp}`
-    await login({ page, user: { email: REGISTRAR, password: STAFF_PASSWORD } })
-    await page.goto('/admin/collections/students/create')
+    await signInAtStaffPortal(page, SECRETARY)
+    await page.goto('/admin/collections/students/create', { timeout: 180_000 })
     await page.locator('#field-admissionNo').fill(viaForm)
     await expect(page.getByLabel('New Password')).toBeHidden()
     await page.locator('#field-firstName').fill('Form')

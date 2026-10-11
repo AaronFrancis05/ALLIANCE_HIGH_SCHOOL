@@ -24,9 +24,9 @@ export const Vacancies: CollectionConfig = {
   },
   access: {
     read: publishedOrStaff,
-    create: roles('superAdmin', 'editor'),
-    update: roles('superAdmin', 'editor'),
-    delete: roles('superAdmin', 'editor'),
+    create: roles('editor'),
+    update: roles('editor'),
+    delete: roles('editor'),
   },
   versions: { drafts: true, maxPerDoc: 10 },
   fields: [

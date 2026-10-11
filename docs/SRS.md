@@ -31,11 +31,11 @@ open for payments without committing to a provider.
 | Prospective parent | Choosing a school, often on a phone, on paid data | Fast pages, clear fees, easy to contact the school |
 | Current parent | Checking dates and their child's results | Term dates, report cards, announcements |
 | Student | Senior One to Senior Six | Notes, past papers, their own report card |
-| Content editor | A teacher with other duties | An admin panel that does not need training |
-| Registrar / DOS | Owns results | Import report cards, release a term |
-| Bursar | Owns fee clearance | Mark a student cleared or blocked |
-| Admissions officer | Owns applications | Review, decide, notify |
-| ICT administrator | Keeps it running | Accounts, backups, audit trail |
+| Staff member | Anyone on the staff, with or without a role | Sign in at the staff portal, keep their own profile, find colleagues |
+| Content manager | A teacher with other duties (role `editor`) | An admin panel that does not need training |
+| School secretary | Owns student records and results (role `secretary`, formerly registrar / DOS) | Keep student records, import report cards, release a term |
+| Bursar | Owns fee clearance and admissions (role `bursar`, formerly also admissions officer) | Mark a student cleared or blocked; review, decide, notify on applications |
+| ICT administrator | The super admin: keeps it running | Accounts and roles, backups, audit trail |
 
 **Constraint that shapes everything:** most visitors are on mid-range Android phones on 4G,
 paying for data. Speed and weight beat desktop polish, every time.
@@ -52,7 +52,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 | FR-02 | Images and files are uploaded through the CMS; every image has alt text and a blur placeholder, and publishing rebuilds the affected pages within seconds. | Built |
 | FR-03 | Videos are embedded from YouTube behind a click-to-load facade, so no visitor pays for video they did not ask for. | Built |
 | FR-04 | News posts carry a category, a publish date and an author, and can be scheduled. | Built |
-| FR-05 | Staff accounts have roles, and every access rule starts from "no" and grants deliberately. Only the super admin adds staff, never with a password: each new person is emailed an invitation (valid three days, can be resent) to choose their own. The admin menu and dashboard show each role only the sections it can work in. | Built |
+| FR-05 | Every staff account is either the **super admin** (ICT, reaches everything) or **staff**. The super admin grants staff any number of roles: Content Manager (`editor`), School Secretary (`secretary`), Bursar (`bursar`), Head of Department (`hod`), Teacher (`teacher`); permissions add up, and staff with no role can only use the staff portal. Every access rule starts from "no" and grants deliberately; nobody changes their own account type, roles or active flag. There are two doors: the super admin signs in at `/admin`, all other staff at the staff portal `/staff`, which also gives them their profile, password change, the staff directory and shortcuts into the admin screens for their roles. Only the super admin adds staff, never with a password: each new person is emailed an invitation (valid three days, can be resent) to choose their own, staff in the staff portal. The admin menu and dashboard show each role only the sections it can work in. | Built; e2e not yet run |
 
 ### e-Library / resources
 
@@ -61,22 +61,22 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 | FR-06 | Students find resources by subject, class, type (notes, past paper, textbook, scheme) and year. | Built |
 | FR-07 | A head of department manages their own department's resources and no other. | Built |
 | FR-08 | A restricted file is served only through a route that re-checks the session and returns a signed URL valid for five minutes; the storage key never reaches the browser. | Built |
-| FR-06a | Holiday work is a resource type with its own section in the student's e-Library, grouped by subject. A teacher uploads it only for the subjects the super admin has assigned them; a head of department within their department; editors, registrars and the super admin anywhere. It takes PDF and Word (.docx) files only, plus ZIP folders for subjects marked as accepting them (ICT practicals). ZIP and Word files are inspected: no unsafe paths, programs, scripts, macros, nested archives, password protection or zip bombs. | Built; e2e not yet run |
+| FR-06a | Holiday work is a resource type with its own section in the student's e-Library, grouped by subject. A teacher uploads it only for the subjects the super admin has assigned them; a head of department within their department; content managers, the secretary and the super admin anywhere. It takes PDF and Word (.docx) files only, plus ZIP folders for subjects marked as accepting them (ICT practicals). ZIP and Word files are inspected: no unsafe paths, programs, scripts, macros, nested archives, password protection or zip bombs. | Built; e2e not yet run |
 | FR-09 | A resource records its subject, class list, visibility, file size and page count, so a student knows what they are downloading before they spend data. | Built |
 
 ### Accounts
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-10 | Students sign in with their admission number (in whatever format the school issues); students are a separate collection from staff, so a student session can never satisfy a staff check. The registrar creates student records without passwords; on first-time sign-in a 6-digit code (15 minutes, five tries) is emailed to the student's and guardians' addresses on file, and the student chooses a password. Students cannot edit their own record. | Built |
+| FR-10 | Students sign in with their admission number (in whatever format the school issues); students are a separate collection from staff, so a student session can never satisfy a staff check. The secretary creates student records without passwords; on first-time sign-in a 6-digit code (15 minutes, five tries) is emailed to the student's and guardians' addresses on file, and the student chooses a password. Students cannot edit their own record. | Built |
 | FR-11 | Staff accounts lock for 15 minutes after five failed attempts. | Built |
-| FR-12 | The registrar imports report cards in bulk from a spreadsheet, with a dry-run summary before anything is written. | Planned |
+| FR-12 | The secretary imports report cards in bulk from a spreadsheet, with a dry-run summary before anything is written. | Planned |
 
 ### Report cards — the sensitive part
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-13 | Results belong to a term, and a term is released by the registrar as a deliberate act. | Built |
+| FR-13 | Results belong to a term, and a term is released by the secretary as a deliberate act. | Built |
 | FR-14 | The bursar records fee clearance per student per term. The bursar cannot read report cards. | Built |
 | FR-15 | A student may open a report card only when **all three** hold: they own it, the term is released, and they are cleared. Checked server-side on every request. | Built |
 
@@ -87,7 +87,7 @@ Status: **Built** = working and tested · **Partial** = some of it works · **Pl
 | FR-16 | A family applies online in one form, validated identically in the browser and on the server. | Built |
 | FR-17 | An applicant uploads required documents (PLE slip, birth certificate, photograph), type- and size-checked. | Built |
 | FR-18 | Each application gets a reference the family can use to track progress. | Built |
-| FR-19 | The admissions officer moves an application through submitted → under review → offered / not offered, and the family is notified. | Built |
+| FR-19 | The bursar, who runs admissions, moves an application through submitted → under review → offered / not offered, and the family is notified. | Built |
 
 ### Around the school
 

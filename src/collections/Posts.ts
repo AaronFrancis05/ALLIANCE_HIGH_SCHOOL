@@ -22,9 +22,9 @@ export const Posts: CollectionConfig = {
   },
   access: {
     read: publishedOrStaff,
-    create: roles('superAdmin', 'editor', 'teacher', 'hod'),
-    update: roles('superAdmin', 'editor', 'teacher', 'hod'),
-    delete: roles('superAdmin', 'editor'),
+    create: roles('editor', 'teacher', 'hod'),
+    update: roles('editor', 'teacher', 'hod'),
+    delete: roles('editor'),
   },
   versions: {
     drafts: {

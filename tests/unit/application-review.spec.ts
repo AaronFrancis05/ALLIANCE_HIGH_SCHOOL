@@ -4,15 +4,15 @@
 
 import { describe, expect, it, vi } from 'vitest'
 import { canChangeApplicationStatus } from '../../src/access/admissions'
-import type { StaffRole, StaffUser, StudentUser } from '../../src/access/roles'
+import type { StudentUser } from '../../src/access/roles'
+import { staffUser as staff } from '../helpers/staff'
 import { notifyFamily, receivedMessage, statusMessage } from '../../src/lib/application-notify'
 import type { Notifier } from '../../src/lib/notify'
 
-const staff = (role: StaffRole) => ({ id: 1, collection: 'users', role, active: true }) as unknown as StaffUser
 const student = { id: 7, collection: 'students' } as unknown as StudentUser
 
 describe('canChangeApplicationStatus', () => {
-  const officer = staff('admissions')
+  const officer = staff('bursar')
 
   it('lets the officer take the normal steps', () => {
     expect(canChangeApplicationStatus(officer, 'submitted', 'review')).toBe(true)
@@ -32,7 +32,7 @@ describe('canChangeApplicationStatus', () => {
   })
 
   it('lets nobody outside the admissions team change anything', () => {
-    for (const user of [staff('editor'), staff('registrar'), staff('bursar'), student, null]) {
+    for (const user of [staff('editor'), staff('secretary'), staff('teacher'), staff(null), student, null]) {
       expect(canChangeApplicationStatus(user, 'submitted', 'review')).toBe(false)
     }
   })

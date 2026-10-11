@@ -96,7 +96,7 @@ The one piece worth stating precisely, because getting it wrong exposes a child'
 A report card is released only when **all three** hold:
 
 1. the requester **owns** it,
-2. the registrar has **released** that term's results, and the card itself is published,
+2. the secretary has **released** that term's results, and the card itself is published,
 3. the bursar has **cleared** that student for that term.
 
 All three are decided server-side on every request by `evaluateReportCardAccess`, a pure
@@ -104,7 +104,7 @@ function with a test for each branch. Refusals for "not yours" and "does not exi
 identical wording, so ids cannot be probed by comparing messages. Every attempt, allowed or
 refused, is written to the audit log.
 
-The registrar may fetch any card, for support. **The bursar may not** — the bursar decides
+The secretary may fetch any card, for support. **The bursar may not** — the bursar decides
 clearance and has no business reading results.
 
 ## 6. Local development

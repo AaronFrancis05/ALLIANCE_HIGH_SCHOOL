@@ -103,6 +103,7 @@ them before you open a branch.
 - [x] Search appearance: site name, favicon, home title and snippet, share image, canonical fix (FR-24, docs/SEO.md)
 - [x] Branded 404 for unknown URLs; contact-page map always shown (FR-21); production DB pool capped
 - [x] Branded error pages (site, portal, global) and an offline fallback page via a minimal service worker
+- [x] **P6-T staff portal and roles** (FR-05): super admin as an account type signing in at /admin only; all other staff sign in at /staff; staff hold any number of roles (editor, secretary, bursar, hod, teacher); registrar merged into secretary, admissions into bursar. Still to do: apply the migrations to production once `main` has this code (see MEMORY.md), e2e run against a local database, 360 px check
 - [ ] Switch Vercel `DATABASE_URL` to the Supabase transaction pooler (port 6543)
 
 ### P7: launch

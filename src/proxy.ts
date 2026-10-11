@@ -53,7 +53,10 @@ function buildCsp(nonce: string | null, isAdmin: boolean): string {
 
 export function proxy(request: NextRequest) {
   const isAdmin = request.nextUrl.pathname.startsWith('/admin')
-  const isPortal = request.nextUrl.pathname.startsWith('/portal')
+  const { pathname } = request.nextUrl
+  // The student portal and the staff portal: both per request, both one person's pages.
+  const isPortal =
+    pathname.startsWith('/portal') || pathname === '/staff' || pathname.startsWith('/staff/')
   const nonce = isAdmin || isPortal ? crypto.randomUUID().replace(/-/g, '') : null
   const csp = buildCsp(nonce, isAdmin)
 

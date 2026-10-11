@@ -6,7 +6,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { denyAll, hiddenUnless, roles } from '../access/roles'
+import { denyAll, hiddenUnlessSuperAdmin, superAdminOnly } from '../access/roles'
 
 export const AuditLogs: CollectionConfig = {
   slug: 'auditLogs',
@@ -15,11 +15,11 @@ export const AuditLogs: CollectionConfig = {
     useAsTitle: 'action',
     defaultColumns: ['createdAt', 'action', 'actorLabel', 'targetType', 'ip'],
     group: 'Administration',
-    hidden: hiddenUnless('superAdmin'),
+    hidden: hiddenUnlessSuperAdmin,
     description: 'Logins, permission changes, fee clearance changes and report card access.',
   },
   access: {
-    read: roles('superAdmin'),
+    read: superAdminOnly,
     // Entries are written by hooks with overrideAccess, never by a request.
     create: denyAll,
     update: denyAll,

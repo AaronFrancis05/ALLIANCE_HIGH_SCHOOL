@@ -15,7 +15,7 @@ export const Navigation: GlobalConfig = {
   slug: 'navigation',
   label: 'Menus',
   admin: { group: 'Settings', hidden: hiddenUnless('editor'), description: 'The top menu and the footer links.' },
-  access: { read: anyone, update: roles('superAdmin', 'editor') },
+  access: { read: anyone, update: roles('editor') },
   fields: [
     {
       name: 'header',

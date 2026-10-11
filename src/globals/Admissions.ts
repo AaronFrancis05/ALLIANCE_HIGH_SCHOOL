@@ -10,8 +10,8 @@ import { revalidateGlobalAfterChange } from '../lib/revalidate'
 export const AdmissionsSettings: GlobalConfig = {
   slug: 'admissionsSettings',
   label: 'Admissions settings',
-  admin: { group: 'Settings', hidden: hiddenUnless('editor', 'admissions', 'bursar'), description: 'Requirements, fees and the online application switch.' },
-  access: { read: anyone, update: roles('superAdmin', 'editor', 'admissions', 'bursar') },
+  admin: { group: 'Settings', hidden: hiddenUnless('editor', 'bursar'), description: 'Requirements, fees and the online application switch.' },
+  access: { read: anyone, update: roles('editor', 'bursar') },
   fields: [
     {
       name: 'applicationsOpen',

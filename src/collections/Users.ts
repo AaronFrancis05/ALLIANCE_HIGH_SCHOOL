@@ -9,27 +9,46 @@
  * (see staff-invite.ts). The super admin can send the invitation again from the account.
  */
 
-import type { CollectionConfig, PayloadHandler } from 'payload'
+import { APIError, type CollectionConfig, type PayloadHandler } from 'payload'
 import {
-  ROLE_LABELS,
-  STAFF_ROLES,
+  ACCOUNT_TYPE_LABELS,
+  ACCOUNT_TYPES,
   canInviteStaff,
+  canUseAdminScreens,
   deleteOtherStaff,
-  fieldSuperAdminOnOthers,
   fieldSuperAdminOnly,
-  hasRole,
-  hiddenUnless,
+  fieldSuperAdminOnOthers,
+  hiddenUnlessSuperAdmin,
+  isSuperAdmin,
+  mayUseAdminSignIn,
   ownPasswordOnly,
   passwordNeverOnCreate,
+  ROLE_LABELS,
+  STAFF_ROLES,
   superAdminOnly,
 } from '../access/roles'
-import type { StaffRole, StaffUser } from '../access/roles'
+import type { StaffUser } from '../access/roles'
 import { recordAudit } from '../lib/audit'
 import { logger } from '../lib/logger'
-import { sendStaffInvite, unusablePassword } from '../lib/staff-invite'
+import { STAFF_PORTAL_SIGN_IN, SWITCHED_OFF, WRONG_DOOR } from '../lib/staff-doors'
+import { resetEmail, sendStaffInvite, unusablePassword } from '../lib/staff-invite'
 
 /** Set on the request when an account is created without a password, so it is invited. */
 const SEND_INVITE = 'sendStaffInvite'
+
+
+/** For the form's show/hide conditions, which see the unsaved form data. */
+function hasAnyRole(data: { roles?: unknown } | undefined, ...wanted: string[]): boolean {
+  return Array.isArray(data?.roles) && data.roles.some((role) => wanted.includes(String(role)))
+}
+
+/** How an account's access reads in the audit log, e.g. "staff: bursar, teacher". */
+function describeAccess(doc: { accountType?: string | null; roles?: string[] | null } | undefined): string {
+  if (!doc) return 'none'
+  if (doc.accountType === 'superAdmin') return 'super admin'
+  const roles = [...(doc.roles ?? [])].sort()
+  return roles.length ? `staff: ${roles.join(', ')}` : 'staff'
+}
 
 /** POST /api/users/:id/invite: sends the invitation again (super admin only). */
 const resendInvite: PayloadHandler = async (req) => {
@@ -44,7 +63,7 @@ const resendInvite: PayloadHandler = async (req) => {
   if (!account) return Response.json({ error: 'That staff account was not found.' }, { status: 404 })
 
   try {
-    await sendStaffInvite(req.payload, { email: account.email, name: account.name, role: account.role as StaffRole })
+    await sendStaffInvite(req.payload, account)
   } catch (error) {
     logger.error('Staff invitation could not be sent', { error })
     return Response.json({ error: 'The invitation email could not be sent. Please try again.' }, { status: 502 })
@@ -67,18 +86,23 @@ export const Users: CollectionConfig = {
   labels: { singular: 'Staff account', plural: 'Staff accounts' },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'email', 'role', 'department', 'firstSignedInAt', 'active'],
+    defaultColumns: ['name', 'email', 'accountType', 'roles', 'department', 'firstSignedInAt', 'active'],
     group: 'People',
     description:
-      'Add a staff member with their email address and role. They are emailed an invitation to choose their own password.',
+      'Add a staff member with their email address and any roles. They are emailed an invitation to choose their own password and sign in at /staff.',
     // Everyone else reaches their own account from the avatar menu.
-    hidden: hiddenUnless('superAdmin'),
+    hidden: hiddenUnlessSuperAdmin,
   },
   auth: {
     // Lock the account after repeated failures (A07).
     maxLoginAttempts: 5,
     lockTime: 15 * 60 * 1000,
     tokenExpiration: 30 * 60, // 30 minutes for staff
+    forgotPassword: {
+      // Staff choose a new password in the staff portal, the super admin in the admin.
+      generateEmailSubject: () => resetEmail.subject,
+      generateEmailHTML: (args) => resetEmail.html(args?.token ?? '', (args?.user as StaffUser | undefined)?.accountType),
+    },
     cookies: {
       sameSite: 'Lax',
       secure: process.env.NODE_ENV === 'production',
@@ -90,12 +114,13 @@ export const Users: CollectionConfig = {
     // Never their own account, so the school is never left without a super admin.
     delete: deleteOtherStaff,
     update: ({ req, id }) => {
-      if (hasRole(req.user as StaffUser, 'superAdmin')) return true
+      if (isSuperAdmin(req.user as StaffUser)) return true
       // Anyone may edit their own profile, but not their own role (see field access below).
       return req.user?.collection === 'users' && String(req.user.id) === String(id)
     },
     read: ({ req }) => req.user?.collection === 'users',
-    admin: ({ req }) => req.user?.collection === 'users',
+    // The super admin, and staff with at least one role. Staff with none use /staff only.
+    admin: ({ req }) => canUseAdminScreens(req.user),
   },
   endpoints: [{ path: '/:id/invite', method: 'post', handler: resendInvite }],
   fields: [
@@ -123,18 +148,36 @@ export const Users: CollectionConfig = {
       admin: { description: 'Full name as it should appear in the staff directory.' },
     },
     {
-      name: 'role',
+      name: 'accountType',
       type: 'select',
       required: true,
-      defaultValue: 'teacher',
-      options: STAFF_ROLES.map((role) => ({ label: ROLE_LABELS[role], value: role })),
+      defaultValue: 'staff',
+      options: ACCOUNT_TYPES.map((type) => ({ label: ACCOUNT_TYPE_LABELS[type], value: type })),
       access: {
-        // Nobody changes their own role, not even the super admin; another super admin can.
+        // Nobody changes their own, so the school is never left without a super admin.
         create: fieldSuperAdminOnly,
         update: fieldSuperAdminOnOthers,
       },
       admin: {
-        description: 'Decides what this person can see and change. Nobody can change their own role.',
+        position: 'sidebar',
+        description: 'The super admin reaches everything and signs in at /admin. Staff sign in at /staff.',
+      },
+    },
+    {
+      name: 'roles',
+      type: 'select',
+      hasMany: true,
+      defaultValue: [],
+      options: STAFF_ROLES.map((role) => ({ label: ROLE_LABELS[role], value: role })),
+      access: {
+        // Nobody changes their own roles; the super admin grants them.
+        create: fieldSuperAdminOnly,
+        update: fieldSuperAdminOnOthers,
+      },
+      admin: {
+        description:
+          'What this person works on, on top of staff access. Choose as many as apply. Without a role they can still use the staff portal.',
+        condition: (data) => data?.accountType !== 'superAdmin',
       },
     },
     {
@@ -146,7 +189,7 @@ export const Users: CollectionConfig = {
       access: { create: fieldSuperAdminOnly, update: fieldSuperAdminOnly },
       admin: {
         description: 'Required for Heads of Department: they may only manage their own department.',
-        condition: (data) => data?.role === 'hod' || data?.role === 'teacher',
+        condition: (data) => hasAnyRole(data, 'hod', 'teacher'),
       },
     },
     {
@@ -158,7 +201,7 @@ export const Users: CollectionConfig = {
       access: { create: fieldSuperAdminOnly, update: fieldSuperAdminOnly },
       admin: {
         description: 'The subjects this teacher teaches. They may upload holiday work for these subjects only.',
-        condition: (data) => data?.role === 'teacher',
+        condition: (data) => hasAnyRole(data, 'teacher'),
       },
     },
     {
@@ -221,6 +264,24 @@ export const Users: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeLogin: [
+      ({ req, user }) => {
+        // Checked after the password is accepted, so it tells nobody whether an email exists.
+        if ((user as StaffUser).active === false) {
+          throw new APIError(SWITCHED_OFF, 403, undefined, true)
+        }
+        // Two doors: the super admin signs in at /admin, everyone else at /staff.
+        const superAdmin = mayUseAdminSignIn({ ...user, collection: 'users' })
+        const viaStaffPortal = Boolean(req.context[STAFF_PORTAL_SIGN_IN])
+        if (superAdmin && viaStaffPortal) {
+          throw new APIError(WRONG_DOOR.superAdmin, 403, undefined, true)
+        }
+        if (!superAdmin && !viaStaffPortal) {
+          throw new APIError(WRONG_DOOR.staff, 403, undefined, true)
+        }
+        return user
+      },
+    ],
     beforeValidate: [
       ({ data, operation, req }) => {
         if (operation !== 'create') return data
@@ -245,11 +306,13 @@ export const Users: CollectionConfig = {
             req,
           })
         }
-        await recordAudit(req, {
-          action: 'staff.login',
-          targetType: 'users',
-          targetId: String(user.id),
-        })
+        // Inside the login's own transaction: staff portal sign-in already holds one
+        // connection for the per-account lock, and production's pool is small.
+        await recordAudit(
+          req,
+          { action: 'staff.login', targetType: 'users', targetId: String(user.id) },
+          { inTransaction: true },
+        )
       },
     ],
     afterChange: [
@@ -257,7 +320,7 @@ export const Users: CollectionConfig = {
         if (operation !== 'create' || !req.context[SEND_INVITE]) return
         req.context[SEND_INVITE] = false
         try {
-          await sendStaffInvite(req.payload, { email: doc.email, name: doc.name, role: doc.role }, req)
+          await sendStaffInvite(req.payload, doc, req)
           await req.payload.update({
             collection: 'users',
             id: doc.id,
@@ -272,12 +335,14 @@ export const Users: CollectionConfig = {
         }
       },
       async ({ req, doc, previousDoc, operation }) => {
-        if (operation === 'update' && previousDoc?.role !== doc.role) {
+        const before = describeAccess(previousDoc)
+        const after = describeAccess(doc)
+        if (operation === 'update' && before !== after) {
           await recordAudit(req, {
             action: 'staff.role-changed',
             targetType: 'users',
             targetId: String(doc.id),
-            detail: `${previousDoc?.role ?? 'none'} to ${doc.role}`,
+            detail: `${before} to ${after}`,
           })
         }
       },

@@ -48,6 +48,9 @@ export function TopBar({ phones, email }: TopBarProps) {
           <Link href="/portal" className="hover:text-gold-300">
             Student portal
           </Link>
+          <Link href="/staff" className="hover:text-gold-300">
+            Staff portal
+          </Link>
         </div>
       </div>
     </div>

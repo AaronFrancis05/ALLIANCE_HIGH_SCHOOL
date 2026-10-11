@@ -106,7 +106,10 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     termReleased: Boolean(term?.resultsReleased),
     clearance,
     published: Boolean(card.published),
-    requesterRole: session.collection === 'users' ? (session.user as User).role : undefined,
+    requesterAccount:
+      session.collection === 'users'
+        ? { accountType: (session.user as User).accountType, roles: (session.user as User).roles }
+        : undefined,
   })
 
   if (!decision.allowed) {
