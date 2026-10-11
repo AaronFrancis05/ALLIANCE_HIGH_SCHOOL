@@ -12,7 +12,7 @@ entry short: what changed, what was verified, what is left.
 ## Current status (as of 2026-10-10)
 
 **Where we are:** P0–P4 done; P2 now done (P2-T11 leadership/staff, P2-T12 careers); P3 done; P5 done (P5-T1 to P5-T5). P6 hardening and P7 launch remain.
-**Latest:** production log fixes on `fix/P6-prod-db-pool-email` (not committed): DB connections released before Vercel suspends an instance, no SMTP verify on cold start. **Owner action on Vercel**: `DATABASE_URL` to the transaction pooler (port 6543) and a real `SMTP_HOST`.
+**Latest:** 2026-10-11 branded error pages (site, portal, global) and an offline fallback page (service worker), uncommitted. Earlier the same day: student sign-in hang fixed (pool starvation) and show-password button, uncommitted on `fix/P6-prod-db-pool-email`. Before that: production log fixes on `fix/P6-prod-db-pool-email` (not committed): DB connections released before Vercel suspends an instance, no SMTP verify on cold start. **Owner action on Vercel**: `DATABASE_URL` to the transaction pooler (port 6543) and a real `SMTP_HOST`.
 **Next up:** student bulk import (CSV, dry run; fills the `import:students` loose end), P6 site-wide search and performance budget, or P4-T bulk report-card import (FR-12). Contact details in docs/CONTENT_TODO.md deliberately left until launch (school owner's call, 2026-09-23).
 
 ### Health checks
@@ -82,6 +82,23 @@ entry short: what changed, what was verified, what is left.
 ---
 
 ## Log
+
+### 2026-10-11 (branded error and offline pages)
+- **Why**: production `/portal/sign-in` showed Next's unbranded "This page couldn't load". The app had a branded 404 but no error boundary.
+- `src/components/layout/ErrorContent.tsx` is the shared body. It tells "offline" (retries by itself when the connection returns) apart from "failed on our side" (shows the error digest as a reference for the office, never the message). It is used by `src/app/(site)/error.tsx` and `src/app/(portal)/error.tsx` (both inside their header and footer) and by `src/app/global-error.tsx` (own document, for when a layout itself fails, e.g. the portal session lookup).
+- **Offline**: `public/sw.js` (registered in production only by `ServiceWorkerRegister` in the site and portal layouts). It is network-first for page loads, serves the cached `public/offline.html` only when the fetch fails outright, and stores nothing else, so portal data is never cached. Raise its `CACHE_VERSION` when offline.html or the crest changes.
+- Verified: typecheck, lint, unit 203/203; at 360 px the offline page, the error page online and offline (temporary throwing route, since removed): no sideways scroll. **Not run**: e2e; the service worker only registers in a production build, so check it on the next deploy (DevTools > Application > Service workers, then go offline and reload).
+
+### 2026-10-11 (nobody changes their own role, the super admin included)
+- `fieldSuperAdminOnOthers` (src/access/roles.ts) guards the staff `role` and `active` fields on update: only a super admin, and never on their own account. On their own account page, Role and Active are read-only. Another super admin can still demote or deactivate them. `deleteOtherStaff` stops a super admin from deleting their own account. So the access-checked paths can never leave the school with no active super admin.
+- Verified: lint, typecheck, unit tests (new cases in tests/unit/access-accounts.spec.ts). **Not run**: e2e and the 360 px check. Needs human review (change under `src/access/`).
+
+### 2026-10-11 (student sign-in hung on production; show-password button)
+- **Bug**: portal sign-in on production never finished (Vercel log: `POST /portal/sign-in` "Task timed out after 300 seconds"). Not a password or first-time problem: the seeded test students have `AllianceDev1!` and `portalSetUp: true`. At peak a sign-in held three connections (advisory lock, Payload's login transaction, and the `afterLogin` audit write in its own transaction) against a production pool of 3, and node-postgres waits for a free connection forever.
+- **Fix**: `recordAudit(..., { inTransaction: true })` writes the Students `afterLogin` entry inside the login transaction (peak is now 2); the duplicate `student.login` entry in `signInAction` is gone; the pool has `connectionTimeoutMillis: 10_000`, so starvation fails in seconds instead of hanging.
+- **Show password**: `src/components/portal/PasswordInput.tsx` (eye button, `aria-pressed`, 48 px target) on the sign-in form and both first-time password boxes.
+- **Seed code untracked** (owner's call): `scripts/seed.ts` and `src/app/api/admin/seed/` are git-ignored and removed from the index; they stay on the owner's machine. Fresh clones have no `pnpm seed`, and the next deploy has no seed route. The password is still in git history and in the e2e tests, so the accounts must still be rotated.
+- Verified: typecheck, lint, unit 203/203. **Not run**: e2e and the 360 px check (Docker down; the only other DB is production). Check sign-in on production after deploy.
 
 ### 2026-10-10 (production logs: EMAXCONNSESSION again, Nodemailer ECONNREFUSED)
 - Production (`ac0b41e`, already has the pool cap of 3) still hit the Supabase **session pooler's** 15-client cap on /admin and /admin/login. The error itself names the pooler's `pool_size: 15`, so the limit is the pooler, not Postgres. (The Supabase account connected to Claude, project `llxxcnrdrkshqddxkyxr`, is **not** the app's database: it has no Payload tables. The production DB lives in another account.) Suspended Vercel instances keep their connections because the idle timeout cannot fire while frozen.

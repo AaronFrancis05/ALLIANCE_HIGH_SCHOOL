@@ -13,12 +13,13 @@ import { Header, type NavItem } from '../../components/layout/Header'
 import { TopBar } from '../../components/layout/TopBar'
 import { Footer } from '../../components/layout/Footer'
 import { OrganisationJsonLd } from '../../components/seo/JsonLd'
+import { ServiceWorkerRegister } from '../../components/layout/ServiceWorkerRegister'
 import { env } from '../../lib/env'
 
 /**
  * Menu used until the office edits it in the CMS.
  *
- * Every entry here must point at a page that exists — a menu that leads to a 404 is worse
+ * Every entry here must point at a page that exists, a menu that leads to a 404 is worse
  * than a shorter menu. Sub-pages are added back as their sections are built (docs/SRS.md,
  * phase P2).
  */
@@ -110,7 +111,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(env.siteUrl),
     title: {
       default: `${name} | Secondary school in Nansana, Wakiso`,
-      template: `%s — ${name}`,
+      template: `%s | ${name}`,
     },
     description: description.slice(0, 155),
     applicationName: name,
@@ -182,6 +183,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         />
 
         <OrganisationJsonLd settings={settings} />
+        <ServiceWorkerRegister />
       </body>
     </html>
   )
