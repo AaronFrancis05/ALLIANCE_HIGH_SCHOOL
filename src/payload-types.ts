@@ -547,7 +547,7 @@ export interface Category {
   createdAt: string;
 }
 /**
- * Add a staff member with their email address and role. They are emailed an invitation to choose their own password.
+ * Add a staff member with their email address and any roles. They are emailed an invitation to choose their own password and sign in at /staff.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -560,13 +560,21 @@ export interface User {
    */
   name: string;
   /**
-   * Decides what this person can see and change. Nobody can change their own role.
+   * The super admin reaches everything and signs in at /admin. Staff sign in at /staff.
    */
-  role: 'superAdmin' | 'editor' | 'hod' | 'registrar' | 'bursar' | 'admissions' | 'teacher';
+  accountType: 'staff' | 'superAdmin';
+  /**
+   * What this person works on, on top of staff access. Choose as many as apply. Without a role they can still use the staff portal.
+   */
+  roles?: ('editor' | 'secretary' | 'bursar' | 'hod' | 'teacher')[] | null;
   /**
    * Required for Heads of Department: they may only manage their own department.
    */
   department?: (number | null) | Department;
+  /**
+   * The subjects this teacher teaches. They may upload holiday work for these subjects only.
+   */
+  subjects?: (number | Subject)[] | null;
   /**
    * Unchecked accounts keep their history but cannot sign in. Nobody can deactivate their own account.
    */
@@ -619,6 +627,27 @@ export interface Department {
    * One action shot that represents the department.
    */
   image?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subjects".
+ */
+export interface Subject {
+  id: number;
+  name: string;
+  code: string;
+  department: number | Department;
+  level: 'o' | 'a' | 'both';
+  /**
+   * Classes that take this subject.
+   */
+  classes?: ('S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6')[] | null;
+  /**
+   * Tick for subjects whose holiday work is handed out as a ZIP folder of practical files, such as ICT. Every folder is still checked for programs, scripts and macros.
+   */
+  acceptsArchives?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -865,23 +894,6 @@ export interface Vacancy {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "subjects".
- */
-export interface Subject {
-  id: number;
-  name: string;
-  code: string;
-  department: number | Department;
-  level: 'o' | 'a' | 'both';
-  /**
-   * Classes that take this subject.
-   */
-  classes?: ('S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6')[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Notes, past papers, textbooks and schemes of work for students.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -897,9 +909,12 @@ export interface Resource {
    * One or two lines so students know what is inside.
    */
   description?: string | null;
-  type: 'notes' | 'pastPaper' | 'textbook' | 'scheme' | 'video' | 'other';
   /**
-   * Heads of Department may only add resources to their own department.
+   * Holiday work takes PDF or Word (.docx) files only, and ZIP folders for subjects that accept them (ICT practicals).
+   */
+  type: 'notes' | 'pastPaper' | 'textbook' | 'scheme' | 'holidayWork' | 'video' | 'other';
+  /**
+   * Heads of Department may only add resources to their own department. For a teacher this is filled from the subject.
    */
   department: number | Department;
   subject: number | Subject;
@@ -1928,6 +1943,7 @@ export interface SubjectsSelect<T extends boolean = true> {
   department?: T;
   level?: T;
   classes?: T;
+  acceptsArchives?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2122,8 +2138,10 @@ export interface ApplicationDocumentsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   password?: T;
   name?: T;
-  role?: T;
+  accountType?: T;
+  roles?: T;
   department?: T;
+  subjects?: T;
   active?: T;
   invitedAt?: T;
   firstSignedInAt?: T;

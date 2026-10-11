@@ -20,7 +20,7 @@ export const SiteSettings: GlobalConfig = {
   },
   access: {
     read: anyone,
-    update: roles('superAdmin', 'editor'),
+    update: roles('editor'),
   },
   fields: [
     {

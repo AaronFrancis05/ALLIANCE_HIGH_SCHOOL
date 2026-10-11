@@ -21,6 +21,7 @@ import type { StaffUser, StudentUser } from '../../../../../access/roles'
 import { privateObjectKey, signedPrivateUrl } from '../../../../../lib/storage'
 import { recordAudit } from '../../../../../lib/audit'
 import { checkRateLimit, clientIdentifier } from '../../../../../lib/rate-limit'
+import { parseRecordId } from '../../../../../lib/validation'
 
 /** Always evaluated per request; nothing here may ever be cached. */
 export const dynamic = 'force-dynamic'
@@ -39,12 +40,18 @@ function refuse(message: string, status: number) {
 }
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params
+  const { id: rawId } = await context.params
 
   const rate = checkRateLimit('fileDownload', clientIdentifier(request))
   if (!rate.allowed) {
     return refuse('Too many requests. Please wait a moment and try again.', 429)
   }
+
+  // Only a real record id goes any further: into a query, a storage key or the audit log.
+  // Anything else reads like any other refusal, so ids cannot be probed.
+  const recordId = parseRecordId(rawId)
+  if (recordId === null) return refuse(NOT_AVAILABLE, 404)
+  const id = String(recordId)
 
   const session = await currentSession()
   const payload = await getPayloadClient()

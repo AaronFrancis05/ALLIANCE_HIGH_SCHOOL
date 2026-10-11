@@ -68,6 +68,7 @@ export default buildConfig({
       },
       beforeDashboard: ['/components/admin/Welcome#Welcome'],
       afterLogin: ['/components/admin/LoginNote#LoginNote'],
+      afterNavLinks: ['/components/admin/StaffPortalLink#StaffPortalLink'],
     },
   },
 

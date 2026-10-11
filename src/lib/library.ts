@@ -7,11 +7,13 @@
  * items they cannot see.
  */
 
-import type { Payload } from 'payload'
+import type { Payload, Where } from 'payload'
+import { HOLIDAY_WORK } from '../access/resources'
 import { resourceFiltersWhere, type ResourceFilters } from './resource-filters'
 import type { Resource, Student, Subject } from '../payload-types'
 
 const SHELF_LIMIT = 100
+const HOLIDAY_WORK_LIMIT = 60
 
 export interface FilterOption {
   value: number
@@ -26,17 +28,33 @@ export interface LibraryShelf {
   years: number[]
 }
 
+export interface ShelfOptions {
+  /**
+   * Leave holiday work off the shelf, for a page that shows it in its own section. A
+   * visitor who picks "Holiday work" in the type filter still gets it on the shelf.
+   */
+  separateHolidayWork?: boolean
+}
+
+function shelfWhere(filters: ResourceFilters, options: ShelfOptions): Where | undefined {
+  const filtered = resourceFiltersWhere(filters)
+  if (!options.separateHolidayWork || filters.type) return filtered
+  const withoutHolidayWork: Where = { type: { not_equals: HOLIDAY_WORK } }
+  return filtered ? { and: [filtered, withoutHolidayWork] } : withoutHolidayWork
+}
+
 export async function loadLibraryShelf(
   payload: Payload,
   filters: ResourceFilters,
   user?: Student,
+  options: ShelfOptions = {},
 ): Promise<LibraryShelf> {
   const asRequester = { overrideAccess: false, ...(user ? { user } : {}) } as const
 
   const [matching, everything] = await Promise.all([
     payload.find({
       collection: 'resources',
-      where: resourceFiltersWhere(filters),
+      where: shelfWhere(filters, options),
       sort: '-createdAt',
       limit: SHELF_LIMIT,
       depth: 1,
@@ -68,4 +86,37 @@ export async function loadLibraryShelf(
       .sort((a, b) => a.label.localeCompare(b.label)),
     years: [...years].sort((a, b) => b - a),
   }
+}
+
+export interface HolidayWorkGroup {
+  subject: string
+  resources: Resource[]
+}
+
+/**
+ * The holiday work this student may see, newest first, grouped by subject. Read as the
+ * student, like the shelf, so `readResources` decides: their class's work, work for all
+ * students, and nothing beyond the public shelf for a suspended student.
+ */
+export async function loadHolidayWork(payload: Payload, user: Student): Promise<HolidayWorkGroup[]> {
+  const found = await payload.find({
+    collection: 'resources',
+    where: { type: { equals: HOLIDAY_WORK } },
+    sort: '-createdAt',
+    limit: HOLIDAY_WORK_LIMIT,
+    depth: 1,
+    overrideAccess: false,
+    user,
+  })
+
+  const groups = new Map<string, Resource[]>()
+  for (const doc of found.docs) {
+    const subject = doc.subject as Subject | number | undefined
+    const name = typeof subject === 'object' && subject ? subject.name : 'Other subjects'
+    groups.set(name, [...(groups.get(name) ?? []), doc])
+  }
+
+  return [...groups]
+    .map(([subject, resources]) => ({ subject, resources }))
+    .sort((a, b) => a.subject.localeCompare(b.subject))
 }

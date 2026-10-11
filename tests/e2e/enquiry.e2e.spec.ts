@@ -8,6 +8,7 @@
 import { test, expect } from '@playwright/test'
 import { getPayload } from 'payload'
 import config from '../../src/payload.config.js'
+import { staffContext } from '../helpers/staff-portal'
 
 const MAILPIT = process.env.MAILPIT_URL ?? 'http://localhost:8025'
 const SUBJECT = `Visit ${Date.now()}`
@@ -20,7 +21,7 @@ test.afterAll(async () => {
 })
 
 test.describe('Enquiry form', () => {
-  test('a visit request reaches the office inbox and the admin panel', async ({ page, playwright, baseURL }) => {
+  test('a visit request reaches the office inbox and the admin panel', async ({ page, browser, baseURL }) => {
     await page.goto('/contact')
     await page.getByLabel('Arrange a visit to the school').check()
     await page.getByLabel('Your name').fill('Test Parent')
@@ -30,15 +31,14 @@ test.describe('Enquiry form', () => {
     await page.getByRole('button', { name: 'Send message' }).click()
     await expect(page.getByTestId('enquiry-sent')).toBeVisible({ timeout: 120_000 })
 
-    // The editor sees it in the admin panel's data.
-    const editor = await playwright.request.newContext({ baseURL })
-    await editor.post('/api/users/login', { data: { email: 'editor@alliancehigh.sc.ug', password: 'AllianceDev1!' } })
+    // The content manager sees it in the admin panel's data.
+    const editor = await staffContext(browser, baseURL, 'editor@alliancehigh.sc.ug')
     const saved = await (
-      await editor.get(`/api/formSubmissions?where[subject][equals]=${encodeURIComponent(SUBJECT)}&depth=0`)
+      await editor.request.get(`/api/formSubmissions?where[subject][equals]=${encodeURIComponent(SUBJECT)}&depth=0`)
     ).json()
     expect(saved.docs).toHaveLength(1)
     expect(saved.docs[0]).toMatchObject({ form: 'visit', phone: '0772 123456', handled: false })
-    await editor.dispose()
+    await editor.close()
 
     // And the office has a copy by email.
     await expect

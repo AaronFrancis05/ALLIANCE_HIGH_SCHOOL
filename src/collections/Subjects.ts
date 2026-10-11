@@ -3,7 +3,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { anyone, hiddenUnless, roles } from '../access/roles'
+import { anyone, hiddenUnless, roles, superAdminOnly } from '../access/roles'
 import { CLASS_LABELS, SCHOOL_CLASSES } from '../access/resources'
 
 export const Subjects: CollectionConfig = {
@@ -13,13 +13,13 @@ export const Subjects: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'code', 'department', 'level'],
     group: 'Academics',
-    hidden: hiddenUnless('editor', 'registrar', 'hod'),
+    hidden: hiddenUnless('editor', 'secretary', 'hod'),
   },
   access: {
     read: anyone,
-    create: roles('superAdmin', 'editor', 'registrar', 'hod'),
-    update: roles('superAdmin', 'editor', 'registrar', 'hod'),
-    delete: roles('superAdmin'),
+    create: roles('editor', 'secretary', 'hod'),
+    update: roles('editor', 'secretary', 'hod'),
+    delete: superAdminOnly,
   },
   fields: [
     { name: 'name', type: 'text', required: true },
@@ -47,6 +47,16 @@ export const Subjects: CollectionConfig = {
       hasMany: true,
       options: SCHOOL_CLASSES.map((value) => ({ label: CLASS_LABELS[value], value })),
       admin: { description: 'Classes that take this subject.' },
+    },
+    {
+      name: 'acceptsArchives',
+      label: 'Accepts ZIP folders',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Tick for subjects whose holiday work is handed out as a ZIP folder of practical files, such as ICT. Every folder is still checked for programs, scripts and macros.',
+      },
     },
   ],
 }

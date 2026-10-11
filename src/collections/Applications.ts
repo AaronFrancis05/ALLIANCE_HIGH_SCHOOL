@@ -11,7 +11,7 @@
  */
 
 import { APIError, type CollectionConfig } from 'payload'
-import { denyAll, hasRole, hiddenUnless, roles, type StaffUser } from '../access/roles'
+import { denyAll, hasRole, hiddenUnless, superAdminOnly, type StaffUser } from '../access/roles'
 import { canChangeApplicationStatus, readAdmissions } from '../access/admissions'
 import { APPLICATION_STATUSES } from '../lib/application-status'
 import { recordAudit } from '../lib/audit'
@@ -36,7 +36,7 @@ export const Applications: CollectionConfig = {
     useAsTitle: 'trackingCode',
     defaultColumns: ['trackingCode', 'applicantName', 'applicantType', 'classSought', 'status', 'createdAt'],
     group: 'Admissions',
-    hidden: hiddenUnless('admissions'),
+    hidden: hiddenUnless('bursar'),
     description: 'Applications submitted through the website.',
   },
   access: {
@@ -44,7 +44,7 @@ export const Applications: CollectionConfig = {
     create: denyAll,
     read: readAdmissions,
     update: readAdmissions,
-    delete: roles('superAdmin'),
+    delete: superAdminOnly,
   },
   fields: [
     {
@@ -253,7 +253,7 @@ export const Applications: CollectionConfig = {
       name: 'notes',
       type: 'array',
       labels: { singular: 'Note', plural: 'Staff notes' },
-      access: { read: ({ req }) => hasRole(req.user as StaffUser, 'admissions') },
+      access: { read: ({ req }) => hasRole(req.user as StaffUser, 'bursar') },
       fields: [
         { name: 'note', type: 'textarea', required: true },
         { name: 'by', type: 'relationship', relationTo: 'users' },

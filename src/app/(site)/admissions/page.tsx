@@ -92,6 +92,15 @@ export default async function AdmissionsPage() {
               </Card>
             ))}
           </div>
+
+          {open ? (
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <ButtonLink href="/admissions/apply" className="min-h-12 px-7">
+                Apply online
+              </ButtonLink>
+              <span className="text-sm text-[var(--text-muted)]">It takes about ten minutes.</span>
+            </div>
+          ) : null}
         </Container>
       </Section>
 
@@ -114,6 +123,7 @@ export default async function AdmissionsPage() {
               </ul>
 
               <div className="mt-8 flex flex-wrap gap-3">
+                {open ? <ButtonLink href="/admissions/apply">Apply online</ButtonLink> : null}
                 <ButtonLink href="/admissions/fees" variant="secondary">
                   See the fees
                 </ButtonLink>

@@ -124,7 +124,14 @@ export function Footer({
           <p>
             &copy; {year} {schoolName}. All rights reserved.
           </p>
-          <div className="flex gap-4">
+          {/* The two portals are here as well as the top bar, which phones do not show. */}
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            <Link href="/portal" className="inline-flex min-h-11 items-center hover:text-gold-300 sm:min-h-0">
+              Student portal
+            </Link>
+            <Link href="/staff" className="inline-flex min-h-11 items-center hover:text-gold-300 sm:min-h-0">
+              Staff portal
+            </Link>
             <Link href="/privacy" className="hover:text-gold-300">
               Privacy notice
             </Link>

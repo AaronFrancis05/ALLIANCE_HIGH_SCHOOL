@@ -11,7 +11,7 @@ export const HomePage: GlobalConfig = {
   slug: 'homePage',
   label: 'Home page',
   admin: { group: 'Settings', hidden: hiddenUnless('editor'), description: 'Hero slides, welcome message and the feature cards.' },
-  access: { read: anyone, update: roles('superAdmin', 'editor') },
+  access: { read: anyone, update: roles('editor') },
   fields: [
     {
       name: 'hero',

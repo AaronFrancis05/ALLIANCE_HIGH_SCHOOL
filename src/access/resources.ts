@@ -3,14 +3,18 @@
  *
  * Reading:  public items are open to everyone; anything else needs a signed-in student
  *           whose class is listed on the resource.
- * Writing:  editors and registrars anywhere; a head of department only inside their
- *           own department; nobody else.
+ * Writing:  content managers and the secretary anywhere; a head of department only inside their
+ *           own department; a teacher only holiday work for a subject they teach;
+ *           nobody else.
  */
 
 import type { Access, Where } from 'payload'
-import { departmentId, hasRole, isStaff, isStudent, type StaffUser, type StudentUser } from './roles'
+import { departmentId, hasRole, isStaff, isStudent, subjectIds, type StaffUser, type StudentUser } from './roles'
 
 export type SchoolClass = 'S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6'
+
+/** The resource type teachers may upload: work set for the holidays. */
+export const HOLIDAY_WORK = 'holidayWork'
 
 export const SCHOOL_CLASSES: SchoolClass[] = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
 
@@ -60,19 +64,46 @@ export function visibleResourcesWhere(user: unknown): Where {
 
 export const readResources: Access = ({ req }) => visibleResourcesWhere(req.user)
 
-/** Editors and registrars may manage any resource; a HOD only their own department's. */
+/** Roles that may manage any resource anywhere (the super admin passes too). */
+const LIBRARY_KEEPERS = ['editor', 'secretary'] as const
+
+/**
+ * True for a teacher whose only way into the library is holiday work for their own
+ * subjects: no role that files elsewhere, and not the super admin. The admin form offers
+ * such a person holiday work and their subjects only.
+ */
+export function filesOnlyHolidayWork(user: unknown): boolean {
+  const staff = user as StaffUser | null
+  return hasRole(staff, 'teacher') && !hasRole(staff, ...LIBRARY_KEEPERS, 'hod')
+}
+
+/**
+ * Content managers and the secretary may manage any resource; a HOD only their own
+ * department's; a teacher only the holiday work of the subjects they teach. Someone who
+ * holds both of the last two gets both.
+ */
 export const writeResources: Access = ({ req }) => {
   const user = req.user as StaffUser | null
 
-  if (hasRole(user, 'superAdmin', 'editor', 'registrar')) return true
+  if (hasRole(user, ...LIBRARY_KEEPERS)) return true
 
-  if (hasRole(user, 'hod')) {
-    const department = departmentId(user)
-    if (!department) return false
-    return { department: { equals: department } }
+  const allowed: Where[] = []
+
+  const department = hasRole(user, 'hod') ? departmentId(user) : null
+  if (department) allowed.push({ department: { equals: department } })
+
+  const subjects = hasRole(user, 'teacher') ? subjectIds(user) : []
+  if (subjects.length) {
+    allowed.push({ and: [{ type: { equals: HOLIDAY_WORK } }, { subject: { in: subjects } }] })
   }
 
-  return false
+  if (!allowed.length) return false
+  return allowed.length === 1 ? allowed[0] : { or: allowed }
+}
+
+function idOf(value: unknown): string | null {
+  const id = typeof value === 'object' && value !== null ? (value as { id: unknown }).id : value
+  return id === null || id === undefined || id === '' ? null : String(id)
 }
 
 /**
@@ -83,11 +114,31 @@ export const writeResources: Access = ({ req }) => {
  */
 export function canFileInDepartment(user: unknown, department: unknown): boolean {
   const staff = user as StaffUser | null
-  if (hasRole(staff, 'superAdmin', 'editor', 'registrar')) return true
+  if (hasRole(staff, ...LIBRARY_KEEPERS)) return true
   if (!hasRole(staff, 'hod')) return false
   const own = departmentId(staff)
-  const target = typeof department === 'object' && department !== null ? (department as { id: unknown }).id : department
-  return own !== null && target !== null && target !== undefined && String(target) === String(own)
+  const target = idOf(department)
+  return own !== null && target !== null && target === String(own)
+}
+
+/**
+ * May this person save a resource of this type and subject in this department? Checked on
+ * every create and on every update that touches one of the three, for the same reason as
+ * `canFileInDepartment`: a teacher could otherwise create a resource for a subject they do
+ * not teach, or turn their holiday work into another kind of resource.
+ */
+export function canFileResource(
+  user: unknown,
+  resource: { department: unknown; subject: unknown; type: unknown },
+): boolean {
+  const staff = user as StaffUser | null
+  if (hasRole(staff, ...LIBRARY_KEEPERS)) return true
+  if (hasRole(staff, 'hod') && canFileInDepartment(staff, resource.department)) return true
+  if (hasRole(staff, 'teacher')) {
+    const subject = idOf(resource.subject)
+    return resource.type === HOLIDAY_WORK && subject !== null && subjectIds(staff).includes(subject)
+  }
+  return false
 }
 
 /**

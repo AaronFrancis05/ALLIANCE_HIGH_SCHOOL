@@ -30,9 +30,9 @@ export const Albums: CollectionConfig = {
   },
   access: {
     read: publishedOrStaff,
-    create: roles('superAdmin', 'editor', 'teacher'),
-    update: roles('superAdmin', 'editor', 'teacher'),
-    delete: roles('superAdmin', 'editor'),
+    create: roles('editor', 'teacher'),
+    update: roles('editor', 'teacher'),
+    delete: roles('editor'),
   },
   versions: { drafts: true },
   fields: [

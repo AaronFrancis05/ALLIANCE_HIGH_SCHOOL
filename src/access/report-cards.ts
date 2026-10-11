@@ -3,7 +3,7 @@
  *
  * A student may download a report card only when all three hold:
  *   1. the report card belongs to them,
- *   2. the registrar has released results for that term,
+ *   2. the secretary has released results for that term,
  *   3. the bursar has cleared them for that term.
  *
  * Every one of these is decided here, on the server, on every request. The storage key
@@ -20,14 +20,14 @@ export interface GateInput {
   requester: { id: string | number; collection: 'students' | 'users' } | null
   /** Who the report card belongs to. */
   ownerId: string | number
-  /** Whether the registrar has released this term's results. */
+  /** Whether the secretary has released this term's results. */
   termReleased: boolean
   /** The bursar's decision for this student and term, if one has been recorded. */
   clearance: { status: ClearanceStatus; reason?: string | null } | null
-  /** Whether the registrar has published this particular report card. */
+  /** Whether the secretary has published this particular report card. */
   published: boolean
-  /** Staff role of the requester, when the requester is staff. */
-  requesterRole?: StaffUser['role']
+  /** Account type and roles of the requester, when the requester is staff. */
+  requesterAccount?: Pick<StaffUser, 'accountType' | 'roles'>
 }
 
 export type GateResult =
@@ -48,7 +48,7 @@ export function evaluateReportCardAccess(input: GateInput): GateResult {
 
   // Staff who are allowed to handle results may always fetch, for support and checking.
   if (requester.collection === 'users') {
-    if (hasRole({ ...requester, collection: 'users', role: input.requesterRole } as StaffUser, 'registrar')) {
+    if (hasRole({ ...requester, ...input.requesterAccount, collection: 'users' }, 'secretary')) {
       return { allowed: true }
     }
     return { allowed: false, reason: 'not-owner', message: 'You do not have access to this report card.' }
@@ -88,7 +88,7 @@ export const readReportCards: Access = ({ req }) => {
   const user = req.user
 
   if (isStaff(user as StaffUser)) {
-    if (hasRole(user as StaffUser, 'registrar')) return true
+    if (hasRole(user as StaffUser, 'secretary')) return true
     // Other staff, including the bursar, have no business reading result files (FR-14).
     return false
   }
@@ -100,8 +100,8 @@ export const readReportCards: Access = ({ req }) => {
   return false
 }
 
-/** Only the registrar uploads, edits or releases report cards. */
-export const writeReportCards: Access = ({ req }) => hasRole(req.user as StaffUser, 'registrar')
+/** Only the secretary uploads, edits or releases report cards. */
+export const writeReportCards: Access = ({ req }) => hasRole(req.user as StaffUser, 'secretary')
 
 /** Only the bursar (and super admin) records fee clearance. */
 export const writeClearances: Access = ({ req }) => hasRole(req.user as StaffUser, 'bursar')
@@ -109,7 +109,7 @@ export const writeClearances: Access = ({ req }) => hasRole(req.user as StaffUse
 /** A student may see their own clearance status so the portal can explain a block. */
 export const readClearances: Access = ({ req }) => {
   const user = req.user
-  if (hasRole(user as StaffUser, 'bursar', 'registrar', 'admissions')) return true
+  if (hasRole(user as StaffUser, 'bursar', 'secretary')) return true
   if (isStudent(user as StudentUser)) return { student: { equals: user!.id } }
   return false
 }

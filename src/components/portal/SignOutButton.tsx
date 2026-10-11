@@ -2,6 +2,7 @@
 
 /**
  * Sign out. A form post rather than a link, so it cannot be triggered by a stray GET.
+ * The student portal's action by default; the staff portal passes its own.
  */
 
 import React from 'react'
@@ -24,9 +25,9 @@ function Button() {
   )
 }
 
-export function SignOutButton() {
+export function SignOutButton({ action = signOutAction }: { action?: () => Promise<void> }) {
   return (
-    <form action={signOutAction}>
+    <form action={action}>
       <Button />
     </form>
   )

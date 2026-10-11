@@ -27,6 +27,7 @@ import { InvitationStatus as InvitationStatus_c7c209edd85eb453d513c5a30e50a0b3 }
 import { Icon as Icon_91a09b539d3c86b0aebf520e7564ce08 } from '../../../components/admin/Logo'
 import { Logo as Logo_91a09b539d3c86b0aebf520e7564ce08 } from '../../../components/admin/Logo'
 import { LoginNote as LoginNote_a1d85335f89946feae7b9aaee9c9d76f } from '../../../components/admin/LoginNote'
+import { StaffPortalLink as StaffPortalLink_856275a193f65a74df78e497b7ccca3d } from '../../../components/admin/StaffPortalLink'
 import { Welcome as Welcome_72e830871eb26c77002633e2e2cc9dea } from '../../../components/admin/Welcome'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -62,6 +63,7 @@ export const importMap = {
   "/components/admin/Logo#Icon": Icon_91a09b539d3c86b0aebf520e7564ce08,
   "/components/admin/Logo#Logo": Logo_91a09b539d3c86b0aebf520e7564ce08,
   "/components/admin/LoginNote#LoginNote": LoginNote_a1d85335f89946feae7b9aaee9c9d76f,
+  "/components/admin/StaffPortalLink#StaffPortalLink": StaffPortalLink_856275a193f65a74df78e497b7ccca3d,
   "/components/admin/Welcome#Welcome": Welcome_72e830871eb26c77002633e2e2cc9dea,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

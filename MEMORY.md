@@ -12,15 +12,15 @@ entry short: what changed, what was verified, what is left.
 ## Current status (as of 2026-10-11)
 
 **Where we are:** P0–P4 done; P2 now done (P2-T11 leadership/staff, P2-T12 careers); P3 done; P5 done (P5-T1 to P5-T5). P6 hardening and P7 launch remain.
-**Latest:** Review fixes: offline fallback always returns a response, precache matching is same-origin, transactional audit failures propagate, password padding is merged, stale seed command removed, and comments clarified. 2026-10-11 branded error pages (site, portal, global) and an offline fallback page (service worker), uncommitted. Earlier the same day: student sign-in hang fixed (pool starvation) and show-password button, uncommitted on `fix/P6-prod-db-pool-email`. Before that: production log fixes on `fix/P6-prod-db-pool-email` (not committed): DB connections released before Vercel suspends an instance, no SMTP verify on cold start. **Owner action on Vercel**: `DATABASE_URL` to the transaction pooler (port 6543) and a real `SMTP_HOST`.
+**Latest:** 2026-10-11 staff portal and multi-role staff (FR-05) on `feat/P6-staff-portal-roles`, merged into `dev`: the super admin is an account type and signs in at /admin only; every other staff member signs in at /staff and holds any number of roles; registrar merged into secretary, admissions into bursar. Two migrations (`staff_accounts_roles_add`, then `staff_accounts_roles_drop`) plus the earlier `holiday_work` are **not yet applied to production**: the drop must wait until `main` deploys this code. Holiday work (P3-T4) committed on `feat/P3-T4-holiday-work`, also merged.
 **Next up:** student bulk import (CSV, dry run; fills the `import:students` loose end), P6 site-wide search and performance budget, or P4-T bulk report-card import (FR-12). Contact details in docs/CONTENT_TODO.md deliberately left until launch (school owner's call, 2026-09-23).
 
 ### Health checks
 | Check | Result | When |
 |---|---|---|
-| `pnpm typecheck` | ✅ passes | 2026-09-24 |
-| `pnpm test` (unit) | ✅ 66 / 66 pass (includes 4 vacancies) | 2026-09-24 |
-| `pnpm lint` | ✅ passes | 2026-09-24 |
+| `pnpm typecheck` | ✅ passes | 2026-10-11 |
+| `pnpm test` (unit) | ✅ 274 / 274 pass | 2026-10-11 |
+| `pnpm lint` | ✅ passes | 2026-10-11 |
 | `pnpm e2e` | ✅ careers 2/2, about 3/3, enquiry 3/3 (reused dev server) | 2026-09-24 |
 | 360 px visual check | ✅ /careers and /careers/[slug]: no sideways scroll, console clean | 2026-09-24 |
 
@@ -82,6 +82,28 @@ entry short: what changed, what was verified, what is left.
 ---
 
 ## Log
+
+### 2026-10-11 (P6 staff portal and multi-role staff, FR-05)
+- **Model**: `users.accountType` (`staff` | `superAdmin`) plus `users.roles` (multi-select: `editor` Content Manager, `secretary` School Secretary, `bursar`, `hod`, `teacher`). `hasRole` is true for the super admin or any held role, so permissions add up. `registrar` merged into `secretary` (students, terms, report cards, resources); `admissions` merged into `bursar` (fees plus applications, documents, enquiries; still never report cards). Staff with no role pass `staffOnly` only and are refused the admin screens (`canUseAdminScreens`). All in `src/access/roles.ts`; collections swept to the new names; `filesOnlyHolidayWork` replaces the old teacher-only check; HOD + teacher rights now combine.
+- **Two doors**: Users `beforeLogin` refuses non-super-admins unless the sign-in came through the staff portal (`STAFF_PORTAL_SIGN_IN` context), and refuses the super admin at the staff portal; also refuses deactivated accounts (previously only their access was cut). Checked after the password, so it reveals nothing to someone without it.
+- **Staff portal** `src/app/(staff)/staff/`: sign-in, sign-out (revokes the session), forgot / reset password (invitations now link to `/staff/reset/<token>`, the super admin's to `/admin/reset/<token>`), profile (name, password change that re-checks the current password and signs out other devices), directory, and a home page with a card per role linking into the admin. Shared session-cookie helpers in `src/lib/session-cookie.ts`; role shortcuts in `src/lib/role-guide.ts` (also used by the admin Welcome panel). Links in the top bar and footer; `/staff` noindex, no-store, nonce CSP like `/portal`. Admin sidebar gets "Back to the staff portal" for staff.
+- **Migrations**: `20261011_182041_staff_accounts_roles_add` (new columns, copies each `role` across with the merges) and `20261011_182129_staff_accounts_roles_drop` (drops `role`). Generated in two halves to avoid drizzle's interactive rename prompt. **Production order**: `holiday_work` and `..._add` can run before `main` deploys (old code keeps working); `..._drop` only after.
+- Verified: lint, typecheck, unit 274/274 (new: additive roles, forged `superAdmin` in roles, two doors, HOD+teacher, invite links). e2e specs updated to sign staff in at /staff but **not run**: `.env` points at the production database and Docker is unavailable. 360 px check not done for the same reason (`pnpm dev` would push schema to production).
+- Needs human review (AGENTS.md section 5): access rules, authentication, report cards and admissions all changed.
+
+### 2026-10-11 (P3-T4 holiday work and upload hardening)
+- **Holiday work** (FR-06a): a new resource type (`holidayWork`). Teachers get a `subjects` field (only the super admin sets it) and may create or edit holiday work only for those subjects (`writeResources`, `canFileResource` in `src/access/resources.ts`); the admin form offers them only that type and their subjects, and files it under the subject's department. HODs and editors keep their rules.
+- **File rules**: holiday work takes PDF or .docx only; ZIP only when the subject has "Accepts ZIP folders" ticked (the migration ticks code `ICT`). ZIPs are refused everywhere else in the library. Re-filing an existing resource cannot smuggle a stored file past these rules.
+- **Upload hardening for every collection**: file names go through a Zod schema (no paths, control characters or missing extension); the extension must match the declared type, which must match the bytes; Windows' `application/x-zip-compressed` is treated as ZIP. `src/lib/zip-inspect.ts` reads the central directory of every ZIP and .docx: unsafe paths, executables/scripts, macro files, nested archives, encryption, more than 1000 entries, more than 200 MB unpacked or a ratio above 200:1 are refused; a .docx with `vbaProject.bin` or no `word/document.xml` is refused.
+- **URL params**: the three file routes and the calendar route validate `[id]` / `[slug]` with Zod (`src/lib/validation.ts`) before any query or audit entry.
+- **Security fix**: a staff member could change their own `department` from their profile (no field access), so a HOD could move themselves into another department's shelf. Now super-admin only. Needs human review (AGENTS.md section 5).
+- `/portal/library` shows a "Holiday work" section by subject above the shelf; the shelf leaves holiday work out unless filtered by that type. Cards show the format (PDF / Word / ZIP folder).
+- Migration `20261011_174938_holiday_work` (enum value, `subjects.accepts_archives`, `users_rels`). **Not applied anywhere yet.**
+- Verified: typecheck, lint, unit 257/257 (34 new). **Not run**: e2e and the 360 px check, because `.env` points at the production Supabase database and Docker is not available, and the e2e web server would write to that database.
+
+### 2026-10-11 (admissions apply-online buttons)
+- `/admissions` showed "Apply online" only in the closing banner. Added it under the three steps and first in the Requirements button row, both linking to `/admissions/apply` and shown only while `applicationsOpen` is on (FR-16).
+- Validation: `pnpm lint` and `pnpm typecheck` pass. Not checked at 360 px in a browser.
 
 ### 2026-10-11 (review fixes)
 

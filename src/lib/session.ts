@@ -11,7 +11,9 @@
 
 import { cache } from 'react'
 import { headers as nextHeaders } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { getPayloadClient } from './payload'
+import { isStaff, isSuperAdmin } from '../access/roles'
 import type { Student, User } from '../payload-types'
 
 export interface Session {
@@ -52,3 +54,15 @@ export const currentStaff = cache(async (): Promise<User | null> => {
   const session = await currentSession()
   return session.collection === 'users' ? (session.user as User) : null
 })
+
+/**
+ * The staff member a staff portal page is for. Anyone not signed in as active staff goes to
+ * the sign-in page; the super admin, whose door is /admin, goes there.
+ */
+export async function requirePortalStaff(): Promise<User> {
+  const staff = await currentStaff()
+  const asStaff = staff ? { ...staff, collection: 'users' as const } : null
+  if (!staff || !isStaff(asStaff)) redirect('/staff/sign-in')
+  if (isSuperAdmin(asStaff)) redirect('/admin')
+  return staff
+}

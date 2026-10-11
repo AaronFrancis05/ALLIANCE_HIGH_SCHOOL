@@ -11,9 +11,9 @@ import { test, expect, type APIRequestContext, type Page } from '@playwright/tes
 import { PDFDocument } from 'pdf-lib'
 import { getPayload } from 'payload'
 import config from '../../src/payload.config.js'
+import { signInAtStaffPortal, staffContext } from '../helpers/staff-portal'
 
 const HOD = 'hod.sciences@alliancehigh.sc.ug'
-const PASSWORD = 'AllianceDev1!'
 const TAG = `bulk${Date.now()}`
 
 test.setTimeout(240_000)
@@ -25,11 +25,11 @@ async function pdf(): Promise<Buffer> {
   return Buffer.from(await document.save())
 }
 
-async function signIn(request: APIRequestContext) {
-  const response = await request.post('/api/users/login', { data: { email: HOD, password: PASSWORD } })
-  expect(response.ok()).toBe(true)
-  const { user } = await response.json()
-  return { ownDepartment: typeof user.department === 'object' ? user.department.id : user.department }
+/** The head of department's own department, read from their session. */
+async function ownDepartmentOf(request: APIRequestContext): Promise<number> {
+  const { user } = await (await request.get('/api/users/me?depth=0')).json()
+  expect(user).toBeTruthy()
+  return typeof user.department === 'object' ? user.department.id : user.department
 }
 
 async function upload(request: APIRequestContext, fields: Record<string, unknown>, filename: string) {
@@ -54,24 +54,25 @@ async function removeTestResources() {
 test.describe('Bulk upload for heads of department', () => {
   let ids: { own: number; other: number; subject: number }
 
-  test.beforeAll(async ({ playwright, baseURL }) => {
-    const request = await playwright.request.newContext({ baseURL })
-    const { ownDepartment } = await signIn(request)
+  test.beforeAll(async ({ browser, baseURL }) => {
+    const context = await staffContext(browser, baseURL, HOD)
+    const request = context.request
+    const ownDepartment = await ownDepartmentOf(request)
     const departments = await (await request.get('/api/departments?limit=50&depth=0')).json()
     const other = departments.docs.find((department: { id: number }) => department.id !== ownDepartment)
     const subjects = await (await request.get('/api/subjects?limit=1&depth=0')).json()
     ids = { own: ownDepartment, other: other.id, subject: subjects.docs[0].id }
-    await request.dispose()
+    await context.close()
   })
 
   test.afterAll(removeTestResources)
 
   test('a head of department cannot file under another department, or move a resource there', async ({
-    playwright,
+    browser,
     baseURL,
   }) => {
-    const request = await playwright.request.newContext({ baseURL })
-    await signIn(request)
+    const context = await staffContext(browser, baseURL, HOD)
+    const request = context.request
     const common = { type: 'notes', subject: ids.subject, classes: ['S3'], visibility: 'students', description: TAG }
 
     const elsewhere = await upload(request, { ...common, title: `${TAG} elsewhere`, department: ids.other }, 'a.pdf')
@@ -87,7 +88,7 @@ test.describe('Bulk upload for heads of department', () => {
     expect(moved.status()).toBe(403)
     const after = await (await request.get(`/api/resources/${created.id}?depth=0`)).json()
     expect(after.department).toBe(ids.own)
-    await request.dispose()
+    await context.close()
   })
 
   test('the bulk upload drawer files several papers at once, titled from their names', async ({ page }) => {
@@ -136,11 +137,10 @@ function capitalise(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
+/** Staff reach the admin screens through the staff portal. */
 async function signInToAdmin(page: Page) {
-  await page.goto('/admin/login', { timeout: 180_000 })
-  await page.locator('#field-email').fill(HOD)
-  await page.locator('#field-password').fill(PASSWORD)
-  await page.click('button[type="submit"]')
+  await signInAtStaffPortal(page, HOD)
+  await page.goto('/admin', { timeout: 180_000 })
   await page.waitForURL(/\/admin$/, { timeout: 180_000 })
 }
 

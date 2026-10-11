@@ -6,7 +6,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { hiddenUnless, publishedOrStaff, roles } from '../access/roles'
+import { hiddenUnless, publishedOrStaff, roles, superAdminOnly } from '../access/roles'
 import { revalidateAfterChange } from '../lib/revalidate'
 import { slugField } from '../fields/slug'
 import { seoFields } from '../fields/seo'
@@ -24,9 +24,9 @@ export const Pages: CollectionConfig = {
   },
   access: {
     read: publishedOrStaff,
-    create: roles('superAdmin', 'editor'),
-    update: roles('superAdmin', 'editor'),
-    delete: roles('superAdmin'),
+    create: roles('editor'),
+    update: roles('editor'),
+    delete: superAdminOnly,
   },
   versions: { drafts: { autosave: { interval: 2000 }, schedulePublish: true }, maxPerDoc: 20 },
   fields: [

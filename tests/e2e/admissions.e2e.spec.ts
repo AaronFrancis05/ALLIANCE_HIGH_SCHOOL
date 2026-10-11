@@ -12,8 +12,8 @@ import sharp from 'sharp'
 import { PDFDocument } from 'pdf-lib'
 import { test, expect, type Page } from '@playwright/test'
 import { STUDENTS, signInStudent } from '../helpers/student'
+import { staffContext } from '../helpers/staff-portal'
 
-const STAFF_PASSWORD = 'AllianceDev1!'
 const DATE_OF_BIRTH = `${new Date().getFullYear() - 12}-05-20`
 
 test.setTimeout(180_000)
@@ -76,12 +76,8 @@ test.describe('Online application', () => {
     const trackingCode = (await code.textContent())!.trim()
     const query = `/api/applications?depth=0&where[trackingCode][equals]=${trackingCode}`
 
-    // The admissions officer finds it, with the aggregate worked out on the server.
-    const staff = await browser.newContext()
-    const login = await staff.request.post('/api/users/login', {
-      data: { email: 'admissions@alliancehigh.sc.ug', password: STAFF_PASSWORD },
-    })
-    expect(login.ok()).toBe(true)
+    // The bursar, who runs admissions, finds it, with the aggregate worked out on the server.
+    const staff = await staffContext(browser, undefined, 'bursar@alliancehigh.sc.ug')
     const found = await (await staff.request.get(query.replace('depth=0', 'depth=1'))).json()
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0]).toMatchObject({ status: 'submitted', classSought: 'S1', pleAggregate: 8 })

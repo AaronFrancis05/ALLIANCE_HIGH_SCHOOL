@@ -12,7 +12,7 @@
  */
 
 import type { CollectionConfig } from 'payload'
-import { hasRole, hiddenUnless, passwordNeverOnCreate, roles, type StaffUser } from '../access/roles'
+import { hasRole, hiddenUnless, passwordNeverOnCreate, superAdminOnly, type StaffUser } from '../access/roles'
 import { CLASS_LABELS, SCHOOL_CLASSES } from '../access/resources'
 import {
   STUDENT_RECORD_KEEPERS,
@@ -53,7 +53,7 @@ export const Students: CollectionConfig = {
   },
   access: {
     create: manageStudents,
-    delete: roles('superAdmin'),
+    delete: superAdminOnly,
     update: manageStudents,
     read: readStudents,
     admin: ({ req }) => req.user?.collection === 'users',
@@ -158,7 +158,7 @@ export const Students: CollectionConfig = {
         { label: 'Suspended', value: 'suspended' },
         { label: 'Alumnus', value: 'alumni' },
       ],
-      access: { update: ({ req }) => hasRole(req.user as StaffUser, 'registrar') },
+      access: { update: ({ req }) => hasRole(req.user as StaffUser, 'secretary') },
     },
     {
       name: 'portalSetUp',
