@@ -1,0 +1,138 @@
+/**
+ * Motion for every public and portal page.
+ *
+ * Rules this file keeps:
+ * - Only `opacity` and `transform` move, so nothing reflows and nothing shifts on a phone.
+ * - Nothing is hidden unless JavaScript has said it will reveal it (`html[data-motion]`, set
+ *   by MotionReveal). With no script, or with reduced motion, every page looks exactly as
+ *   it did before.
+ * - Everything sits inside `prefers-reduced-motion: no-preference`; brand.css also cuts any
+ *   remaining durations to zero for anyone who asks for less motion.
+ */
+
+:root {
+  /* A gentle ease-out: quick to start, slow to settle, like turning a page. */
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-reveal: 650ms;
+}
+
+@keyframes motion-rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.125rem);
+  }
+}
+
+/* A photograph easing back from a slight zoom, the way a slide settles on a projector. */
+@keyframes motion-settle {
+  from {
+    transform: scale(1.08);
+  }
+}
+
+/* A stroke of gold chalk drawn under a heading, left to right. */
+@keyframes motion-chalk {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Menus unfold downwards from the bar they hang from. */
+@keyframes motion-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-0.375rem);
+  }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  /*
+   * Scroll reveal. Hidden only once the script is running, and only for elements it has
+   * not yet shown. `backwards` fill (not `both`) hands control back to the element's own
+   * styles when the animation ends, so hover lifts and transitions keep working.
+   */
+  html[data-motion] [data-reveal]:not([data-revealed]) {
+    opacity: 0;
+  }
+
+  html[data-motion] [data-revealed='in'] {
+    animation: motion-rise var(--motion-reveal) var(--motion-ease) var(--reveal-delay, 0ms) backwards;
+  }
+
+  /* Load-time entrance for banner text: pure CSS, so it runs before any script. */
+  .motion-rise {
+    animation: motion-rise 700ms var(--motion-ease) var(--motion-delay, 0ms) backwards;
+  }
+
+  .motion-drop {
+    animation: motion-drop 200ms var(--motion-ease) backwards;
+  }
+
+  .motion-settle {
+    animation: motion-settle 9s var(--motion-ease) backwards;
+  }
+
+  /* The chalk line runs once the heading itself has been revealed (or at once without JS). */
+  .chalk-underline::after {
+    animation: motion-chalk 900ms var(--motion-ease) 250ms backwards;
+  }
+
+  html[data-motion] [data-reveal]:not([data-revealed]) .chalk-underline::after,
+  html[data-motion] .chalk-underline[data-reveal]:not([data-revealed])::after {
+    animation: none;
+    transform: scaleX(0);
+  }
+
+  /* Cards rise a little under a mouse, as a sheet lifts off a desk. Touch screens skip it. */
+  @media (hover: hover) {
+    .motion-lift {
+      transition:
+        transform 300ms var(--motion-ease),
+        box-shadow 300ms var(--motion-ease),
+        border-color 150ms ease;
+    }
+
+    .motion-lift:hover {
+      transform: translateY(-0.25rem);
+      box-shadow: var(--shadow-raised);
+    }
+  }
+
+  /* Buttons give under a press. */
+  .motion-press {
+    transition-property: color, background-color, border-color, transform;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+  }
+
+  .motion-press:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+}
+
+@layer components {
+  /*
+   * The gold mark under section headings. Absolutely placed in the gap below the heading,
+   * so it takes no space and moves nothing. It is decoration only.
+   */
+  .chalk-underline {
+    position: relative;
+  }
+
+  .chalk-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -0.55rem;
+    left: 0;
+    width: 3.5rem;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-gold-500), var(--color-gold-300));
+    transform-origin: left center;
+    pointer-events: none;
+  }
+
+  .chalk-underline-center::after {
+    left: calc(50% - 1.75rem);
+  }
+}

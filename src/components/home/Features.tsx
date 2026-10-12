@@ -44,7 +44,8 @@ export function Features({ features }: { features: Feature[] }) {
             return (
               <article
                 key={feature.title}
-                className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-[var(--shadow-card)]"
+                data-reveal
+                className="motion-lift overflow-hidden rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-[var(--shadow-card)]"
               >
                 {isMedia(feature.image) ? (
                   <div className="relative aspect-4/3 w-full">

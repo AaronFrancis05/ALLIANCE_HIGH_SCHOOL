@@ -23,7 +23,7 @@ export function Welcome({ heading, name, title, message, photo, readMoreHref }: 
     <Section tone="plain">
       <Container>
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          <div className="relative mx-auto w-full max-w-sm">
+          <div data-reveal className="relative mx-auto w-full max-w-sm">
             {isMedia(photo) ? (
               <div className="relative aspect-4/5 overflow-hidden rounded-[var(--radius-card)] shadow-[var(--shadow-raised)]">
                 <MediaImage media={photo} sizes="(max-width: 1024px) 90vw, 380px" />
@@ -38,11 +38,11 @@ export function Welcome({ heading, name, title, message, photo, readMoreHref }: 
             </div>
           </div>
 
-          <div>
+          <div data-reveal>
             <p className="mb-3 inline-block rounded-full border border-[var(--border-subtle)] px-3 py-1 text-xs font-semibold tracking-widest text-maroon-700 uppercase">
               Welcome
             </p>
-            <h2 className="text-3xl sm:text-4xl">{heading ?? 'Welcome from the Head Teacher'}</h2>
+            <h2 className="chalk-underline text-3xl sm:text-4xl">{heading ?? 'Welcome from the Head Teacher'}</h2>
             <Prose className="mt-5 text-[var(--text-body)]">
               {message.split('\n\n').map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>

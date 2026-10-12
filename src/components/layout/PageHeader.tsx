@@ -30,10 +30,10 @@ export function PageHeader({ title, lead, image, trail = [] }: PageHeaderProps) 
   const hasImage = isMedia(image)
 
   return (
-    <section className={cn('relative isolate bg-maroon-800', !hasImage && 'pattern-plus')}>
+    <section className={cn('relative isolate overflow-hidden bg-maroon-800', !hasImage && 'pattern-plus')}>
       {hasImage ? (
         <>
-          <div className="absolute inset-0 -z-10">
+          <div className="motion-settle absolute inset-0 -z-10">
             <MediaImage media={image} priority sizes="100vw" alt="" />
           </div>
           {/* Dark enough for white text at 4.5:1 wherever the photograph is light. */}
@@ -64,8 +64,15 @@ export function PageHeader({ title, lead, image, trail = [] }: PageHeaderProps) 
           </ol>
         </nav>
 
-        <h1 className="mt-4 font-display text-3xl leading-tight text-white sm:text-5xl">{title}</h1>
-        {lead ? <p className="mt-4 max-w-2xl text-base text-cream-200 sm:text-lg">{lead}</p> : null}
+        <h1 className="motion-rise mt-4 font-display text-3xl leading-tight text-white sm:text-5xl">{title}</h1>
+        {lead ? (
+          <p
+            className="motion-rise mt-4 max-w-2xl text-base text-cream-200 sm:text-lg"
+            style={{ '--motion-delay': '120ms' } as React.CSSProperties}
+          >
+            {lead}
+          </p>
+        ) : null}
       </Container>
 
       {hasImage ? <PlaceholderNote media={image} /> : null}

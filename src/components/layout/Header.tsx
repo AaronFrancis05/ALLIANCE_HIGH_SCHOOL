@@ -181,7 +181,7 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
                 </button>
 
                 {openMenu === item.href ? (
-                  <div className="absolute top-full left-0 z-50 min-w-[20rem] rounded-b-xl border border-cream-300 bg-white p-2 shadow-[0_2px_4px_rgb(20_20_20/0.08),0_16px_40px_-16px_rgb(20_20_20/0.28)] shadow-[var(--shadow-raised)]">
+                  <div className="motion-drop absolute top-full left-0 z-50 min-w-[20rem] rounded-b-xl border border-cream-300 bg-white p-2 shadow-[0_2px_4px_rgb(20_20_20/0.08),0_16px_40px_-16px_rgb(20_20_20/0.28)] shadow-[var(--shadow-raised)]">
                     {item.children.map((child) => (
                       <Link
                         key={child.href}
@@ -215,7 +215,7 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
 
           <Link
             href="/admissions"
-            className="ml-1 inline-flex min-h-11 shrink-0 items-center rounded-lg bg-gold-500 px-3 py-2 text-sm font-semibold whitespace-nowrap text-ink-950 transition-colors hover:bg-gold-400 xl:ml-2 xl:px-4"
+            className="motion-press ml-1 inline-flex min-h-11 shrink-0 items-center rounded-lg bg-gold-500 px-3 py-2 text-sm font-semibold whitespace-nowrap text-ink-950 transition-colors hover:bg-gold-400 xl:ml-2 xl:px-4"
           >
             Apply now
           </Link>
@@ -249,7 +249,7 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
       {drawerOpen ? (
         <div
           id="mobile-menu"
-          className="fixed inset-x-0 bottom-0 overflow-y-auto overscroll-contain border-t border-maroon-900/40 bg-maroon-800 lg:hidden"
+          className="motion-drop fixed inset-x-0 bottom-0 overflow-y-auto overscroll-contain border-t border-maroon-900/40 bg-maroon-800 lg:hidden"
           style={{ top: drawerTop }}
         >
           <div className="container-site pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">

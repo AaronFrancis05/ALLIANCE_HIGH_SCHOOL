@@ -23,7 +23,10 @@ export function PostCard({ post }: { post: Post }) {
   const category = typeof post.category === 'object' ? (post.category as Category) : null
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-raised)]">
+    <article
+      data-reveal
+      className="group motion-lift flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-raised)]"
+    >
       <Link href={`/news/${post.slug}`} className="relative block aspect-16/9 w-full overflow-hidden">
         <MediaImage
           media={post.coverImage}

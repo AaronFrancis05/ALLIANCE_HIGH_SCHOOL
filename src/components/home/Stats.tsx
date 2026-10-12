@@ -55,7 +55,7 @@ function StatItem({ stat, visible }: { stat: Stat; visible: boolean }) {
   const display = match ? `${match[1]}${counted.toLocaleString('en-UG')}${match[3]}` : stat.value
 
   return (
-    <div className="text-center">
+    <div data-reveal className="text-center">
       <p className="font-display text-4xl font-semibold text-gold-400 sm:text-5xl">{display}</p>
       <p className="mt-2 text-sm text-cream-200">{stat.label}</p>
     </div>

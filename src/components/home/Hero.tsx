@@ -63,13 +63,16 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
             aria-label={`${slideIndex + 1} of ${slides.length}`}
             className="relative w-full shrink-0 snap-start"
           >
-            <div className="relative h-[68vh] max-h-[640px] min-h-[420px] w-full">
-              <MediaImage
-                media={slide.image}
-                priority={slideIndex === 0}
-                sizes="100vw"
-                className="object-cover"
-              />
+            <div className="relative h-[68vh] max-h-[640px] min-h-[420px] w-full overflow-hidden">
+              {/* The photograph eases back from a slight zoom as the page opens. */}
+              <div className="motion-settle absolute inset-0">
+                <MediaImage
+                  media={slide.image}
+                  priority={slideIndex === 0}
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              </div>
               {/*
                 On a phone the text runs the full width, so the whole picture is darkened
                 from the bottom. From `sm` up the panel sits on the left, so only that side
@@ -92,29 +95,37 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
                       leave the headline unreadable against the photograph.
                     */}
                     {slideIndex === 0 ? (
-                      <h1 className="font-display text-3xl leading-tight text-white sm:text-5xl">
+                      <h1 className="motion-rise font-display text-3xl leading-tight text-white sm:text-5xl">
                         {slide.headline}
                       </h1>
                     ) : (
-                      <p className="font-display text-3xl leading-tight text-white sm:text-5xl">
+                      <p className="motion-rise font-display text-3xl leading-tight text-white sm:text-5xl">
                         {slide.headline}
                       </p>
                     )}
                     {slide.subhead ? (
-                      <p className="mt-4 text-base text-cream-200 sm:text-lg">{slide.subhead}</p>
+                      <p
+                        className="motion-rise mt-4 text-base text-cream-200 sm:text-lg"
+                        style={{ '--motion-delay': '150ms' } as React.CSSProperties}
+                      >
+                        {slide.subhead}
+                      </p>
                     ) : null}
-                    <div className="mt-7 flex flex-wrap gap-3">
+                    <div
+                      className="motion-rise mt-7 flex flex-wrap gap-3"
+                      style={{ '--motion-delay': '300ms' } as React.CSSProperties}
+                    >
                       {slide.buttonLabel && slide.buttonHref ? (
                         <Link
                           href={slide.buttonHref}
-                          className="inline-flex min-h-12 items-center rounded-lg bg-gold-500 px-6 text-sm font-semibold text-ink-950 hover:bg-gold-400"
+                          className="motion-press inline-flex min-h-12 items-center rounded-lg bg-gold-500 px-6 text-sm font-semibold text-ink-950 hover:bg-gold-400"
                         >
                           {slide.buttonLabel}
                         </Link>
                       ) : null}
                       <Link
                         href="/admissions"
-                        className="inline-flex min-h-12 items-center rounded-lg border-2 border-white/70 px-6 text-sm font-semibold text-white hover:bg-white hover:text-ink-950"
+                        className="motion-press inline-flex min-h-12 items-center rounded-lg border-2 border-white/70 px-6 text-sm font-semibold text-white hover:bg-white hover:text-ink-950"
                       >
                         Admissions
                       </Link>

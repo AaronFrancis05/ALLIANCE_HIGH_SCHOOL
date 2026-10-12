@@ -123,11 +123,11 @@ export default async function HomePageRoute() {
           <div className="grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <div>
               <div className="mb-8 flex items-end justify-between gap-4">
-                <div>
+                <div data-reveal>
                   <p className="mb-2 text-xs font-semibold tracking-widest text-maroon-700 uppercase">
                     Latest news
                   </p>
-                  <h2 className="text-3xl">What is happening at school</h2>
+                  <h2 className="chalk-underline text-3xl">What is happening at school</h2>
                 </div>
                 <Link
                   href="/news"
@@ -152,8 +152,10 @@ export default async function HomePageRoute() {
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-semibold tracking-widest text-maroon-700 uppercase">Diary</p>
-              <h2 className="mb-8 text-3xl">Upcoming events</h2>
+              <div data-reveal>
+                <p className="mb-2 text-xs font-semibold tracking-widest text-maroon-700 uppercase">Diary</p>
+                <h2 className="chalk-underline mb-8 text-3xl">Upcoming events</h2>
+              </div>
 
               {events.docs.length ? (
                 <ul className="space-y-4">
@@ -204,6 +206,7 @@ export default async function HomePageRoute() {
                 <Link
                   key={album.id}
                   href={`/gallery/${album.slug}`}
+                  data-reveal
                   className="group relative aspect-square overflow-hidden rounded-[var(--radius-card)]"
                 >
                   <MediaImage
@@ -233,7 +236,7 @@ export default async function HomePageRoute() {
       {/* Closing call to action */}
       <Section tone="brand" pattern className="py-16">
         <Container className="text-center">
-          <h2 className="text-3xl text-white sm:text-4xl">
+          <h2 data-reveal className="chalk-underline chalk-underline-center text-3xl text-white sm:text-4xl">
             {home?.callToAction?.heading ?? 'Join our school community'}
           </h2>
           {home?.callToAction?.body ? (
