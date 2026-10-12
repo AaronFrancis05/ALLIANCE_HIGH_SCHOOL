@@ -62,7 +62,7 @@ export function SectionHeading({
   inverted?: boolean
 }) {
   return (
-    <header className={cn('mb-10 max-w-2xl', align === 'center' && 'mx-auto text-center')}>
+    <header data-reveal className={cn('mb-10 max-w-2xl', align === 'center' && 'mx-auto text-center')}>
       {eyebrow ? (
         <p
           className={cn(
@@ -73,7 +73,15 @@ export function SectionHeading({
           {eyebrow}
         </p>
       ) : null}
-      <h2 className={cn('text-3xl sm:text-4xl', inverted && 'text-white')}>{title}</h2>
+      <h2
+        className={cn(
+          'chalk-underline text-3xl sm:text-4xl',
+          align === 'center' && 'chalk-underline-center',
+          inverted && 'text-white',
+        )}
+      >
+        {title}
+      </h2>
       {lead ? (
         <p className={cn('mt-4 text-lg', inverted ? 'text-cream-200' : 'text-[var(--text-muted)]')}>{lead}</p>
       ) : null}
@@ -94,7 +102,7 @@ const buttonStyles: Record<ButtonVariant, string> = {
 }
 
 const buttonBase =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60'
+  'motion-press inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60'
 
 export function Button({
   variant = 'primary',
@@ -136,6 +144,7 @@ export function Card({
 }) {
   return (
     <Tag
+      data-reveal
       className={cn(
         'rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-[var(--shadow-card)]',
         className,

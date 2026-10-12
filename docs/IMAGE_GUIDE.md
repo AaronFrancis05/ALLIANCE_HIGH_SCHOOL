@@ -17,7 +17,7 @@ Every picture on the site, what it is, and where it appears.
   including GPS stripped, long edge capped at 2400 px, WebP, plus a blur placeholder.
 - **Video** is embedded from YouTube behind a click-to-load facade. Never autoplay with sound.
 
-## Real photographs in use (16)
+## Real photographs in use (22)
 
 These are the school's own photographs. Nothing to do.
 
@@ -39,8 +39,14 @@ These are the school's own photographs. Nothing to do.
 | About, A-Level section | 4:5 | Senior students walking along the palm-lined avenue at Alliance High School Nansana |
 | Admissions header; Contact | 3:2 | A member of staff guiding a student outside the administration block at Alliance High School Nansana |
 | Academics, classroom; Stats background | 16:9 | Students writing at their desks during a lesson at Alliance High School Nansana |
+| Home hero, slide 3; Gallery, around the campus | 16:9 | Students walking along the tree-lined avenue through the campus at Alliance High School Nansana |
+| About, school life; Gallery, around the campus | 16:9 | Students in school uniform standing together on the campus road at Alliance High School Nansana |
+| Contact header; Gallery, around the campus | 16:9 | The administration block at Alliance High School Nansana |
+| Facilities; Gallery, in the classroom | 4:3 | Students working at computers in the computer laboratory at Alliance High School Nansana |
+| Gallery, in the classroom | 3:2 | Two students taking notes at a classroom desk at Alliance High School Nansana |
+| Gallery, in the classroom | 3:2 | Two students reading and writing together at a classroom desk at Alliance High School Nansana |
 
-## Placeholders to replace (10)
+## Placeholders to replace (6)
 
 These are AI-generated stand-ins. They are labelled "Placeholder image" wherever they
 appear, because an invented picture must never be passed off as a photograph of a real
@@ -49,33 +55,12 @@ event at the school. Each one below says exactly what to photograph to replace i
 **To replace one:** put the photograph in `assets/`, point its manifest entry at the file,
 change `kind` to `photo`, remove `brief`, then run `pnpm images && pnpm seed`.
 
-### Home hero, slide 4; About, facilities
-
-- **Replaces:** `placeholder-campus-aerial-alliance-high-nansana.webp`
-- **Shape:** 16:9
-- **Photograph to take:** Drone shot from about 60 m, morning light, whole campus with classroom blocks, trees and the Nansana hills behind. Leave empty sky on the left third for the headline.
-- **Alt text once replaced:** an aerial view of the campus at Alliance High School Nansana
-
-### About, school life; News default image
-
-- **Replaces:** `placeholder-morning-assembly-alliance-high-nansana.webp`
-- **Shape:** 16:9
-- **Photograph to take:** Whole-school assembly on the parade ground at 7:30 am, students in lines, flag being raised, teacher addressing them. Shot from slightly raised position.
-- **Alt text once replaced:** morning assembly at Alliance High School Nansana
-
 ### Why choose us; Academics, sciences
 
 - **Replaces:** `placeholder-chemistry-laboratory-alliance-high-nansana.webp`
 - **Shape:** 4:3
 - **Photograph to take:** Senior Four students in lab coats doing a titration, teacher supervising, clean benches, labelled reagent bottles.
 - **Alt text once replaced:** a chemistry practical at Alliance High School Nansana
-
-### Why choose us; Facilities
-
-- **Replaces:** `placeholder-computer-laboratory-alliance-high-nansana.webp`
-- **Shape:** 4:3
-- **Photograph to take:** Students at desktop computers in the ICT lab, teacher helping one of them, tidy cabling, natural light from the windows.
-- **Alt text once replaced:** the computer laboratory at Alliance High School Nansana
 
 ### Sports
 
@@ -111,13 +96,6 @@ change `kind` to `photo`, remove `brief`, then run `pnpm images && pnpm seed`.
 - **Shape:** 16:9
 - **Photograph to take:** A student receiving an award on speech day, guest of honour handing over the trophy, parents applauding.
 - **Alt text once replaced:** prize-giving day at Alliance High School Nansana
-
-### Contact
-
-- **Replaces:** `placeholder-main-gate-alliance-high-nansana.webp`
-- **Shape:** 16:9
-- **Photograph to take:** The main gate with the school signboard clearly readable, shot straight on in the morning. This one matters for Google Business Profile.
-- **Alt text once replaced:** the main gate at Alliance High School Nansana
 
 ## A note for whoever does the photography
 

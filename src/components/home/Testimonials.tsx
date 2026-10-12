@@ -21,7 +21,8 @@ export function Testimonials({ testimonials }: { testimonials: Testimonial[] }) 
           {testimonials.slice(0, 3).map((testimonial) => (
             <figure
               key={testimonial.id}
-              className="flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 shadow-[var(--shadow-card)]"
+              data-reveal
+              className="motion-lift flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 shadow-[var(--shadow-card)]"
             >
               <Quote className="h-7 w-7 text-gold-500" aria-hidden />
               <blockquote className="mt-3 flex-1 text-[var(--text-body)] italic">

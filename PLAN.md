@@ -109,7 +109,7 @@ them before you open a branch.
 ### P7: launch
 - [ ] Collect everything in docs/CONTENT_TODO.md from the school
 - [ ] Claim the Google Business Profile and submit the sitemap in Search Console (docs/SEO.md §2)
-- [ ] Replace the 12 AI placeholder images (docs/IMAGE_GUIDE.md)
+- [ ] Replace the AI placeholder images (docs/IMAGE_GUIDE.md): 6 of 10 left, no photos yet of the lab, football, MDD, dining hall, dormitory, prize-giving
 - [ ] Choose hosting (managed or VPS) and write `docs/DEPLOYMENT-VPS.md`
 - [ ] Automated backups plus a restore that has actually been tested (NFR-07)
 - [ ] Train the content editor, registrar, bursar and admissions officer

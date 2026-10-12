@@ -17,6 +17,7 @@ import { currentStaff } from '../../lib/session'
 import { canUseAdminScreens } from '../../access/roles'
 import { SignOutButton } from '../../components/portal/SignOutButton'
 import { ServiceWorkerRegister } from '../../components/layout/ServiceWorkerRegister'
+import { MotionReveal } from '../../components/layout/MotionReveal'
 import { signOutAction } from './staff/actions'
 
 /** Never cached: a page here belongs to one staff member. */
@@ -104,6 +105,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
         </footer>
 
         <ServiceWorkerRegister />
+        <MotionReveal />
       </body>
     </html>
   )
