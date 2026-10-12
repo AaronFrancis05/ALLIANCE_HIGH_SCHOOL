@@ -36,7 +36,7 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
   const pathname = usePathname()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
-  // Where the drawer starts: the header's bottom edge, measured when it opens, because
+  // Where the drawer starts: the header's bottom edge, measured when it opens and resizes, because
   // the header grows when the school name wraps onto two lines on a narrow phone.
   const [drawerTop, setDrawerTop] = useState(0)
   const headerRef = useRef<HTMLElement>(null)
@@ -57,6 +57,17 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
     return () => {
       document.body.style.overflow = ''
     }
+  }, [drawerOpen])
+
+  useEffect(() => {
+    if (!drawerOpen) return
+
+    const updateDrawerTop = () => {
+      setDrawerTop(headerRef.current?.getBoundingClientRect().bottom ?? 0)
+    }
+    updateDrawerTop()
+    window.addEventListener('resize', updateDrawerTop)
+    return () => window.removeEventListener('resize', updateDrawerTop)
   }, [drawerOpen])
 
   // The drawer is phone-only. If the window widens past the breakpoint (a tablet turned
