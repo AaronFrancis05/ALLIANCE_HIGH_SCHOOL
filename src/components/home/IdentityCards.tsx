@@ -43,13 +43,11 @@ export function IdentityCards({ vision, mission, coreValues, theme }: IdentityCa
             <article
               key={card.title}
               data-reveal
-              className="motion-lift flex flex-col rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 shadow-[var(--shadow-card)] sm:p-7"
+              className="motion-lift rounded-[var(--radius-card)] border-t-4 border-gold-500 bg-[var(--surface-raised)] p-6 shadow-[var(--shadow-raised)] sm:p-7"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-maroon-50 text-maroon-700">
-                <card.icon className="h-6 w-6" aria-hidden />
-              </span>
-              <h2 className="mt-5 font-display text-xl text-[var(--text-strong)]">{card.title}</h2>
-              <p className="mt-3 text-[0.9375rem] leading-relaxed text-[var(--text-muted)]">{card.body}</p>
+              <card.icon className="h-7 w-7 text-maroon-700" aria-hidden />
+              <h2 className="mt-3 font-display text-lg text-[var(--text-strong)]">{card.title}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">{card.body}</p>
             </article>
           ))}
         </div>
