@@ -7,11 +7,17 @@
  * works without JavaScript, and can be swiped. The headline sits in a panel on the left
  * so it never covers a student's face, and only the first image is given priority so the
  * page still loads quickly on 4G.
+ *
+ * Slides advance on their own every `INTERVAL_MS`. The timer is the active dot's progress
+ * bar: when its CSS animation ends, the next slide is shown. Pausing the animation pauses
+ * the carousel, so the two never drift apart, and a visitor who asks for reduced motion
+ * gets no animation and therefore no autoplay. Hovering, hiding the tab or pressing the
+ * pause button all hold the current slide (WCAG 2.2.2).
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
 import { MediaImage } from '../ui/MediaImage'
 import { cn } from '../../lib/cn'
 import type { Media } from '../../payload-types'
@@ -24,9 +30,18 @@ export interface HeroSlide {
   buttonHref?: string | null
 }
 
+const INTERVAL_MS = 7000
+/** Quiet time after the last scroll event before the track counts as at rest. */
+const SETTLE_MS = 120
+
 export function Hero({ slides }: { slides: HeroSlide[] }) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [index, setIndex] = useState(0)
+  const [stopped, setStopped] = useState(false)
+  const [hovered, setHovered] = useState(false)
+  const [hidden, setHidden] = useState(false)
+
+  const paused = stopped || hovered || hidden
 
   const scrollTo = useCallback((next: number) => {
     const track = trackRef.current
@@ -35,25 +50,51 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
     track.scrollTo({ left: track.clientWidth * clamped, behavior: 'smooth' })
   }, [])
 
-  // Keep the dots in step when the visitor swipes.
+  /*
+   * Keep the dots in step when the visitor swipes. The active slide only changes once the
+   * track has come to rest, so the outgoing photograph keeps its zoom until it is off
+   * screen and the incoming copy fades up after the slide lands. A short debounce stands
+   * in for `scrollend`, which older Safari lacks.
+   */
   useEffect(() => {
     const track = trackRef.current
     if (!track) return
+    let settle: ReturnType<typeof setTimeout> | undefined
 
     const onScroll = () => {
-      setIndex(Math.round(track.scrollLeft / track.clientWidth))
+      clearTimeout(settle)
+      settle = setTimeout(() => setIndex(Math.round(track.scrollLeft / track.clientWidth)), SETTLE_MS)
     }
 
     track.addEventListener('scroll', onScroll, { passive: true })
-    return () => track.removeEventListener('scroll', onScroll)
+    return () => {
+      clearTimeout(settle)
+      track.removeEventListener('scroll', onScroll)
+    }
+  }, [])
+
+  // Hold the slide while the tab is in the background.
+  useEffect(() => {
+    const onVisibility = () => setHidden(document.visibilityState === 'hidden')
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
   }, [])
 
   if (!slides.length) return null
 
   return (
-    <section aria-roledescription="carousel" aria-label="About the school" className="relative bg-ink-950">
+    <section
+      aria-roledescription="carousel"
+      aria-label="About the school"
+      className="relative bg-ink-950"
+      style={{ '--hero-interval': `${INTERVAL_MS}ms` } as React.CSSProperties}
+      // Mouse only: a tap on a phone fires an enter with no matching leave.
+      onPointerEnter={(event) => event.pointerType === 'mouse' && setHovered(true)}
+      onPointerLeave={(event) => event.pointerType === 'mouse' && setHovered(false)}
+    >
       <div
         ref={trackRef}
+        aria-live={paused ? 'polite' : 'off'}
         className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {slides.map((slide, slideIndex) => (
@@ -61,11 +102,12 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
             key={`${slide.headline}-${slideIndex}`}
             aria-roledescription="slide"
             aria-label={`${slideIndex + 1} of ${slides.length}`}
-            className="relative w-full shrink-0 snap-start"
+            data-active={slideIndex === index ? '' : undefined}
+            className="hero-slide relative w-full shrink-0 snap-start"
           >
             <div className="relative h-[68vh] max-h-[640px] min-h-[420px] w-full overflow-hidden">
-              {/* The photograph eases back from a slight zoom as the page opens. */}
-              <div className="motion-settle absolute inset-0">
+              {/* The active photograph pushes in slowly for as long as it is shown. */}
+              <div className="hero-photo absolute inset-0">
                 <MediaImage
                   media={slide.image}
                   priority={slideIndex === 0}
@@ -95,25 +137,25 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
                       leave the headline unreadable against the photograph.
                     */}
                     {slideIndex === 0 ? (
-                      <h1 className="motion-rise font-display text-3xl leading-tight text-white sm:text-5xl">
+                      <h1 className="hero-copy font-display text-3xl leading-tight text-white sm:text-5xl">
                         {slide.headline}
                       </h1>
                     ) : (
-                      <p className="motion-rise font-display text-3xl leading-tight text-white sm:text-5xl">
+                      <p className="hero-copy font-display text-3xl leading-tight text-white sm:text-5xl">
                         {slide.headline}
                       </p>
                     )}
                     {slide.subhead ? (
                       <p
-                        className="motion-rise mt-4 text-base text-cream-200 sm:text-lg"
-                        style={{ '--motion-delay': '150ms' } as React.CSSProperties}
+                        className="hero-copy mt-4 text-base text-cream-200 sm:text-lg"
+                        style={{ '--motion-delay': '120ms' } as React.CSSProperties}
                       >
                         {slide.subhead}
                       </p>
                     ) : null}
                     <div
-                      className="motion-rise mt-7 flex flex-wrap gap-3"
-                      style={{ '--motion-delay': '300ms' } as React.CSSProperties}
+                      className="hero-copy mt-7 flex flex-wrap gap-3"
+                      style={{ '--motion-delay': '240ms' } as React.CSSProperties}
                     >
                       {slide.buttonLabel && slide.buttonHref ? (
                         <Link
@@ -140,7 +182,7 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
 
       {slides.length > 1 ? (
         <>
-          <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2">
+          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2">
             {slides.map((slide, dotIndex) => (
               <button
                 key={`dot-${slide.headline}-${dotIndex}`}
@@ -149,11 +191,29 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
                 aria-label={`Go to slide ${dotIndex + 1}`}
                 aria-current={dotIndex === index}
                 className={cn(
-                  'h-2.5 rounded-full transition-all',
-                  dotIndex === index ? 'w-8 bg-gold-500' : 'w-2.5 bg-white/60 hover:bg-white',
+                  'relative h-2.5 overflow-hidden rounded-full transition-[width,background-color] duration-300',
+                  dotIndex === index ? 'w-8 bg-white/40' : 'w-2.5 bg-white/60 hover:bg-white',
                 )}
-              />
+              >
+                {dotIndex === index ? (
+                  <span
+                    key={`progress-${index}`}
+                    aria-hidden
+                    data-paused={paused ? '' : undefined}
+                    onAnimationEnd={() => scrollTo(index + 1)}
+                    className="hero-progress absolute inset-0 rounded-full bg-gold-500"
+                  />
+                ) : null}
+              </button>
             ))}
+            <button
+              type="button"
+              onClick={() => setStopped((value) => !value)}
+              aria-label={stopped ? 'Play slideshow' : 'Pause slideshow'}
+              className="ml-1 flex h-11 w-11 items-center justify-center rounded-full text-white/80 hover:text-white"
+            >
+              {stopped ? <Play className="h-4 w-4" aria-hidden /> : <Pause className="h-4 w-4" aria-hidden />}
+            </button>
           </div>
 
           <div className="pointer-events-none absolute inset-y-0 right-0 hidden items-center gap-2 pr-4 sm:flex">
@@ -161,7 +221,7 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
               type="button"
               onClick={() => scrollTo(index - 1)}
               aria-label="Previous slide"
-              className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/70"
+              className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/70"
             >
               <ChevronLeft className="h-5 w-5" aria-hidden />
             </button>
@@ -169,7 +229,7 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
               type="button"
               onClick={() => scrollTo(index + 1)}
               aria-label="Next slide"
-              className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/70"
+              className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/70"
             >
               <ChevronRight className="h-5 w-5" aria-hidden />
             </button>

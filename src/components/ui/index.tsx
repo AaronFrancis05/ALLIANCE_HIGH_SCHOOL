@@ -73,13 +73,7 @@ export function SectionHeading({
           {eyebrow}
         </p>
       ) : null}
-      <h2
-        className={cn(
-          'chalk-underline text-3xl sm:text-4xl',
-          align === 'center' && 'chalk-underline-center',
-          inverted && 'text-white',
-        )}
-      >
+      <h2 className={cn('text-3xl sm:text-4xl', inverted && 'text-white')}>
         {title}
       </h2>
       {lead ? (

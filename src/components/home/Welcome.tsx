@@ -42,7 +42,7 @@ export function Welcome({ heading, name, title, message, photo, readMoreHref }: 
             <p className="mb-3 inline-block rounded-full border border-[var(--border-subtle)] px-3 py-1 text-xs font-semibold tracking-widest text-maroon-700 uppercase">
               Welcome
             </p>
-            <h2 className="chalk-underline text-3xl sm:text-4xl">{heading ?? 'Welcome from the Head Teacher'}</h2>
+            <h2 className="text-3xl sm:text-4xl">{heading ?? 'Welcome from the Head Teacher'}</h2>
             <Prose className="mt-5 text-[var(--text-body)]">
               {message.split('\n\n').map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>

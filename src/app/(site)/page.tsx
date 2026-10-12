@@ -127,7 +127,7 @@ export default async function HomePageRoute() {
                   <p className="mb-2 text-xs font-semibold tracking-widest text-maroon-700 uppercase">
                     Latest news
                   </p>
-                  <h2 className="chalk-underline text-3xl">What is happening at school</h2>
+                  <h2 className="text-3xl">What is happening at school</h2>
                 </div>
                 <Link
                   href="/news"
@@ -154,7 +154,7 @@ export default async function HomePageRoute() {
             <div>
               <div data-reveal>
                 <p className="mb-2 text-xs font-semibold tracking-widest text-maroon-700 uppercase">Diary</p>
-                <h2 className="chalk-underline mb-8 text-3xl">Upcoming events</h2>
+                <h2 className="mb-8 text-3xl">Upcoming events</h2>
               </div>
 
               {events.docs.length ? (
@@ -236,7 +236,7 @@ export default async function HomePageRoute() {
       {/* Closing call to action */}
       <Section tone="brand" pattern className="py-16">
         <Container className="text-center">
-          <h2 data-reveal className="chalk-underline chalk-underline-center text-3xl text-white sm:text-4xl">
+          <h2 data-reveal className="text-3xl text-white sm:text-4xl">
             {home?.callToAction?.heading ?? 'Join our school community'}
           </h2>
           {home?.callToAction?.body ? (

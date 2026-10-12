@@ -84,6 +84,11 @@ entry short: what changed, what was verified, what is left.
 
 ## Log
 
+### 2026-10-12 (motion refinement, hero autoplay)
+- Owner asked to remove the gold chalk underline under headings: `.chalk-underline` is gone from motion.css, SectionHeading, Welcome and the home page. Motion toned down: reveal travel 0.75rem over 600 ms with an expo ease-out, the PageHeader zoom-settle is 1.04 over 2.4 s, the card hover lift is 2 px, and the button press scales to 0.98.
+- Home hero now advances every 7 s. The timer is the active dot's CSS progress bar (`.hero-progress`); `animationend` moves to the next slide, so pausing the animation pauses the carousel. It holds while a mouse is over it, while the tab is hidden, or after the new pause button is pressed (WCAG 2.2.2). There is no autoplay under reduced motion. The active slide's photo pushes in slowly (`.hero-photo`) and its copy fades up (`.hero-copy`). The active index only changes once the track settles (120 ms debounce).
+- Verified: lint, typecheck (apart from a stale `.next/dev/types` entry for a deleted route), unit 274/274. **Not checked in a browser or by e2e**: `.env` points at production. Check the next Vercel preview at 360 px.
+
 ### 2026-10-12 (real photos replace 4 placeholders, merged into `dev`)
 - Nine new school photos in `assets/`; six used (1779, 1738, 1739, 1825, 1838, 1847). Placeholders replaced: campus aerial → tree-lined avenue (home hero slide 3), assembly → students in uniform, computer lab → real lab, main gate → administration block (Contact header). Gallery "Around the campus" and "In the classroom" gain the new photos. 1823/1824/1846 are near-duplicates, left out.
 - Still placeholders (no matching photo): chemistry practical, football, MDD, dining hall, dormitory, prize-giving. Main-gate photo still wanted for Google Business Profile (CONTENT_TODO §4).
@@ -92,7 +97,7 @@ entry short: what changed, what was verified, what is left.
 ### 2026-10-12 (motion pass, `feat/ui-motion`, merged into `dev`)
 - New `src/app/(site)/motion.css` (imported by brand.css) and `components/layout/MotionReveal.tsx` (mounted in the site, portal and staff layouts). No new dependency. Only `opacity` and `transform` animate, and everything sits behind `prefers-reduced-motion: no-preference`.
 - Scroll reveal: `data-reveal` elements (SectionHeading, Card, home cards, post cards, gallery tiles, stats) rise in, staggered 80 ms. Nothing is hidden until the script sets `html[data-motion]`, and anything on screen at that moment is shown at once, so there is no flicker and no-JS visitors see everything.
-- School touches: a gold "chalk" stroke draws under section headings (`.chalk-underline`, absolutely placed, takes no space); the hero and PageHeader photos settle from a slight zoom (`.motion-settle`) while the title, lead and buttons rise in; cards lift on mouse hover (`.motion-lift`); buttons press (`.motion-press`); menus drop in (`.motion-drop`).
+- School touches: (chalk underline later removed, see above); the hero and PageHeader photos settle from a slight zoom (`.motion-settle`) while the title, lead and buttons rise in; cards lift on mouse hover (`.motion-lift`); buttons press (`.motion-press`); menus drop in (`.motion-drop`).
 - Verified: lint, typecheck, unit 274/274; a static harness compiled from the real brand.css, checked in Chromium at 360 px and 1280 px (no sideways scroll, console clean, reduced motion leaves everything visible). **Not checked on the real pages or by e2e**: `.env` points at production. Check the next Vercel preview.
 
 ### 2026-10-12 (PR #10 docstring coverage)
