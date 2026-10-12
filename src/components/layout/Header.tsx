@@ -1,14 +1,5 @@
 'use client'
 
-/**
- * Sticky header: crest and name, main menu with drop-downs, portal menu and an Apply
- * button. On phones everything collapses into a drawer, which also carries the portal
- * links that the top bar shows on desktop.
- *
- * The menu data comes from the CMS, so the office can add a page to the navigation
- * without a developer.
- */
-
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -32,6 +23,14 @@ interface HeaderProps {
 const PORTAL_LINK_CLASS =
   'flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cream-200/40 px-3 text-sm font-semibold text-white hover:bg-maroon-700'
 
+/**
+ * Sticky header: crest and name, main menu with drop-downs, portal menu and an Apply
+ * button. On phones everything collapses into a drawer, which also carries the portal
+ * links that the top bar shows on desktop.
+ *
+ * The menu data comes from the CMS, so the office can add a page to the navigation
+ * without a developer.
+ */
 export function Header({ schoolName, motto, items }: HeaderProps) {
   const pathname = usePathname()
   const [drawerOpen, setDrawerOpen] = useState(false)

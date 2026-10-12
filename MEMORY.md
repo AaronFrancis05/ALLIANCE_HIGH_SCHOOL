@@ -9,10 +9,11 @@ entry short: what changed, what was verified, what is left.
 
 ---
 
-## Current status (as of 2026-10-11)
+## Current status (as of 2026-10-12)
 
 **Where we are:** P0–P4 done; P2 now done (P2-T11 leadership/staff, P2-T12 careers); P3 done; P5 done (P5-T1 to P5-T5). P6 hardening and P7 launch remain.
 **Latest:** 2026-10-11 staff portal and multi-role staff (FR-05) on `feat/P6-staff-portal-roles`, merged into `dev`: the super admin is an account type and signs in at /admin only; every other staff member signs in at /staff and holds any number of roles; registrar merged into secretary, admissions into bursar. **Production database**: `holiday_work` and `staff_accounts_roles_add` are applied (2026-10-11); `staff_accounts_roles_drop` is **pending on purpose** and must run only after `main` deploys this code (`pnpm payload migrate`, answer yes to the dev-mode prompt: the old 2026-10-01 `dev` row is harmless). Holiday work (P3-T4) committed on `feat/P3-T4-holiday-work`, also merged.
+**Documentation:** PR #10 component JSDoc now attaches to all four touched function declarations; local coverage verification is 4/4. Hosted coverage rerun pending.
 **Next up:** student bulk import (CSV, dry run; fills the `import:students` loose end), P6 site-wide search and performance budget, or P4-T bulk report-card import (FR-12). Contact details in docs/CONTENT_TODO.md deliberately left until launch (school owner's call, 2026-09-23).
 
 ### Health checks
@@ -82,6 +83,10 @@ entry short: what changed, what was verified, what is left.
 ---
 
 ## Log
+
+### 2026-10-12 (PR #10 docstring coverage)
+- Moved the existing `BooleanCell` and `Header` JSDoc directly above their functions. `TopBar` and `booleanCell` were already documented.
+- Verified with the TypeScript parser: attached documentation increased from 2/4 to 4/4; executable code is unchanged. Focused ESLint passed. Full application tests and browser checks were not run for this documentation-only change; hosted coverage rerun remains pending.
 
 ### 2026-10-12 (admin panel design pass)
 - `src/app/(payload)/custom.scss`: fixed the sidebar bug where every group heading showed a gold bar (`.nav-group__indicator` is the chevron, not the active marker). List views now show the table as a card with uppercase headers, hover rows and maroon title links; there's a branded search bar, filter pills and pagination, and an empty state with a dashed panel. Edit views get a Playfair title, a maroon-to-cream rule under the header, a cream sidebar and a cream auth panel.
