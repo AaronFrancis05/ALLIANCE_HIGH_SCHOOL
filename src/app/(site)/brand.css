@@ -91,6 +91,11 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    /*
+     * The public header is sticky. Without this, anything scrolled to (a #faqs link, or the
+     * error summary or confirmation a form moves focus to after submitting) lands under it.
+     */
+    scroll-padding-top: 7rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -107,11 +112,18 @@
   }
 
   body {
+    /*
+     * Safety net: one over-wide element must not let the whole page slide sideways on a
+     * phone. 'clip', unlike 'hidden', does not break the sticky header.
+     */
+    overflow-x: clip;
     background-color: var(--surface);
     color: var(--text-body);
     font-family: var(--font-sans);
     font-size: 1rem;
     line-height: 1.65;
+    /* A long email address or link from the CMS breaks rather than widening the page. */
+    overflow-wrap: break-word;
     -webkit-font-smoothing: antialiased;
   }
 

@@ -9,6 +9,7 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, hiddenUnless, roles, staffOnly } from '../access/roles'
 import { assertAllowedUpload } from '../lib/upload-safety'
+import { booleanCell } from '../fields/boolean-cell'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -78,6 +79,7 @@ export const Media: CollectionConfig = {
       defaultValue: false,
       admin: {
         position: 'sidebar',
+        components: { Cell: booleanCell('Placeholder', 'Real photo') },
         description:
           'A temporary stand-in, not a real photograph of the school. Replace it as soon as a real photo exists.',
       },

@@ -12,6 +12,7 @@ import { hiddenUnless, isSuperAdmin, type StaffUser } from '../access/roles'
 import { assertAllowedUpload } from '../lib/upload-safety'
 import { recordAudit } from '../lib/audit'
 import { hideStorageKey } from '../access/private-files'
+import { booleanCell } from '../fields/boolean-cell'
 
 export const ReportCards: CollectionConfig = {
   slug: 'reportCards',
@@ -58,6 +59,7 @@ export const ReportCards: CollectionConfig = {
       defaultValue: false,
       admin: {
         position: 'sidebar',
+        components: { Cell: booleanCell('Published', 'Draft') },
         description:
           'Publishing is not enough on its own: the term must also be released and the student cleared.',
       },

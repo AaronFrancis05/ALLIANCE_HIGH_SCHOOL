@@ -12,9 +12,11 @@ interface TopBarProps {
   email?: string | null
 }
 
+/**
+ * Always rendered on desktop, even before the office enters phone numbers: the portal
+ * links on the right are the only desktop route to the student and staff portals.
+ */
 export function TopBar({ phones, email }: TopBarProps) {
-  if (!phones.length && !email) return null
-
   return (
     <div className="hidden bg-ink-950 text-cream-100 lg:block">
       <div className="container-site flex items-center justify-between gap-6 py-2 text-xs">
@@ -39,8 +41,6 @@ export function TopBar({ phones, email }: TopBarProps) {
             </a>
           ) : null}
         </div>
-
-        {/* Application tracking is added here when P5 builds it. */}
         <div className="flex items-center gap-4">
           <Link href="/resources" className="hover:text-gold-300">
             e-Library
