@@ -7,6 +7,7 @@
 
 import type { CollectionConfig } from 'payload'
 import { denyAll, hiddenUnless, roles, superAdminOnly } from '../access/roles'
+import { booleanCell } from '../fields/boolean-cell'
 
 export const FormSubmissions: CollectionConfig = {
   slug: 'formSubmissions',
@@ -57,7 +58,11 @@ export const FormSubmissions: CollectionConfig = {
       name: 'handled',
       type: 'checkbox',
       defaultValue: false,
-      admin: { position: 'sidebar', description: 'Tick once the office has replied.' },
+      admin: {
+        position: 'sidebar',
+        description: 'Tick once the office has replied.',
+        components: { Cell: booleanCell('Handled', 'New') },
+      },
     },
   ],
 }

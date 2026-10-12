@@ -4,6 +4,7 @@
 
 import type { CollectionConfig } from 'payload'
 import { anyone, hiddenUnless, roles } from '../access/roles'
+import { booleanCell } from '../fields/boolean-cell'
 
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
@@ -29,7 +30,11 @@ export const Testimonials: CollectionConfig = {
       name: 'featured',
       type: 'checkbox',
       defaultValue: false,
-      admin: { position: 'sidebar', description: 'Show on the home page.' },
+      admin: {
+        position: 'sidebar',
+        description: 'Show on the home page.',
+        components: { Cell: booleanCell('Featured', 'No') },
+      },
     },
     {
       name: 'consent',

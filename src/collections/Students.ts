@@ -14,6 +14,7 @@
 import type { CollectionConfig } from 'payload'
 import { hasRole, hiddenUnless, passwordNeverOnCreate, superAdminOnly, type StaffUser } from '../access/roles'
 import { CLASS_LABELS, SCHOOL_CLASSES } from '../access/resources'
+import { booleanCell } from '../fields/boolean-cell'
 import {
   STUDENT_RECORD_KEEPERS,
   fieldStudentRecordKeepers,
@@ -168,6 +169,7 @@ export const Students: CollectionConfig = {
       access: { create: () => false, update: fieldStudentRecordKeepers },
       admin: {
         position: 'sidebar',
+        components: { Cell: booleanCell('Set up', 'Not yet') },
         description:
           'Ticked once the student has chosen a password. Untick it if they have forgotten it: the old password stops working and they set a new one through first-time sign-in.',
       },

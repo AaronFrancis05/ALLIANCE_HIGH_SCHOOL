@@ -29,6 +29,7 @@ import {
 } from '../access/roles'
 import type { StaffUser } from '../access/roles'
 import { recordAudit } from '../lib/audit'
+import { booleanCell } from '../fields/boolean-cell'
 import { logger } from '../lib/logger'
 import { STAFF_PORTAL_SIGN_IN, SWITCHED_OFF, WRONG_DOOR } from '../lib/staff-doors'
 import { resetEmail, sendStaffInvite, unusablePassword } from '../lib/staff-invite'
@@ -211,6 +212,7 @@ export const Users: CollectionConfig = {
       access: { update: fieldSuperAdminOnOthers },
       admin: {
         position: 'sidebar',
+        components: { Cell: booleanCell('Active', 'Deactivated') },
         description: 'Unchecked accounts keep their history but cannot sign in. Nobody can deactivate their own account.',
       },
     },

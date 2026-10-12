@@ -8,6 +8,7 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, hasRole, hiddenUnless, roles, superAdminOnly, type StaffUser } from '../access/roles'
 import { recordAudit } from '../lib/audit'
+import { booleanCell } from '../fields/boolean-cell'
 
 export const AcademicTerms: CollectionConfig = {
   slug: 'academicTerms',
@@ -52,7 +53,11 @@ export const AcademicTerms: CollectionConfig = {
       name: 'current',
       type: 'checkbox',
       defaultValue: false,
-      admin: { position: 'sidebar', description: 'The term the school is in now.' },
+      admin: {
+        position: 'sidebar',
+        description: 'The term the school is in now.',
+        components: { Cell: booleanCell('Current', 'Not current') },
+      },
     },
     {
       name: 'resultsReleased',
@@ -61,6 +66,7 @@ export const AcademicTerms: CollectionConfig = {
       access: { update: ({ req }) => hasRole(req.user as StaffUser, 'secretary') },
       admin: {
         position: 'sidebar',
+        components: { Cell: booleanCell('Released', 'Not released') },
         description:
           'When this is on, cleared students can download their report cards for this term. Turn it on only when the school is ready.',
       },

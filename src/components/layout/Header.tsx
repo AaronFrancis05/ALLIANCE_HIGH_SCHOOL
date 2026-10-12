@@ -2,17 +2,18 @@
 
 /**
  * Sticky header: crest and name, main menu with drop-downs, portal menu and an Apply
- * button. On phones everything collapses into a drawer.
+ * button. On phones everything collapses into a drawer, which also carries the portal
+ * links that the top bar shows on desktop.
  *
  * The menu data comes from the CMS, so the office can add a page to the navigation
  * without a developer.
  */
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { ChevronDown, Menu, X } from 'lucide-react'
+import { ChevronDown, GraduationCap, Menu, Users, X } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { CREST_SRC } from '../../lib/brand'
 
@@ -28,10 +29,17 @@ interface HeaderProps {
   items: NavItem[]
 }
 
+const PORTAL_LINK_CLASS =
+  'flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cream-200/40 px-3 text-sm font-semibold text-white hover:bg-maroon-700'
+
 export function Header({ schoolName, motto, items }: HeaderProps) {
   const pathname = usePathname()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
+  // Where the drawer starts: the header's bottom edge, measured when it opens, because
+  // the header grows when the school name wraps onto two lines on a narrow phone.
+  const [drawerTop, setDrawerTop] = useState(0)
+  const headerRef = useRef<HTMLElement>(null)
 
   // Close everything on navigation, otherwise the drawer stays open behind the new page.
   // Adjusting during render rather than in an effect means the new page never paints
@@ -50,6 +58,17 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
       document.body.style.overflow = ''
     }
   }, [drawerOpen])
+
+  // The drawer is phone-only. If the window widens past the breakpoint (a tablet turned
+  // sideways) close it, or the page would stay locked with no visible way out.
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1024px)')
+    const onChange = () => {
+      if (desktop.matches) setDrawerOpen(false)
+    }
+    desktop.addEventListener('change', onChange)
+    return () => desktop.removeEventListener('change', onChange)
+  }, [])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -71,14 +90,26 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
     }
   }, [openMenu])
 
+  // Links close the drawer themselves: a link to a section of the current page ("#faqs")
+  // does not change the pathname, so the navigation reset above would not fire.
+  const closeDrawer = () => setDrawerOpen(false)
+
   const isCurrent = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(`${href}/`))
 
   return (
-    <header className="sticky top-0 z-50 border-b border-maroon-900/40 bg-maroon-800 text-white shadow-[var(--shadow-card)]">
-      <div className="container-site flex items-center justify-between gap-4 py-3">
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-50 border-b border-maroon-900/40 bg-maroon-800 text-white shadow-[var(--shadow-card)]"
+    >
+      <div className="container-site flex items-center justify-between gap-3 py-3 sm:gap-4">
+        {/*
+          On a phone the name may wrap and the motto tightens, so the row never grows wider
+          than the screen (at 360 px the name on one line does not fit beside the menu
+          button). From `sm` up there is room, and the name stays on one line.
+        */}
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-3 rounded-md py-1"
+          className="flex min-w-0 items-center gap-2.5 rounded-md py-1 sm:shrink-0 sm:gap-3"
           aria-label={`${schoolName}, home`}
         >
           <Image
@@ -87,14 +118,14 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
             width={48}
             height={48}
             priority
-            className="h-11 w-11 shrink-0 object-contain"
+            className="h-10 w-10 shrink-0 object-contain sm:h-11 sm:w-11"
           />
-          <span className="leading-tight">
-            <span className="block font-display text-base font-semibold whitespace-nowrap sm:text-lg">
+          <span className="min-w-0 leading-tight">
+            <span className="block font-display text-[0.9375rem] font-semibold sm:text-lg sm:whitespace-nowrap">
               {schoolName}
             </span>
             {motto ? (
-              <span className="block text-[11px] tracking-[0.18em] whitespace-nowrap text-gold-300 uppercase">
+              <span className="block truncate text-[10px] tracking-[0.12em] text-gold-300 uppercase sm:text-[11px] sm:tracking-[0.18em]">
                 {motto}
               </span>
             ) : null}
@@ -199,33 +230,62 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
           className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg hover:bg-maroon-700 lg:hidden"
           aria-expanded={drawerOpen}
           aria-controls="mobile-menu"
-          onClick={() => setDrawerOpen((open) => !open)}
+          onClick={() => {
+            setDrawerTop(headerRef.current?.getBoundingClientRect().bottom ?? 0)
+            setDrawerOpen((open) => !open)
+          }}
         >
           <span className="sr-only">{drawerOpen ? 'Close menu' : 'Open menu'}</span>
           {drawerOpen ? <X className="h-6 w-6" aria-hidden /> : <Menu className="h-6 w-6" aria-hidden />}
         </button>
       </div>
 
-      {/* Mobile drawer */}
+      {/*
+        Mobile drawer. It is fixed from the header's bottom edge to the bottom of the screen
+        and scrolls on its own, so the last links and the Apply button are always reachable,
+        whatever the phone's height and however much room the browser's toolbars take.
+        The portal links sit at the top: on desktop they are in the top bar, which phones hide.
+      */}
       {drawerOpen ? (
-        <div id="mobile-menu" className="xl:hidden">
-          <div className="max-h-[calc(100vh-4.5rem)] overflow-y-auto border-t border-maroon-900/40 bg-maroon-800 pb-6">
-            <nav aria-label="Main menu" className="container-site flex flex-col py-2">
+        <div
+          id="mobile-menu"
+          className="fixed inset-x-0 bottom-0 overflow-y-auto overscroll-contain border-t border-maroon-900/40 bg-maroon-800 lg:hidden"
+          style={{ top: drawerTop }}
+        >
+          <div className="container-site pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <div className="grid grid-cols-2 gap-2">
+              <Link href="/portal" className={PORTAL_LINK_CLASS} onClick={closeDrawer}>
+                <GraduationCap className="h-5 w-5 shrink-0" aria-hidden />
+                Student portal
+              </Link>
+              <Link href="/staff" className={PORTAL_LINK_CLASS} onClick={closeDrawer}>
+                <Users className="h-5 w-5 shrink-0" aria-hidden />
+                Staff portal
+              </Link>
+            </div>
+
+            <nav aria-label="Main menu" className="mt-2 flex flex-col">
               {items.map((item) => (
                 <div key={item.href} className="border-b border-maroon-700/60 py-1">
                   <Link
                     href={item.href}
-                    className="block rounded-md px-2 py-3 text-base font-medium hover:bg-maroon-700"
+                    onClick={closeDrawer}
+                    aria-current={isCurrent(item.href) ? 'page' : undefined}
+                    className={cn(
+                      'flex min-h-12 items-center rounded-md px-2 text-base font-medium hover:bg-maroon-700',
+                      isCurrent(item.href) && 'text-gold-300',
+                    )}
                   >
                     {item.label}
                   </Link>
                   {item.children?.length ? (
-                    <div className="mb-2 ml-3 flex flex-col gap-1">
+                    <div className="mb-2 ml-3 flex flex-col">
                       {item.children.map((child) => (
                         <Link
                           key={child.href}
                           href={child.href}
-                          className="rounded-md px-2 py-2 text-sm text-cream-200 hover:bg-maroon-700"
+                          onClick={closeDrawer}
+                          className="flex min-h-11 items-center rounded-md px-2 text-sm text-cream-200 hover:bg-maroon-700"
                         >
                           {child.label}
                         </Link>
@@ -234,22 +294,16 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
                   ) : null}
                 </div>
               ))}
-
-              <Link
-                href="/admissions"
-                className="mt-4 inline-flex min-h-12 items-center justify-center rounded-lg bg-gold-500 px-4 text-base font-semibold text-ink-950"
-              >
-                Apply now
-              </Link>
             </nav>
+
+            <Link
+              href="/admissions"
+              onClick={closeDrawer}
+              className="mt-5 flex min-h-12 items-center justify-center rounded-lg bg-gold-500 px-4 text-base font-semibold text-ink-950"
+            >
+              Apply now
+            </Link>
           </div>
-          {/* Tapping outside the drawer closes it. Hidden from assistive tech: the
-              close button in the header already does this job. */}
-          <div
-            aria-hidden="true"
-            className="fixed inset-0 -z-10"
-            onClick={() => setDrawerOpen(false)}
-          />
         </div>
       ) : null}
     </header>

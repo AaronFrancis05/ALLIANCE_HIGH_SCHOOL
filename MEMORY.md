@@ -83,6 +83,11 @@ entry short: what changed, what was verified, what is left.
 
 ## Log
 
+### 2026-10-12 (admin panel design pass)
+- `src/app/(payload)/custom.scss`: fixed the sidebar bug where every group heading showed a gold bar (`.nav-group__indicator` is the chevron, not the active marker). List views now show the table as a card with uppercase headers, hover rows and maroon title links; there's a branded search bar, filter pills and pagination, and an empty state with a dashed panel. Edit views get a Playfair title, a maroon-to-cream rule under the header, a cream sidebar and a cream auth panel.
+- New `components/admin/BooleanCell.tsx` plus `fields/boolean-cell.ts`: listed checkboxes read as badges ("Released / Not released", "Current", "Active / Deactivated", "Handled / New", and so on) instead of raw `true` / `false`. The import map was regenerated offline.
+- Verified: typecheck, lint, unit 274/274. **Not yet looked at in a browser**: the local `.env` points at production, so check /admin on the next Vercel preview (desktop and 360 px).
+
 ### 2026-10-11 (P6 staff portal and multi-role staff, FR-05)
 - **Model**: `users.accountType` (`staff` | `superAdmin`) plus `users.roles` (multi-select: `editor` Content Manager, `secretary` School Secretary, `bursar`, `hod`, `teacher`). `hasRole` is true for the super admin or any held role, so permissions add up. `registrar` merged into `secretary` (students, terms, report cards, resources); `admissions` merged into `bursar` (fees plus applications, documents, enquiries; still never report cards). Staff with no role pass `staffOnly` only and are refused the admin screens (`canUseAdminScreens`). All in `src/access/roles.ts`; collections swept to the new names; `filesOnlyHolidayWork` replaces the old teacher-only check; HOD + teacher rights now combine.
 - **Two doors**: Users `beforeLogin` refuses non-super-admins unless the sign-in came through the staff portal (`STAFF_PORTAL_SIGN_IN` context), and refuses the super admin at the staff portal; also refuses deactivated accounts (previously only their access was cut). Checked after the password, so it reveals nothing to someone without it.
