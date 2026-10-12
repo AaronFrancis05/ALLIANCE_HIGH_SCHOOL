@@ -1,14 +1,5 @@
 'use client'
 
-/**
- * Sticky header: crest and name, main menu with drop-downs, portal menu and an Apply
- * button. On phones everything collapses into a drawer, which also carries the portal
- * links that the top bar shows on desktop.
- *
- * The menu data comes from the CMS, so the office can add a page to the navigation
- * without a developer.
- */
-
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -32,11 +23,19 @@ interface HeaderProps {
 const PORTAL_LINK_CLASS =
   'flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cream-200/40 px-3 text-sm font-semibold text-white hover:bg-maroon-700'
 
+/**
+ * Sticky header: crest and name, main menu with drop-downs, portal menu and an Apply
+ * button. On phones everything collapses into a drawer, which also carries the portal
+ * links that the top bar shows on desktop.
+ *
+ * The menu data comes from the CMS, so the office can add a page to the navigation
+ * without a developer.
+ */
 export function Header({ schoolName, motto, items }: HeaderProps) {
   const pathname = usePathname()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
-  // Where the drawer starts: the header's bottom edge, measured when it opens, because
+  // Where the drawer starts: the header's bottom edge, measured when it opens and resizes, because
   // the header grows when the school name wraps onto two lines on a narrow phone.
   const [drawerTop, setDrawerTop] = useState(0)
   const headerRef = useRef<HTMLElement>(null)
@@ -57,6 +56,17 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
     return () => {
       document.body.style.overflow = ''
     }
+  }, [drawerOpen])
+
+  useEffect(() => {
+    if (!drawerOpen) return
+
+    const updateDrawerTop = () => {
+      setDrawerTop(headerRef.current?.getBoundingClientRect().bottom ?? 0)
+    }
+    updateDrawerTop()
+    window.addEventListener('resize', updateDrawerTop)
+    return () => window.removeEventListener('resize', updateDrawerTop)
   }, [drawerOpen])
 
   // The drawer is phone-only. If the window widens past the breakpoint (a tablet turned
@@ -181,7 +191,7 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
                 </button>
 
                 {openMenu === item.href ? (
-                  <div className="absolute top-full left-0 z-50 min-w-[20rem] rounded-b-xl border border-cream-300 bg-white p-2 shadow-[0_2px_4px_rgb(20_20_20/0.08),0_16px_40px_-16px_rgb(20_20_20/0.28)] shadow-[var(--shadow-raised)]">
+                  <div className="motion-drop absolute top-full left-0 z-50 min-w-[20rem] rounded-b-xl border border-cream-300 bg-white p-2 shadow-[0_2px_4px_rgb(20_20_20/0.08),0_16px_40px_-16px_rgb(20_20_20/0.28)] shadow-[var(--shadow-raised)]">
                     {item.children.map((child) => (
                       <Link
                         key={child.href}
@@ -215,7 +225,7 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
 
           <Link
             href="/admissions"
-            className="ml-1 inline-flex min-h-11 shrink-0 items-center rounded-lg bg-gold-500 px-3 py-2 text-sm font-semibold whitespace-nowrap text-ink-950 transition-colors hover:bg-gold-400 xl:ml-2 xl:px-4"
+            className="motion-press ml-1 inline-flex min-h-11 shrink-0 items-center rounded-lg bg-gold-500 px-3 py-2 text-sm font-semibold whitespace-nowrap text-ink-950 transition-colors hover:bg-gold-400 xl:ml-2 xl:px-4"
           >
             Apply now
           </Link>
@@ -249,7 +259,7 @@ export function Header({ schoolName, motto, items }: HeaderProps) {
       {drawerOpen ? (
         <div
           id="mobile-menu"
-          className="fixed inset-x-0 bottom-0 overflow-y-auto overscroll-contain border-t border-maroon-900/40 bg-maroon-800 lg:hidden"
+          className="motion-drop fixed inset-x-0 bottom-0 overflow-y-auto overscroll-contain border-t border-maroon-900/40 bg-maroon-800 lg:hidden"
           style={{ top: drawerTop }}
         >
           <div className="container-site pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">

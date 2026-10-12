@@ -7,6 +7,7 @@
  */
 
 @import 'tailwindcss';
+@import './motion.css';
 
 @theme {
   /* Maroon: the shield. Primary brand colour. */

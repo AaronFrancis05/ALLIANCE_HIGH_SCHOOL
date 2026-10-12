@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   const [settings, headerImage] = await Promise.all([
     getSiteSettings(),
-    getMediaBySlug('placeholder-main-gate-alliance-high-nansana'),
+    getMediaBySlug('the-administration-block-alliance-high-nansana'),
   ])
 
   const phones = settings?.phones ?? []

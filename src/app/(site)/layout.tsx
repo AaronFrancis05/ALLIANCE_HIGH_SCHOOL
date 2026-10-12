@@ -14,6 +14,7 @@ import { TopBar } from '../../components/layout/TopBar'
 import { Footer } from '../../components/layout/Footer'
 import { OrganisationJsonLd } from '../../components/seo/JsonLd'
 import { ServiceWorkerRegister } from '../../components/layout/ServiceWorkerRegister'
+import { MotionReveal } from '../../components/layout/MotionReveal'
 import { env } from '../../lib/env'
 
 /**
@@ -184,6 +185,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
         <OrganisationJsonLd settings={settings} />
         <ServiceWorkerRegister />
+        <MotionReveal />
       </body>
     </html>
   )

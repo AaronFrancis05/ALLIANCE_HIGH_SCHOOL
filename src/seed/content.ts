@@ -124,7 +124,7 @@ export const homePage = {
     {
       headline: 'A campus built for study',
       subhead: 'Classrooms, laboratories, a library and boarding facilities on a quiet, green site.',
-      imageKey: 'ph-campus-aerial',
+      imageKey: 'campus-avenue',
       buttonLabel: 'Visit the school',
       buttonHref: '/contact',
     },
@@ -298,8 +298,8 @@ export const subjects: {
 ]
 
 export const albums = [
-  { title: 'Around the campus', category: 'campus' as const, imageKeys: ['hero-students-driveway', 'hero-students-lined-up', 'studentlife-two-seniors', 'ph-campus-aerial'] },
-  { title: 'In the classroom', category: 'academics' as const, imageKeys: ['academics-classroom', 'academics-outdoor-class', 'academics-girls-reading', 'ph-computer-lab'] },
+  { title: 'Around the campus', category: 'campus' as const, imageKeys: ['hero-students-driveway', 'hero-students-lined-up', 'studentlife-two-seniors', 'campus-avenue', 'students-in-uniform', 'administration-block'] },
+  { title: 'In the classroom', category: 'academics' as const, imageKeys: ['academics-classroom', 'academics-outdoor-class', 'academics-girls-reading', 'computer-lab', 'classroom-two-students-writing', 'classroom-two-students-reading'] },
   { title: 'The library', category: 'academics' as const, imageKeys: ['library-desk-reading', 'library-shelves', 'library-closeup'] },
   { title: 'Clubs and societies', category: 'clubs' as const, imageKeys: ['clubs-debate-group', 'clubs-journalism', 'ph-mdd'] },
   { title: 'Sports', category: 'sports' as const, imageKeys: ['ph-football'] },

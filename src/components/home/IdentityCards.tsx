@@ -41,7 +41,8 @@ export function IdentityCards({ vision, mission, coreValues, theme }: IdentityCa
           {cards.map((card) => (
             <article
               key={card.title}
-              className="rounded-[var(--radius-card)] border-t-4 border-gold-500 bg-[var(--surface-raised)] p-6 shadow-[var(--shadow-raised)]"
+              data-reveal
+              className="motion-lift rounded-[var(--radius-card)] border-t-4 border-gold-500 bg-[var(--surface-raised)] p-6 shadow-[var(--shadow-raised)]"
             >
               <card.icon className="h-7 w-7 text-maroon-700" aria-hidden />
               <h2 className="mt-3 font-display text-lg text-[var(--text-strong)]">{card.title}</h2>
