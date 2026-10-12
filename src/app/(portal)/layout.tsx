@@ -16,6 +16,7 @@ import { currentStudent } from '../../lib/session'
 import { SignOutButton } from '../../components/portal/SignOutButton'
 import { ServiceWorkerRegister } from '../../components/layout/ServiceWorkerRegister'
 import { MotionReveal } from '../../components/layout/MotionReveal'
+import { BackToTop } from '../../components/layout/BackToTop'
 
 /** Never cached: a page here belongs to one student. */
 export const dynamic = 'force-dynamic'
@@ -94,6 +95,7 @@ export default async function PortalLayout({ children }: { children: React.React
 
         <ServiceWorkerRegister />
         <MotionReveal />
+        <BackToTop targetId="portal-main" />
       </body>
     </html>
   )

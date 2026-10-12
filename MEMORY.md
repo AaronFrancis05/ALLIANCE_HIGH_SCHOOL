@@ -84,6 +84,10 @@ entry short: what changed, what was verified, what is left.
 
 ## Log
 
+### 2026-10-12 (back-to-top button)
+- New `components/layout/BackToTop.tsx`, mounted in the site, portal and staff layouts. It is a round maroon button fixed in the bottom-right corner, z-40 so the header and mobile menu (z-50) cover it, and it fades in once the visitor has scrolled more than a screen down. Smooth scroll, or instant under reduced motion. Focus then moves to that layout's `<main>` (`main`, `portal-main`, `staff-main`), so the next Tab starts at the top. Hidden from keyboard and screen readers while invisible.
+- Verified: lint, typecheck. **Not checked in a browser**: `.env` points at production.
+
 ### 2026-10-12 (motion refinement, hero autoplay)
 - Owner asked to remove the gold chalk underline under headings: `.chalk-underline` is gone from motion.css, SectionHeading, Welcome and the home page. Motion toned down: reveal travel 0.75rem over 600 ms with an expo ease-out, the PageHeader zoom-settle is 1.04 over 2.4 s, the card hover lift is 2 px, and the button press scales to 0.98.
 - Home hero now advances every 7 s. The timer is the active dot's CSS progress bar (`.hero-progress`); `animationend` moves to the next slide, so pausing the animation pauses the carousel. It holds while a mouse is over it, while the tab is hidden, or after the new pause button is pressed (WCAG 2.2.2). There is no autoplay under reduced motion. The active slide's photo pushes in slowly (`.hero-photo`) and its copy fades up (`.hero-copy`). The active index only changes once the track settles (120 ms debounce).
