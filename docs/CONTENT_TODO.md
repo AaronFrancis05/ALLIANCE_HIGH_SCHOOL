@@ -77,7 +77,11 @@ publish, including a parent's consent where a student is named.
 
 ## 4. Photographs
 
-Sixteen real photographs of the school are in use. Twelve sections still show
-AI-generated stand-ins, each labelled "Placeholder image" on the site. They must be replaced
+Twenty-two real photographs of the school are in use. Six still show AI-generated
+stand-ins, each labelled "Placeholder image" on the site: the chemistry practical, football,
+music dance and drama, the dining hall, a dormitory and prize-giving day. They must be replaced
 with real photographs before launch — see [IMAGE_GUIDE.md](./IMAGE_GUIDE.md), which describes
 exactly what to photograph for each one.
+
+The Contact page now uses the administration block, but a straight-on photograph of the main
+gate with the signboard readable is still wanted for the Google Business Profile (docs/SEO.md).

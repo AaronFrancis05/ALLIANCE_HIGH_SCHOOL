@@ -178,30 +178,62 @@ export const imageManifest: ImageEntry[] = [
     alt: 'Students writing at their desks during a lesson at Alliance High School Nansana',
     aspect: '16:9',
   },
+  {
+    key: 'campus-avenue',
+    kind: 'photo',
+    source: '9Y3A1847.JPG',
+    slug: 'students-on-the-tree-lined-campus-avenue-alliance-high-nansana',
+    slot: 'Home hero, slide 3; Gallery, around the campus',
+    alt: 'Students walking along the tree-lined avenue through the campus at Alliance High School Nansana',
+    aspect: '16:9',
+  },
+  {
+    key: 'students-in-uniform',
+    kind: 'photo',
+    source: '9Y3A1779.JPG',
+    slug: 'students-in-school-uniform-on-the-campus-road-alliance-high-nansana',
+    slot: 'About, school life; Gallery, around the campus',
+    alt: 'Students in school uniform standing together on the campus road at Alliance High School Nansana',
+    aspect: '16:9',
+  },
+  {
+    key: 'administration-block',
+    kind: 'photo',
+    source: '9Y3A1838.JPG',
+    slug: 'the-administration-block-alliance-high-nansana',
+    slot: 'Contact header; Gallery, around the campus',
+    alt: 'The administration block at Alliance High School Nansana',
+    aspect: '16:9',
+  },
+  {
+    key: 'computer-lab',
+    kind: 'photo',
+    source: '9Y3A1825.JPG',
+    slug: 'students-in-the-computer-laboratory-alliance-high-nansana',
+    slot: 'Facilities; Gallery, in the classroom',
+    alt: 'Students working at computers in the computer laboratory at Alliance High School Nansana',
+    aspect: '4:3',
+  },
+  {
+    key: 'classroom-two-students-writing',
+    kind: 'photo',
+    source: '9Y3A1738.JPG',
+    slug: 'two-students-taking-notes-in-class-alliance-high-nansana',
+    slot: 'Gallery, in the classroom',
+    alt: 'Two students taking notes at a classroom desk at Alliance High School Nansana',
+    aspect: '3:2',
+  },
+  {
+    key: 'classroom-two-students-reading',
+    kind: 'photo',
+    source: '9Y3A1739.JPG',
+    slug: 'two-students-studying-at-a-classroom-desk-alliance-high-nansana',
+    slot: 'Gallery, in the classroom',
+    alt: 'Two students reading and writing together at a classroom desk at Alliance High School Nansana',
+    aspect: '3:2',
+  },
 
   // ------------------------------------------------- AI placeholders, replace with real photos
-  {
-    key: 'ph-campus-aerial',
-    kind: 'placeholder',
-    source: 'generated/aerial.png',
-    slug: 'placeholder-campus-aerial-alliance-high-nansana',
-    slot: 'Home hero, slide 4; About, facilities',
-    alt: 'Placeholder image standing in for an aerial view of the campus at Alliance High School Nansana',
-    aspect: '16:9',
-    brief:
-      'Drone shot from about 60 m, morning light, whole campus with classroom blocks, trees and the Nansana hills behind. Leave empty sky on the left third for the headline.',
-  },
-  {
-    key: 'ph-assembly',
-    kind: 'placeholder',
-    source: 'generated/assembly.png',
-    slug: 'placeholder-morning-assembly-alliance-high-nansana',
-    slot: 'About, school life; News default image',
-    alt: 'Placeholder image standing in for morning assembly at Alliance High School Nansana',
-    aspect: '16:9',
-    brief:
-      'Whole-school assembly on the parade ground at 7:30 am, students in lines, flag being raised, teacher addressing them. Shot from slightly raised position.',
-  },
   {
     key: 'ph-chemistry-lab',
     kind: 'placeholder',
@@ -212,17 +244,6 @@ export const imageManifest: ImageEntry[] = [
     aspect: '4:3',
     brief:
       'Senior Four students in lab coats doing a titration, teacher supervising, clean benches, labelled reagent bottles.',
-  },
-  {
-    key: 'ph-computer-lab',
-    kind: 'placeholder',
-    source: 'generated/computer-lab.png',
-    slug: 'placeholder-computer-laboratory-alliance-high-nansana',
-    slot: 'Why choose us; Facilities',
-    alt: 'Placeholder image standing in for the computer laboratory at Alliance High School Nansana',
-    aspect: '4:3',
-    brief:
-      'Students at desktop computers in the ICT lab, teacher helping one of them, tidy cabling, natural light from the windows.',
   },
   {
     key: 'ph-football',
@@ -277,17 +298,6 @@ export const imageManifest: ImageEntry[] = [
     aspect: '16:9',
     brief:
       'A student receiving an award on speech day, guest of honour handing over the trophy, parents applauding.',
-  },
-  {
-    key: 'ph-main-gate',
-    kind: 'placeholder',
-    source: 'generated/main-gate.png',
-    slug: 'placeholder-main-gate-alliance-high-nansana',
-    slot: 'Contact',
-    alt: 'Placeholder image standing in for the main gate at Alliance High School Nansana',
-    aspect: '16:9',
-    brief:
-      'The main gate with the school signboard clearly readable, shot straight on in the morning. This one matters for Google Business Profile.',
   },
 ]
 

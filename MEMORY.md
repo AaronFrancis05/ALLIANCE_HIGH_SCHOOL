@@ -63,7 +63,7 @@ entry short: what changed, what was verified, what is left.
 - The header's "Apply now" link (Navigation global) still points to `/admissions`, which now links on to `/admissions/apply`.
 - The `import:students` script points to a file that does not exist: `scripts/import-students.ts`.
 - There is no `docs/DEPLOYMENT-VPS.md` and no CI pipeline.
-- There are 12 AI placeholder images, and many school facts are still placeholders (docs/CONTENT_TODO.md).
+- There are 6 AI placeholder images left (lab practical, football, MDD, dining hall, dormitory, prize-giving), and many school facts are still placeholders (docs/CONTENT_TODO.md).
 
 ---
 
@@ -82,6 +82,17 @@ entry short: what changed, what was verified, what is left.
 ---
 
 ## Log
+
+### 2026-10-12 (real photos replace 4 placeholders, merged into `dev`)
+- Nine new school photos in `assets/`; six used (1779, 1738, 1739, 1825, 1838, 1847). Placeholders replaced: campus aerial → tree-lined avenue (home hero slide 3), assembly → students in uniform, computer lab → real lab, main gate → administration block (Contact header). Gallery "Around the campus" and "In the classroom" gain the new photos. 1823/1824/1846 are near-duplicates, left out.
+- Still placeholders (no matching photo): chemistry practical, football, MDD, dining hall, dormitory, prize-giving. Main-gate photo still wanted for Google Business Profile (CONTENT_TODO §4).
+- Verified: typecheck, lint on changed files, unit 274/274. **Not done**: production upload. `scripts/_oneoff-real-photos.ts` (dry run by default, `--apply` to write, needs `NODE_ENV=production` so Payload does not push schema) uploads the six through Payload and rewires home/posts/albums from the old placeholder ids. Delete it after use. The Contact page shows a plain header in production until it has run.
+
+### 2026-10-12 (motion pass, `feat/ui-motion`, merged into `dev`)
+- New `src/app/(site)/motion.css` (imported by brand.css) and `components/layout/MotionReveal.tsx` (mounted in the site, portal and staff layouts). No new dependency. Only `opacity` and `transform` animate, and everything sits behind `prefers-reduced-motion: no-preference`.
+- Scroll reveal: `data-reveal` elements (SectionHeading, Card, home cards, post cards, gallery tiles, stats) rise in, staggered 80 ms. Nothing is hidden until the script sets `html[data-motion]`, and anything on screen at that moment is shown at once, so there is no flicker and no-JS visitors see everything.
+- School touches: a gold "chalk" stroke draws under section headings (`.chalk-underline`, absolutely placed, takes no space); the hero and PageHeader photos settle from a slight zoom (`.motion-settle`) while the title, lead and buttons rise in; cards lift on mouse hover (`.motion-lift`); buttons press (`.motion-press`); menus drop in (`.motion-drop`).
+- Verified: lint, typecheck, unit 274/274; a static harness compiled from the real brand.css, checked in Chromium at 360 px and 1280 px (no sideways scroll, console clean, reduced motion leaves everything visible). **Not checked on the real pages or by e2e**: `.env` points at production. Check the next Vercel preview.
 
 ### 2026-10-12 (admin panel design pass)
 - `src/app/(payload)/custom.scss`: fixed the sidebar bug where every group heading showed a gold bar (`.nav-group__indicator` is the chevron, not the active marker). List views now show the table as a card with uppercase headers, hover rows and maroon title links; there's a branded search bar, filter pills and pagination, and an empty state with a dashed panel. Edit views get a Playfair title, a maroon-to-cream rule under the header, a cream sidebar and a cream auth panel.
