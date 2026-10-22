@@ -14,6 +14,7 @@ import { PageHeader } from '../../../components/layout/PageHeader'
 import { BreadcrumbJsonLd } from '../../../components/seo/JsonLd'
 import { EnquiryForm } from '../../../components/contact/EnquiryForm'
 import { getMediaBySlug, getSiteSettings } from '../../../lib/payload'
+import { schoolFacts } from '../../../lib/school-facts'
 import { mapDirectionsUrl, mapEmbedUrl } from '../../../lib/map'
 
 export const revalidate = 3600
@@ -115,6 +116,7 @@ export default async function ContactPage() {
                 ))}
                 {address?.poBox ? <span className="mt-2 block">{address.poBox}</span> : null}
               </address>
+              <p className="mt-3 text-sm text-[var(--text-muted)]">{schoolFacts.directions}</p>
               <a
                 href="#map"
                 className="mt-3 inline-flex min-h-11 items-center font-medium text-maroon-700 hover:underline"

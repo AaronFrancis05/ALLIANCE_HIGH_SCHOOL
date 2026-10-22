@@ -52,7 +52,10 @@ function StatItem({ stat, visible }: { stat: Stat; visible: boolean }) {
   const numeric = match ? Number(match[2].replace(/,/g, '')) : 0
   const counted = useCountUp(numeric, visible)
 
-  const display = match ? `${match[1]}${counted.toLocaleString('en-UG')}${match[3]}` : stat.value
+  // Keep the grouping the office typed: "1,200" stays grouped, a year such as "1993" does not.
+  const grouped = match ? match[2].includes(',') : false
+  const figure = grouped ? counted.toLocaleString('en-UG') : String(counted)
+  const display = match ? `${match[1]}${figure}${match[3]}` : stat.value
 
   return (
     <div data-reveal className="text-center">
