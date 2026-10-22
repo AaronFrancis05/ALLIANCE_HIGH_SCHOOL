@@ -14,6 +14,7 @@ import { MediaImage, PlaceholderNote } from '../../../components/ui/MediaImage'
 import { PageHeader } from '../../../components/layout/PageHeader'
 import { BreadcrumbJsonLd } from '../../../components/seo/JsonLd'
 import { getMediaBySlug, getSiteSettings } from '../../../lib/payload'
+import { schoolFacts } from '../../../lib/school-facts'
 
 export const revalidate = 3600
 
@@ -37,6 +38,24 @@ export default async function AboutPage() {
 
   const founded = settings?.foundedYear
   const values = settings?.coreValues ?? []
+  const { staff } = schoolFacts
+
+  const glance = [
+    ...(isContentPlaceholder(founded) || !founded ? [] : [{ label: 'Founded', value: founded, note: '' }]),
+    { label: 'Registration', value: schoolFacts.registrationNumber, note: 'Ministry of Education and Sports' },
+    { label: 'UNEB centre', value: schoolFacts.unebCentre, note: 'O-Level and A-Level' },
+    {
+      label: 'Selection code',
+      value: schoolFacts.selectionCode,
+      note: `For ${schoolFacts.selectionClasses}`,
+    },
+    { label: 'Campus', value: `${schoolFacts.campusAcres} acres`, note: 'Day and boarding' },
+    {
+      label: 'Staff',
+      value: `${staff.resident + staff.visiting} teachers`,
+      note: `${staff.resident} resident, ${staff.visiting} visiting, plus ${staff.support} support staff`,
+    },
+  ]
 
   return (
     <>
@@ -56,26 +75,34 @@ export default async function AboutPage() {
               <h2 className="text-3xl">A school built on discipline and attention</h2>
 
               <div className="mt-6 space-y-4 text-[var(--text-body)]">
-                <p>
-                  Alliance High School Nansana is a mixed secondary school in Nansana, Wakiso District.
-                  We take students from Senior One through to Senior Six, teaching the competence-based
-                  lower secondary curriculum and a wide choice of A-Level combinations.
-                </p>
-                <p>
-                  The school takes both boarders and day students. What we ask of every learner is the
-                  same: come to work, be known by name, and leave better than you arrived. Our motto,{' '}
-                  <em>{settings?.motto ?? 'Adfecto Excellencia'}</em>
-                  {settings?.mottoMeaning ? ` (${settings.mottoMeaning.toLowerCase()})` : null}, is
-                  meant literally.
-                </p>
                 {isContentPlaceholder(founded) ? (
                   <p className="rounded-[var(--radius-card)] border border-dashed border-cream-300 bg-cream-100 p-4 text-sm text-[var(--text-muted)]">
                     The school&rsquo;s founding year has not been supplied yet. It will appear here once
                     the office adds it.
                   </p>
                 ) : (
-                  <p>The school was founded in {founded}.</p>
+                  <p>
+                    Alliance High School Nansana was established in {founded} to nurture boys and girls
+                    into great thinkers and socially responsible citizens. Since then it has offered
+                    comprehensive and vocational education to O-Level and A-Level students.
+                  </p>
                 )}
+                <p>
+                  It is a private, mixed day and boarding school in Nansana, Wakiso District, on a{' '}
+                  {schoolFacts.campusAcres}-acre campus. Students aged {schoolFacts.ageRange} join us
+                  from Senior One through to Senior Six, and each class from Senior One to Senior Four
+                  has {schoolFacts.oLevelStreams} streams. The school is interdenominational and welcomes
+                  students of every religious background.
+                </p>
+                <p>
+                  Teaching is in the hands of {schoolFacts.staff.resident} resident teachers and{' '}
+                  {schoolFacts.staff.visiting} visiting teachers, supported by{' '}
+                  {schoolFacts.staff.support} support staff. What we ask of every learner is the same:
+                  come to work, be known by name, and leave better than you arrived. Our motto,{' '}
+                  <em>{settings?.motto ?? 'Adfecto Excellentia'}</em>
+                  {settings?.mottoMeaning ? ` (${settings.mottoMeaning.toLowerCase()})` : null}, is
+                  meant literally.
+                </p>
               </div>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -90,6 +117,19 @@ export default async function AboutPage() {
               <MediaImage media={campusImage} sizes="(max-width: 1024px) 100vw, 40vw" />
               <PlaceholderNote media={campusImage} />
             </div>
+          </div>
+
+          <div className="mt-12">
+            <h2 className="text-2xl">The school at a glance</h2>
+            <dl className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {glance.map((item) => (
+                <Card key={item.label} className="p-5">
+                  <dt className="text-xs font-semibold tracking-widest text-maroon-700 uppercase">{item.label}</dt>
+                  <dd className="mt-2 font-display text-xl text-[var(--text-strong)]">{item.value}</dd>
+                  {item.note ? <dd className="mt-1 text-sm text-[var(--text-muted)]">{item.note}</dd> : null}
+                </Card>
+              ))}
+            </dl>
           </div>
         </Container>
       </Section>

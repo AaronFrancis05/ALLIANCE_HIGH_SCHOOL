@@ -232,6 +232,71 @@ export const imageManifest: ImageEntry[] = [
     alt: 'Two students reading and writing together at a classroom desk at Alliance High School Nansana',
     aspect: '3:2',
   },
+  // Supplied by the school 2026-10-19 (WhatsApp, low resolution). 07.28.52 is a near-duplicate
+  // of 07.28.51 and is left out.
+  {
+    key: 'sports-boys-football',
+    kind: 'photo',
+    source: 'wa-0728-47.jpeg',
+    slug: 'boys-football-team-talk-alliance-high-nansana',
+    slot: 'Sports; Why choose us; Gallery, sports',
+    alt: 'The boys football team in green kit gathered for a team talk on the pitch at Alliance High School Nansana',
+    aspect: '3:2',
+  },
+  {
+    key: 'sports-girls-football',
+    kind: 'photo',
+    source: 'wa-0728-50.jpeg',
+    slug: 'girls-football-team-on-the-pitch-alliance-high-nansana',
+    slot: 'Gallery, sports',
+    alt: 'The girls football team in orange kit walking together across the pitch at Alliance High School Nansana',
+    aspect: '4:5',
+  },
+  {
+    key: 'studentlife-bible-reading',
+    kind: 'photo',
+    source: 'wa-0728-46.jpeg',
+    slug: 'students-reading-the-bible-together-alliance-high-nansana',
+    slot: 'Gallery, clubs and societies',
+    alt: 'Four students in school uniform reading the Bible together outdoors at Alliance High School Nansana',
+    aspect: '4:5',
+  },
+  {
+    key: 'studentlife-a-level-girls',
+    kind: 'photo',
+    source: 'wa-0728-51.jpeg',
+    slug: 'senior-girls-seated-under-the-trees-alliance-high-nansana',
+    slot: 'Gallery, around the campus',
+    alt: 'Four senior students in red ties seated together under the trees at Alliance High School Nansana',
+    aspect: '4:5',
+  },
+  {
+    key: 'vocational-tailoring-lesson',
+    kind: 'photo',
+    source: 'wa-0729-29.jpeg',
+    slug: 'tailoring-and-fashion-design-lesson-alliance-high-nansana',
+    slot: 'Academics, vocational skills; Gallery, tailoring',
+    alt: 'A student working at a sewing machine during a tailoring and fashion design lesson at Alliance High School Nansana',
+    aspect: '4:5',
+  },
+  {
+    key: 'vocational-tailoring-sewing',
+    kind: 'photo',
+    source: 'wa-0729-28.jpeg',
+    slug: 'student-sewing-in-the-tailoring-class-alliance-high-nansana',
+    slot: 'Gallery, tailoring',
+    alt: 'A student practising stitching on a sewing machine while classmates watch in the tailoring class at Alliance High School Nansana',
+    aspect: '4:5',
+  },
+  {
+    key: 'vocational-tailoring-practice',
+    kind: 'photo',
+    source: 'wa-0729-28b.jpeg',
+    slug: 'students-practising-on-the-sewing-machine-alliance-high-nansana',
+    slot: 'Gallery, tailoring',
+    alt: 'Students gathered round a classmate practising on a sewing machine in the tailoring class at Alliance High School Nansana',
+    aspect: '4:5',
+  },
 
   // ------------------------------------------------- AI placeholders, replace with real photos
   {
@@ -244,17 +309,6 @@ export const imageManifest: ImageEntry[] = [
     aspect: '4:3',
     brief:
       'Senior Four students in lab coats doing a titration, teacher supervising, clean benches, labelled reagent bottles.',
-  },
-  {
-    key: 'ph-football',
-    kind: 'placeholder',
-    source: 'generated/football.png',
-    slug: 'placeholder-football-match-alliance-high-nansana',
-    slot: 'Sports',
-    alt: 'Placeholder image standing in for a football match at Alliance High School Nansana',
-    aspect: '3:2',
-    brief:
-      'Mid-action football on the school pitch, fast shutter, players in the school strip, supporters along the touchline.',
   },
   {
     key: 'ph-mdd',

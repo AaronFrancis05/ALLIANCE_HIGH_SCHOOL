@@ -35,7 +35,7 @@ export const SiteSettings: GlobalConfig = {
               name: 'motto',
               type: 'text',
               required: true,
-              defaultValue: 'Adfecto Excellencia',
+              defaultValue: 'Adfecto Excellentia',
               admin: { description: 'As it appears on the crest.' },
             },
             {

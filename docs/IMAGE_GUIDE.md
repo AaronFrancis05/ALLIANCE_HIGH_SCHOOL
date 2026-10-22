@@ -17,7 +17,7 @@ Every picture on the site, what it is, and where it appears.
   including GPS stripped, long edge capped at 2400 px, WebP, plus a blur placeholder.
 - **Video** is embedded from YouTube behind a click-to-load facade. Never autoplay with sound.
 
-## Real photographs in use (22)
+## Real photographs in use (29)
 
 These are the school's own photographs. Nothing to do.
 
@@ -45,8 +45,15 @@ These are the school's own photographs. Nothing to do.
 | Facilities; Gallery, in the classroom | 4:3 | Students working at computers in the computer laboratory at Alliance High School Nansana |
 | Gallery, in the classroom | 3:2 | Two students taking notes at a classroom desk at Alliance High School Nansana |
 | Gallery, in the classroom | 3:2 | Two students reading and writing together at a classroom desk at Alliance High School Nansana |
+| Sports; Why choose us; Gallery, sports | 3:2 | The boys football team in green kit gathered for a team talk on the pitch at Alliance High School Nansana |
+| Gallery, sports | 4:5 | The girls football team in orange kit walking together across the pitch at Alliance High School Nansana |
+| Gallery, clubs and societies | 4:5 | Four students in school uniform reading the Bible together outdoors at Alliance High School Nansana |
+| Gallery, around the campus | 4:5 | Four senior students in red ties seated together under the trees at Alliance High School Nansana |
+| Academics, vocational skills; Gallery, tailoring | 4:5 | A student working at a sewing machine during a tailoring and fashion design lesson at Alliance High School Nansana |
+| Gallery, tailoring | 4:5 | A student practising stitching on a sewing machine while classmates watch in the tailoring class at Alliance High School Nansana |
+| Gallery, tailoring | 4:5 | Students gathered round a classmate practising on a sewing machine in the tailoring class at Alliance High School Nansana |
 
-## Placeholders to replace (6)
+## Placeholders to replace (5)
 
 These are AI-generated stand-ins. They are labelled "Placeholder image" wherever they
 appear, because an invented picture must never be passed off as a photograph of a real
@@ -61,13 +68,6 @@ change `kind` to `photo`, remove `brief`, then run `pnpm images && pnpm seed`.
 - **Shape:** 4:3
 - **Photograph to take:** Senior Four students in lab coats doing a titration, teacher supervising, clean benches, labelled reagent bottles.
 - **Alt text once replaced:** a chemistry practical at Alliance High School Nansana
-
-### Sports
-
-- **Replaces:** `placeholder-football-match-alliance-high-nansana.webp`
-- **Shape:** 3:2
-- **Photograph to take:** Mid-action football on the school pitch, fast shutter, players in the school strip, supporters along the touchline.
-- **Alt text once replaced:** a football match at Alliance High School Nansana
 
 ### Clubs, MDD; Gallery
 

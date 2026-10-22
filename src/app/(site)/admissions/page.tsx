@@ -53,7 +53,8 @@ export default async function AdmissionsPage() {
   const faqs = (admissions?.faqs ?? []).filter((faq) => faq.question && faq.answer)
   const open = admissions?.applicationsOpen ?? false
   const phone = settings?.phones?.[0]?.number
-  const email = settings?.emails?.find((entry) => entry.label === 'Admissions')?.address
+  const email =
+    settings?.emails?.find((entry) => entry.label === 'Admissions')?.address ?? settings?.emails?.[0]?.address
 
   return (
     <>

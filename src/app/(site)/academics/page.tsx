@@ -27,7 +27,7 @@ const LEVELS = [
   {
     id: 'o-level',
     title: 'O-Level: Senior One to Senior Four',
-    body: 'The competence-based lower secondary curriculum, ending in the Uganda Certificate of Education. Learners take a broad set of subjects and are assessed continuously as well as at the end.',
+    body: 'The competence-based lower secondary curriculum, ending in the Uganda Certificate of Education. Each class has two streams. Learners take a broad set of subjects and are assessed continuously as well as at the end.',
   },
   {
     id: 'a-level',
@@ -39,9 +39,10 @@ const LEVELS = [
 export default async function AcademicsPage() {
   const payload = await getPayloadClient()
 
-  const [headerImage, classroomImage, departments, subjects] = await Promise.all([
+  const [headerImage, classroomImage, tailoringImage, departments, subjects] = await Promise.all([
     getMediaBySlug('students-reading-a-mathematics-textbook-alliance-high-nansana'),
     getMediaBySlug('students-working-through-an-exercise-outdoors-alliance-high-nansana'),
+    getMediaBySlug('tailoring-and-fashion-design-lesson-alliance-high-nansana'),
     payload.find({ collection: 'departments', limit: 20, sort: 'name', depth: 2 }),
     payload.find({ collection: 'subjects', limit: 100, sort: 'name', depth: 1 }),
   ])
@@ -87,6 +88,31 @@ export default async function AcademicsPage() {
             <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)]">
               <MediaImage media={classroomImage} sizes="(max-width: 1024px) 100vw, 40vw" />
               <PlaceholderNote media={classroomImage} />
+            </div>
+          </div>
+        </Container>
+      </Section>
+
+      <Section tone="plain" id="vocational">
+        <Container>
+          <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-12">
+            <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-[var(--radius-card)]">
+              <MediaImage media={tailoringImage} sizes="(max-width: 1024px) 100vw, 30vw" />
+              <PlaceholderNote media={tailoringImage} />
+            </div>
+            <div>
+              <p className="mb-2 text-xs font-semibold tracking-widest text-maroon-700 uppercase">Vocational skills</p>
+              <h2 className="text-2xl sm:text-3xl">Skills learnt with the hands</h2>
+              <p className="mt-3 text-[var(--text-body)]">
+                Alongside the classroom subjects, the school offers vocational programmes. In tailoring
+                and fashion design, learners study design on the board and then practise on the school&rsquo;s
+                sewing machines, each taking a turn at the machine while classmates follow.
+              </p>
+              <div className="mt-6">
+                <ButtonLink href="/gallery/tailoring-and-fashion-design" variant="secondary">
+                  See the tailoring class
+                </ButtonLink>
+              </div>
             </div>
           </div>
         </Container>

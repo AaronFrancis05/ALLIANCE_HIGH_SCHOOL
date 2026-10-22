@@ -11,22 +11,24 @@ export const CONTENT_PLACEHOLDER = (label: string) => `[${label}]`
 export const siteSettings = {
   schoolName: 'Alliance High School Nansana',
   shortName: 'Alliance High Nansana',
-  motto: 'Adfecto Excellencia',
+  // Motto, founding year, vision, mission, values, phones, email and address are from the
+  // school profile and brochure (supplied 2026-10-22). The motto's meaning is still unconfirmed.
+  motto: 'Adfecto Excellentia',
   mottoMeaning: 'We strive for excellence',
   tagline:
-    'A secondary school in Nansana, Wakiso District, developing students physically, academically and socially.',
-  foundedYear: CONTENT_PLACEHOLDER('Founding year'),
+    'A private, mixed day and boarding school for O-Level and A-Level in Nansana, Wakiso District, since 1993.',
+  foundedYear: '1993',
   vision:
-    'To be one of the leading schools in the East African region where all young people are given the opportunity and challenges to achieve their potential physically, academically and socially.',
+    'To be one of the leading secondary schools in the East African region where all young people are given the opportunity and challenges to achieve their full potential physically, academically and socially.',
   mission:
-    'To promote intellectual, emotional, physical and social development of our students through a broad based curriculum implemented by a dedicated staff.',
+    'To promote the intellectual, emotional, physical and social development of our students through a broad based curriculum implemented by a dedicated staff.',
   coreValues: [
     { value: 'Professionalism', description: '' },
     { value: 'Integrity', description: '' },
     { value: 'Responsibility', description: '' },
     { value: 'Teamwork', description: '' },
     { value: 'Continuous improvement', description: '' },
-    { value: 'Respect for individuals and environment', description: '' },
+    { value: 'Respect for individuals and the environment', description: '' },
   ],
   themeOfTheYear: {
     year: String(new Date().getFullYear()),
@@ -35,13 +37,11 @@ export const siteSettings = {
   },
   phones: [
     { label: 'School office', number: '+256 702 601686', whatsapp: true },
+    { label: 'School office', number: '+256 772 601685', whatsapp: false },
   ],
-  emails: [
-    { label: 'General', address: 'info@alliancehigh.sc.ug' },
-    { label: 'Admissions', address: 'admissions@alliancehigh.sc.ug' },
-  ],
+  emails: [{ label: 'General', address: 'alliancehighschooluga@yahoo.com' }],
   address: {
-    line1: 'Nansana',
+    line1: 'Off Yesu Amala Trading Centre, Nansana',
     district: 'Wakiso District',
     country: 'Uganda',
     poBox: 'P.O. Box 7236, Kampala',
@@ -54,9 +54,9 @@ export const siteSettings = {
   ],
   stats: [
     { value: CONTENT_PLACEHOLDER('0'), label: 'Students enrolled' },
-    { value: CONTENT_PLACEHOLDER('0'), label: 'Teaching staff' },
-    { value: CONTENT_PLACEHOLDER('0'), label: 'Years of service' },
-    { value: CONTENT_PLACEHOLDER('0'), label: 'Clubs and societies' },
+    { value: '69', label: 'Teachers' },
+    { value: '1993', label: 'Founded' },
+    { value: '6 acres', label: 'Campus' },
   ],
   social: [],
 }
@@ -96,7 +96,7 @@ export const homePage = {
       title: 'Sport and culture',
       body: 'Football, netball, athletics, music, dance and drama, with time set aside every week.',
       icon: 'trophy' as const,
-      imageKey: 'ph-football',
+      imageKey: 'sports-boys-football',
     },
     {
       title: 'Care and discipline',
@@ -171,7 +171,18 @@ export const admissionsSettings = {
     },
     {
       question: 'Is Alliance High School Nansana a boarding school?',
-      answer: 'The school takes both boarding and day students. Boarders are supervised by resident matrons and patrons.',
+      answer:
+        'Yes. It is a mixed day and boarding school for boys and girls. Boarders are supervised by resident matrons and patrons.',
+    },
+    {
+      question: 'What is the school’s selection code?',
+      answer:
+        'The Ministry of Education and Sports selection code is 2627, for Senior One and Senior Five. The school is also a UNEB examination centre, number U0839, for both O-Level and A-Level.',
+    },
+    {
+      question: 'Is the school tied to one church?',
+      answer:
+        'No. Alliance High School Nansana is a private, interdenominational school and takes students of every religious background.',
     },
     {
       question: 'What classes does the school offer?',
@@ -298,11 +309,12 @@ export const subjects: {
 ]
 
 export const albums = [
-  { title: 'Around the campus', category: 'campus' as const, imageKeys: ['hero-students-driveway', 'hero-students-lined-up', 'studentlife-two-seniors', 'campus-avenue', 'students-in-uniform', 'administration-block'] },
+  { title: 'Around the campus', category: 'campus' as const, imageKeys: ['hero-students-driveway', 'hero-students-lined-up', 'studentlife-two-seniors', 'campus-avenue', 'students-in-uniform', 'administration-block', 'studentlife-a-level-girls'] },
   { title: 'In the classroom', category: 'academics' as const, imageKeys: ['academics-classroom', 'academics-outdoor-class', 'academics-girls-reading', 'computer-lab', 'classroom-two-students-writing', 'classroom-two-students-reading'] },
   { title: 'The library', category: 'academics' as const, imageKeys: ['library-desk-reading', 'library-shelves', 'library-closeup'] },
-  { title: 'Clubs and societies', category: 'clubs' as const, imageKeys: ['clubs-debate-group', 'clubs-journalism', 'ph-mdd'] },
-  { title: 'Sports', category: 'sports' as const, imageKeys: ['ph-football'] },
+  { title: 'Clubs and societies', category: 'clubs' as const, imageKeys: ['clubs-debate-group', 'clubs-journalism', 'ph-mdd', 'studentlife-bible-reading'] },
+  { title: 'Sports', category: 'sports' as const, imageKeys: ['sports-boys-football', 'sports-girls-football'] },
+  { title: 'Tailoring and fashion design', category: 'academics' as const, imageKeys: ['vocational-tailoring-lesson', 'vocational-tailoring-sewing', 'vocational-tailoring-practice'] },
   { title: 'Boarding life', category: 'campus' as const, imageKeys: ['ph-dining-hall', 'ph-dormitory'] },
 ]
 
