@@ -1,8 +1,9 @@
 /**
- * Vision, Mission, Core Values and the theme of the year, as cards lifted over the hero.
+ * Vision, Mission, Core Values and the theme of the year, as a row of cards under the hero.
  *
- * The idea comes from the Mengo site; the difference here is that the cards sit below
- * the photograph rather than on top of it, so nothing is cut off on a small screen.
+ * The idea comes from the Mengo site. The cards sit fully below the photograph, never
+ * over it, so they leave the hero's slide controls clear and nothing is cut off on a
+ * small screen.
  */
 
 import React from 'react'
@@ -35,14 +36,14 @@ export function IdentityCards({ vision, mission, coreValues, theme }: IdentityCa
   if (!cards.length) return null
 
   return (
-    <div className="relative z-10 bg-[var(--surface)] pb-14">
+    <div className="bg-[var(--surface)] py-12 sm:py-16 lg:py-20">
       <Container>
-        <div className="-mt-10 grid gap-4 sm:grid-cols-2 lg:-mt-16 lg:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {cards.map((card) => (
             <article
               key={card.title}
               data-reveal
-              className="motion-lift rounded-[var(--radius-card)] border-t-4 border-gold-500 bg-[var(--surface-raised)] p-6 shadow-[var(--shadow-raised)]"
+              className="motion-lift rounded-[var(--radius-card)] border-t-4 border-gold-500 bg-[var(--surface-raised)] p-6 shadow-[var(--shadow-raised)] sm:p-7"
             >
               <card.icon className="h-7 w-7 text-maroon-700" aria-hidden />
               <h2 className="mt-3 font-display text-lg text-[var(--text-strong)]">{card.title}</h2>
