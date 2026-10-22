@@ -28,25 +28,22 @@ wrong, it is wrong on every page.
 
 | What | Currently shows | Where |
 |---|---|---|
-| School office telephone | `+256 702 601686` | Top bar, footer, contact page |
-| General email | `info@alliancehigh.sc.ug` | Footer, contact page |
-| Admissions email | `admissions@alliancehigh.sc.ug` | Footer, admissions |
 | Postal address | `P.O. Box 7236, Kampala` | Footer, contact, structured data |
 | Office hours | Mon–Fri 8am–5pm, Sat 9am–1pm | Contact page |
-| Motto and its meaning | "Adfecto Excellencia" / "We strive for excellence" | Header, footer, crest |
-| Vision and mission | As seeded | Home, about |
-| Core values | Six values, no descriptions | Home |
+| Meaning of the motto | "We strive for excellence" (the spelling "Adfecto Excellentia" is confirmed) | About |
+| Selection code | `2627` for S.1 and S.5. Read from a folded brochure; the second digit sat on the crease | About, admissions FAQ (`src/lib/school-facts.ts`) |
+| Core value descriptions | Six values, no descriptions | Home, about |
+
+Confirmed from the school profile and brochure (supplied 2026-10-22) and now live: founding year
+1993, vision, mission, core values, both phone numbers, the email address, the location, the
+registration number PSS/A/25, the UNEB centre U0839, campus size and staff numbers.
 
 ## 2. Blank placeholders, waiting on the school
 
 | Placeholder | Where it shows | Who can answer |
 |---|---|---|
-| `[Founding year]` | About page, structured data | Head Teacher's office |
 | `[Theme of the year]` | Home page identity cards | Head Teacher's office |
 | `[0]` Students enrolled | Home page statistics | Registrar |
-| `[0]` Teaching staff | Home page statistics | Head Teacher's office |
-| `[0]` Years of service | Home page statistics | Head Teacher's office |
-| `[0]` Clubs and societies | Home page statistics | Director of Studies |
 | `[Amount]` × 9 — fees | Fees table: tuition, other and total for each class band | Bursar |
 | `[Parent's name]` | Testimonial on the home page | Communications |
 | `[Student's name]` | Testimonial on the home page | Communications |
@@ -77,9 +74,11 @@ publish, including a parent's consent where a student is named.
 
 ## 4. Photographs
 
-Twenty-two real photographs of the school are in use. Six still show AI-generated
-stand-ins, each labelled "Placeholder image" on the site: the chemistry practical, football,
-music dance and drama, the dining hall, a dormitory and prize-giving day. They must be replaced
+Twenty-nine real photographs of the school are in use. Five still show AI-generated
+stand-ins, each labelled "Placeholder image" on the site: the chemistry practical, music dance
+and drama, the dining hall, a dormitory and prize-giving day. The seven photos added on
+2026-10-22 (football, tailoring, Bible reading, senior girls) are WhatsApp copies of
+608–960 px; larger originals would sharpen them. They must be replaced
 with real photographs before launch — see [IMAGE_GUIDE.md](./IMAGE_GUIDE.md), which describes
 exactly what to photograph for each one.
 

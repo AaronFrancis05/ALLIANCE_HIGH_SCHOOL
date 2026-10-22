@@ -30,7 +30,7 @@ export default async function StudentLifePage() {
   const [headerImage, clubsImage, sportImage, boardingImage, events] = await Promise.all([
     getMediaBySlug('students-heading-to-the-library-alliance-high-nansana'),
     getMediaBySlug('students-reading-magazines-in-the-journalism-club-alliance-high-nansana'),
-    getMediaBySlug('placeholder-football-match-alliance-high-nansana'),
+    getMediaBySlug('boys-football-team-talk-alliance-high-nansana'),
     getMediaBySlug('placeholder-dining-hall-alliance-high-nansana'),
     payload.find({
       collection: 'events',

@@ -9,10 +9,10 @@ entry short: what changed, what was verified, what is left.
 
 ---
 
-## Current status (as of 2026-10-12)
+## Current status (as of 2026-10-22)
 
 **Where we are:** P0–P4 done; P2 now done (P2-T11 leadership/staff, P2-T12 careers); P3 done; P5 done (P5-T1 to P5-T5). P6 hardening and P7 launch remain.
-**Latest:** 2026-10-11 staff portal and multi-role staff (FR-05) on `feat/P6-staff-portal-roles`, merged into `dev`: the super admin is an account type and signs in at /admin only; every other staff member signs in at /staff and holds any number of roles; registrar merged into secretary, admissions into bursar. **Production database**: `holiday_work` and `staff_accounts_roles_add` are applied (2026-10-11); `staff_accounts_roles_drop` is **pending on purpose** and must run only after `main` deploys this code (`pnpm payload migrate`, answer yes to the dev-mode prompt: the old 2026-10-01 `dev` row is harmless). Holiday work (P3-T4) committed on `feat/P3-T4-holiday-work`, also merged.
+**Latest:** 2026-10-22 official school facts (profile and brochure) and seven new photos applied to production; see the log. Before that: 2026-10-11 staff portal and multi-role staff (FR-05) on `feat/P6-staff-portal-roles`, merged into `dev`: the super admin is an account type and signs in at /admin only; every other staff member signs in at /staff and holds any number of roles; registrar merged into secretary, admissions into bursar. **Production database**: `holiday_work` and `staff_accounts_roles_add` are applied (2026-10-11); `staff_accounts_roles_drop` is **pending on purpose** and must run only after `main` deploys this code (`pnpm payload migrate`, answer yes to the dev-mode prompt: the old 2026-10-01 `dev` row is harmless). Holiday work (P3-T4) committed on `feat/P3-T4-holiday-work`, also merged.
 **Documentation:** PR #10 component JSDoc now attaches to all four touched function declarations; local coverage verification is 4/4. Hosted coverage rerun pending.
 **Next up:** student bulk import (CSV, dry run; fills the `import:students` loose end), P6 site-wide search and performance budget, or P4-T bulk report-card import (FR-12). Contact details in docs/CONTENT_TODO.md deliberately left until launch (school owner's call, 2026-09-23).
 
@@ -64,7 +64,7 @@ entry short: what changed, what was verified, what is left.
 - The header's "Apply now" link (Navigation global) still points to `/admissions`, which now links on to `/admissions/apply`.
 - The `import:students` script points to a file that does not exist: `scripts/import-students.ts`.
 - There is no `docs/DEPLOYMENT-VPS.md` and no CI pipeline.
-- There are 6 AI placeholder images left (lab practical, football, MDD, dining hall, dormitory, prize-giving), and many school facts are still placeholders (docs/CONTENT_TODO.md).
+- There are 5 AI placeholder images left (lab practical, MDD, dining hall, dormitory, prize-giving), and many school facts are still placeholders (docs/CONTENT_TODO.md).
 
 ---
 
@@ -83,6 +83,12 @@ entry short: what changed, what was verified, what is left.
 ---
 
 ## Log
+
+### 2026-10-22 (school profile facts, seven new photos, `feat/school-profile-photos` merged into `dev`)
+- From the school profile and brochure: motto spelling "Adfecto Excellentia", founded 1993, exact vision/mission/values, phones +256 702 601686 and +256 772 601685, alliancehighschooluga@yahoo.com (replaces the invented @alliancehigh.sc.ug addresses), location. Registration PSS/A/25, UNEB centre U0839, selection code 2627, 6 acres, staff 44/25/20 live in `src/lib/school-facts.ts` (no migration, owner's call). About has a new story and a "School at a glance" panel; Contact shows directions; Academics has two streams and a vocational (tailoring) block; Admissions FAQs on selection code and interdenominational status; home stats: Teachers 69, Founded 1993, Campus 6 acres.
+- Photos: real boys' football replaces the football placeholder (Student life, home feature, Sports album); girls' football, Bible reading, senior girls and three tailoring shots added; new album "Tailoring and fashion design". `scripts/optimize-images.ts` now keeps existing blur entries (it used to wipe them when originals were absent). `Stats` no longer renders "1993" as "1,993".
+- **Production applied** through the live site's REST API (this network silently drops ports 5432/6543 to every Supabase pooler; the direct DB host is IPv6-only). One-off `scripts/_oneoff-school-profile.ts` (not committed, deleted): uploads verified 200 on R2, re-run reported nothing to do. `.env` now uses the session pooler with `sslmode=no-verify`; the DB password was pasted in a chat and should be rotated.
+- Verified: typecheck, lint, unit 274/274. **Not checked in a browser**: look at /about, /academics, /student-life, /contact, /admissions, /gallery on the next Vercel deploy at 360 px.
 
 ### 2026-10-12 (motion refinement, hero autoplay)
 - Owner asked to remove the gold chalk underline under headings: `.chalk-underline` is gone from motion.css, SectionHeading, Welcome and the home page. Motion toned down: reveal travel 0.75rem over 600 ms with an expo ease-out, the PageHeader zoom-settle is 1.04 over 2.4 s, the card hover lift is 2 px, and the button press scales to 0.98.

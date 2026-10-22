@@ -26,7 +26,13 @@ const BLUR_WIDTH = 16
 async function main() {
   await fs.mkdir(OUT_DIR, { recursive: true })
 
-  const blur: Record<string, string> = {}
+  // Start from the existing blur data so photos whose originals are not on this machine keep
+  // their entry. Entries for slugs no longer in the manifest are dropped.
+  const slugs = new Set(imageManifest.map((entry) => entry.slug))
+  const existing: Record<string, string> = JSON.parse(await fs.readFile(BLUR_FILE, 'utf8').catch(() => '{}'))
+  const blur: Record<string, string> = Object.fromEntries(
+    Object.entries(existing).filter(([slug]) => slugs.has(slug)),
+  )
   let written = 0
   let placeholders = 0
   const missing: string[] = []
